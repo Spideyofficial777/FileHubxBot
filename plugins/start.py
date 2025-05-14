@@ -341,38 +341,83 @@ async def check_plan(client: Client, message: Message):
 
 #=====================================================================================##
 # Command to add premium user
-@Client.on_message(filters.command("add_premium"))
-async def give_premium_cmd_handler(client, message):
-    user_id = message.from_user.id
-    if user_id not in OWNER_ID:
-        await message.reply("ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴀɴʏ ᴘᴇʀᴍɪꜱꜱɪᴏɴ ᴛᴏ ᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ.")
+@Bot.on_message(filters.command("addpremium") & filters.private & admin)
+async def add_premium_user_command(client, msg):
+    if len(msg.command) != 4:
+        await msg.reply_text(
+            "**Usage:** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
+            "**Time Units:**\n"
+            "`s` - seconds\n"
+            "`m` - minutes\n"
+            "`h` - hours\n"
+            "`d` - days\n"
+            "`mo` - months (30 days)\n"
+            "`y` - years (365 days)\n\n"
+            "**Examples:**\n"
+            "`/addpremium 123456789 30 m` → 30 minutes\n"
+            "`/addpremium 123456789 2 h` → 2 hours\n"
+            "`/addpremium 123456789 1 d` → 1 day\n"
+            "`/addpremium 123456789 1 y` → 1 year`"
+        )
         return
-    if len(message.command) == 3:
-        user_id = int(message.command[1])  # Convert the user_id to integer
-        user = await client.get_users(user_id)
-        time = message.command[2]        
-        seconds = await get_seconds(time)
-        if seconds > 0:
-            expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
-            user_data = {"id": user_id, "expiry_time": expiry_time} 
-            await db.update_user(user_data)  # Use the update_user method to update or insert user data
-            await message.reply_text(f"ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴛᴏ ᴛʜᴇ ᴜꜱᴇʀꜱ.\n👤 ᴜꜱᴇʀ ɴᴀᴍᴇ : {user.mention}\n⚡ ᴜꜱᴇʀ ɪᴅ : {user.id}\n⏰ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ : {time}")
-            time_zone = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
-            current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")            
-            expiry = expiry_time   
-            expiry_str_in_ist = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y\n⏱️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")  
-            await client.send_message(
-                chat_id=user_id,
-                text=f"ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ ꜰᴏʀ {time} ᴇɴᴊᴏʏ 😀\n\n⏳ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ : {current_time}\n\n⌛️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ : {expiry_str_in_ist}",                
-            )
-            #user = await client.get_users(user_id)
-            await client.send_message(CHANNEL_ID, text=f"#Added_Premium\n\n👤 ᴜꜱᴇʀ : {user.mention}\n⚡ ᴜꜱᴇʀ ɪᴅ : {user.id}\n⏰ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ : {time}\n\n⏳ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ : {current_time}\n\n⌛️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ : {expiry_str_in_ist}", disable_web_page_preview=True)
-                
-        else:
-            await message.reply_text("Invalid time format. Please use '1day for days', '1hour for hours', or '1min for minutes', or '1month for months' or '1year for year'")
-    else:
-        await message.reply_text("Usage: /add_premium user_id time \n\nExample /add_premium 1252789 10day \n\n(e.g. for time units '1day for days', '1hour for hours', or '1min for minutes', or '1month for months' or '1year for year')")
 
+    try:
+        user_id = int(msg.command[1])
+        time_value = int(msg.command[2])
+        time_unit = msg.command[3].lower()
+
+        # Time conversion
+        time_map = {
+            "s": 1,
+            "m": 60,
+            "h": 3600,
+            "d": 86400,
+            "mo": 2592000,
+            "y": 31536000,
+        }
+
+        if time_unit not in time_map:
+            await msg.reply_text("❌ Invalid time unit. Use: `s`, `m`, `h`, `d`, `mo`, `y`.")
+            return
+
+        seconds = time_value * time_map[time_unit]
+        expiry_time = datetime.now() + timedelta(seconds=seconds)
+        user_data = {"id": user_id, "expiry_time": expiry_time}
+        await db.update_user(user_data)
+        user = await client.get_users(user_id)
+
+        # Format IST times
+        tz = pytz.timezone("Asia/Kolkata")
+        current_time = datetime.now(tz).strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")
+        expiry_str = expiry_time.astimezone(tz).strftime("%d-%m-%Y\n⏱️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
+
+        # Notify admin
+        await msg.reply_text(
+            f"✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴅᴅᴇᴅ ꜰᴏʀ `{user_id}`\n⏰ ᴅᴜʀᴀᴛɪᴏɴ: `{time_value} {time_unit}`\n\n⌛ ᴇxᴘɪʀᴇs ᴏɴ: `{expiry_str}`"
+        )
+
+        # Notify user
+        await client.send_message(
+            chat_id=user_id,
+            text=(
+                f"🎉 **Premium Activated!**\n\n"
+                f"ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɪꜱ ᴀᴄᴛɪᴠᴇ ꜰᴏʀ `{time_value} {time_unit}`\n\n"
+                f"⏳ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ: {current_time}\n"
+                f"⌛ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ: {expiry_str}"
+            ),
+        )
+
+        # Log
+        await client.send_message(
+            CHANNEL_ID,
+            text=f"#Added_Premium\n\n👤 ᴜꜱᴇʀ : {user.mention}\n⚡ ᴜꜱᴇʀ ɪᴅ : `{user.id}`\n⏰ ᴅᴜʀᴀᴛɪᴏɴ : `{time_value} {time_unit}`\n\n⏳ ᴊᴏɪɴɪɴɢ : {current_time}\n⌛ ᴇxᴘɪʀʏ : {expiry_str}",
+            disable_web_page_preview=True
+        )
+
+    except ValueError:
+        await msg.reply_text("❌ Invalid input. `user_id` and `time_value` must be numbers.")
+    except Exception as e:
+        await msg.reply_text(f"⚠️ An error occurred: `{str(e)}`")
 
 # Command to remove premium user
 @Bot.on_message(filters.command('remove_premium') & filters.private & admin)
