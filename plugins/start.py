@@ -332,70 +332,70 @@ async def check_plan(client: Client, message: Message):
 # Command to add premium user
 @Bot.on_message(filters.command('addpremium') & filters.private & admin)
 async def add_premium_user_command(client, msg):
-    if len(msg.command) != 4:
-        await msg.reply_text(
-            "➤ **ᴜꜱᴀɢᴇ :** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
-            "**ᴛɪᴍᴇ ᴜɴɪᴛꜱ :**\n"
-            "`s` → ꘢ꜱᴇᴄᴏɴᴅꜱ\n"
-            "`m` → ꘢ᴍɪɴᴜᴛᴇꜱ\n"
-            "`h` → ꘢ʜᴏᴜʀꜱ\n"
-            "`d` → ꘢ᴅᴀʏꜱ\n"
-            "`y` → ꘢ʏᴇᴀʀꜱ\n\n"
-            "**ᴇxᴀᴍᴘʟᴇꜱ :**\n"
-            "`/addpremium 123456789 30 m` → 30 ᴍɪɴᴜᴛᴇꜱ\n"
-            "`/addpremium 123456789 2 h` → 2 ʜᴏᴜʀꜱ\n"
-            "`/addpremium 123456789 1 d` → 1 ᴅᴀʏ\n"
-            "`/addpremium 123456789 1 y` → 1 ʏᴇᴀʀ"
-        )
-        return
+    if len(msg.command) != 4:
+        await msg.reply_text(
+            "➤ **ᴜꜱᴀɢᴇ :** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
+            "**ᴛɪᴍᴇ ᴜɴɪᴛꜱ :**\n"
+            "`s` → ꜱᴇᴄᴏɴᴅꜱ\n"
+            "`m` → ᴍɪɴᴜᴛᴇꜱ\n"
+            "`h` → ʜᴏᴜʀꜱ\n"
+            "`d` → ᴅᴀʏꜱ\n"
+            "`y` → ʏᴇᴀʀꜱ\n\n"
+            "**ᴇxᴀᴍᴘʟᴇꜱ :**\n"
+            "`/addpremium 123456789 30 m` → 30 ᴍɪɴᴜᴛᴇꜱ\n"
+            "`/addpremium 123456789 2 h` → 2 ʜᴏᴜʀꜱ\n"
+            "`/addpremium 123456789 1 d` → 1 ᴅᴀʏ\n"
+            "`/addpremium 123456789 1 y` → 1 ʏᴇᴀʀ"
+        )
+        return
 
-    try:
-        user_id = int(msg.command[1])
-        time_value = int(msg.command[2])
-        time_unit = msg.command[3].lower()  # supports: s, m, h, d, y
+    try:
+        user_id = int(msg.command[1])
+        time_value = int(msg.command[2])
+        time_unit = msg.command[3].lower()  # supports: s, m, h, d, y
 
-        # Call add_premium function
-        expiration_time = await add_premium(user_id, time_value, time_unit)
+        # Call add_premium function
+        expiration_time = await add_premium(user_id, time_value, time_unit)
 
-        # Format Time for IST
-        time_zone = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
-        current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")            
-        expiry_ist = expiration_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
+        # Format Time for IST
+        time_zone = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+        current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")
+        expiry_ist = expiration_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
 
-        # Notify the admin
-        await msg.reply_text(
-            f"✅ **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!**\n\n"
-            f"👤 **ᴜꜱᴇʀ ɪᴅ :** `{user_id}`\n"
-            f"⏳ **ᴅᴜʀᴀᴛɪᴏɴ :** `{time_value} {time_unit}`\n"
-            f"{current_time}\n{expiry_ist}"
-        )
+        # Notify the admin
+        await msg.reply_text(
+            f"✅ **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!**\n\n"
+            f"👤 **ᴜꜱᴇʀ ɪᴅ :** `{user_id}`\n"
+            f"⏳ **ᴅᴜʀᴀᴛɪᴏɴ :** `{time_value} {time_unit}`\n"
+            f"{current_time}\n{expiry_ist}"
+        )
 
-        # Notify the user
-        await client.send_message(
-            chat_id=user_id,
-            text=(
-                f"🎉 **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!**\n\n"
-                f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ **{time_value} {time_unit}** ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
-                f"{current_time}\n{expiry_ist}"
-            )
-        )
+        # Notify the user
+        await client.send_message(
+            chat_id=user_id,
+            text=(
+                f"🎉 **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!**\n\n"
+                f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ **{time_value} {time_unit}** ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
+                f"{current_time}\n{expiry_ist}"
+            )
+        )
 
-        # Send log to log channel
-        await client.send_message(
-            chat_id=LOG_CHANNEL,
-            text=(
-                f"#Added_Premium\n\n"
-                f"👤 **User ID:** `{user_id}`\n"
-                f"⏳ **Premium Duration:** `{time_value} {time_unit}`\n"
-                f"{current_time}\n{expiry_ist}"
-            ),
-            disable_web_page_preview=True
-        )
+        # Send log to log channel
+        await client.send_message(
+            chat_id=LOG_CHANNEL,
+            text=(
+                f"#Added_Premium\n\n"
+                f"👤 **User ID:** `{user_id}`\n"
+                f"⏳ **Premium Duration:** `{time_value} {time_unit}`\n"
+                f"{current_time}\n{expiry_ist}"
+            ),
+            disable_web_page_preview=True
+        )
 
-    except ValueError:
-        await msg.reply_text("❌ **ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!**\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.")
-    except Exception as e:
-        await msg.reply_text(f"⚠️ **ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ :** `{str(e)}`")
+    except ValueError:
+        await msg.reply_text("❌ **ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!**\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.")
+    except Exception as e:
+        await msg.reply_text(f"⚠️ **ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ :** `{str(e)}`")
 
 
 # Command to remove premium user
