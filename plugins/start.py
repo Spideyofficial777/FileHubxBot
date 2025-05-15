@@ -19,6 +19,8 @@ from helper_func import *
 from database.database import *
 from database.db_premium import *
 from Script import script
+import cbb
+
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
@@ -489,7 +491,7 @@ async def bcmd(bot: Bot, message: Message):
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
 
-@Bot.on_message(filters.command("plan"))
+@Client.on_message(filters.command("plan"))
 async def plan(client, message):
     user_id = message.from_user.id 
     users = message.from_user.mention 
