@@ -1,14 +1,3 @@
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 
 import asyncio
 import os
@@ -29,7 +18,7 @@ from config import *
 from helper_func import *
 from database.database import *
 from database.db_premium import *
-
+from Script import script
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
@@ -341,83 +330,73 @@ async def check_plan(client: Client, message: Message):
 
 #=====================================================================================##
 # Command to add premium user
-@Bot.on_message(filters.command("addpremium") & filters.private & admin)
+@Bot.on_message(filters.command('addpremium') & filters.private & admin)
 async def add_premium_user_command(client, msg):
-    if len(msg.command) != 4:
-        await msg.reply_text(
-            "**Usage:** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
-            "**Time Units:**\n"
-            "`s` - seconds\n"
-            "`m` - minutes\n"
-            "`h` - hours\n"
-            "`d` - days\n"
-            "`mo` - months (30 days)\n"
-            "`y` - years (365 days)\n\n"
-            "**Examples:**\n"
-            "`/addpremium 123456789 30 m` → 30 minutes\n"
-            "`/addpremium 123456789 2 h` → 2 hours\n"
-            "`/addpremium 123456789 1 d` → 1 day\n"
-            "`/addpremium 123456789 1 y` → 1 year`"
-        )
-        return
+    if len(msg.command) != 4:
+        await msg.reply_text(
+            "➤ **ᴜꜱᴀɢᴇ :** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
+            "**ᴛɪᴍᴇ ᴜɴɪᴛꜱ :**\n"
+            "`s` → ꘢ꜱᴇᴄᴏɴᴅꜱ\n"
+            "`m` → ꘢ᴍɪɴᴜᴛᴇꜱ\n"
+            "`h` → ꘢ʜᴏᴜʀꜱ\n"
+            "`d` → ꘢ᴅᴀʏꜱ\n"
+            "`y` → ꘢ʏᴇᴀʀꜱ\n\n"
+            "**ᴇxᴀᴍᴘʟᴇꜱ :**\n"
+            "`/addpremium 123456789 30 m` → 30 ᴍɪɴᴜᴛᴇꜱ\n"
+            "`/addpremium 123456789 2 h` → 2 ʜᴏᴜʀꜱ\n"
+            "`/addpremium 123456789 1 d` → 1 ᴅᴀʏ\n"
+            "`/addpremium 123456789 1 y` → 1 ʏᴇᴀʀ"
+        )
+        return
 
-    try:
-        user_id = int(msg.command[1])
-        time_value = int(msg.command[2])
-        time_unit = msg.command[3].lower()
+    try:
+        user_id = int(msg.command[1])
+        time_value = int(msg.command[2])
+        time_unit = msg.command[3].lower()  # supports: s, m, h, d, y
 
-        # Time conversion
-        time_map = {
-            "s": 1,
-            "m": 60,
-            "h": 3600,
-            "d": 86400,
-            "mo": 2592000,
-            "y": 31536000,
-        }
+        # Call add_premium function
+        expiration_time = await add_premium(user_id, time_value, time_unit)
 
-        if time_unit not in time_map:
-            await msg.reply_text("❌ Invalid time unit. Use: `s`, `m`, `h`, `d`, `mo`, `y`.")
-            return
+        # Format Time for IST
+        time_zone = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+        current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")            
+        expiry_ist = expiration_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
 
-        seconds = time_value * time_map[time_unit]
-        expiry_time = datetime.now() + timedelta(seconds=seconds)
-        user_data = {"id": user_id, "expiry_time": expiry_time}
-        await db.update_user(user_data)
-        user = await client.get_users(user_id)
+        # Notify the admin
+        await msg.reply_text(
+            f"✅ **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!**\n\n"
+            f"👤 **ᴜꜱᴇʀ ɪᴅ :** `{user_id}`\n"
+            f"⏳ **ᴅᴜʀᴀᴛɪᴏɴ :** `{time_value} {time_unit}`\n"
+            f"{current_time}\n{expiry_ist}"
+        )
 
-        # Format IST times
-        tz = pytz.timezone("Asia/Kolkata")
-        current_time = datetime.now(tz).strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")
-        expiry_str = expiry_time.astimezone(tz).strftime("%d-%m-%Y\n⏱️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
+        # Notify the user
+        await client.send_message(
+            chat_id=user_id,
+            text=(
+                f"🎉 **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!**\n\n"
+                f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ **{time_value} {time_unit}** ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
+                f"{current_time}\n{expiry_ist}"
+            )
+        )
 
-        # Notify admin
-        await msg.reply_text(
-            f"✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴅᴅᴇᴅ ꜰᴏʀ `{user_id}`\n⏰ ᴅᴜʀᴀᴛɪᴏɴ: `{time_value} {time_unit}`\n\n⌛ ᴇxᴘɪʀᴇs ᴏɴ: `{expiry_str}`"
-        )
+        # Send log to log channel
+        await client.send_message(
+            chat_id=LOG_CHANNEL,
+            text=(
+                f"#Added_Premium\n\n"
+                f"👤 **User ID:** `{user_id}`\n"
+                f"⏳ **Premium Duration:** `{time_value} {time_unit}`\n"
+                f"{current_time}\n{expiry_ist}"
+            ),
+            disable_web_page_preview=True
+        )
 
-        # Notify user
-        await client.send_message(
-            chat_id=user_id,
-            text=(
-                f"🎉 **Premium Activated!**\n\n"
-                f"ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɪꜱ ᴀᴄᴛɪᴠᴇ ꜰᴏʀ `{time_value} {time_unit}`\n\n"
-                f"⏳ ᴊᴏɪɴɪɴɢ ᴅᴀᴛᴇ: {current_time}\n"
-                f"⌛ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ: {expiry_str}"
-            ),
-        )
+    except ValueError:
+        await msg.reply_text("❌ **ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!**\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.")
+    except Exception as e:
+        await msg.reply_text(f"⚠️ **ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ :** `{str(e)}`")
 
-        # Log
-        await client.send_message(
-            CHANNEL_ID,
-            text=f"#Added_Premium\n\n👤 ᴜꜱᴇʀ : {user.mention}\n⚡ ᴜꜱᴇʀ ɪᴅ : `{user.id}`\n⏰ ᴅᴜʀᴀᴛɪᴏɴ : `{time_value} {time_unit}`\n\n⏳ ᴊᴏɪɴɪɴɢ : {current_time}\n⌛ ᴇxᴘɪʀʏ : {expiry_str}",
-            disable_web_page_preview=True
-        )
-
-    except ValueError:
-        await msg.reply_text("❌ Invalid input. `user_id` and `time_value` must be numbers.")
-    except Exception as e:
-        await msg.reply_text(f"⚠️ An error occurred: `{str(e)}`")
 
 # Command to remove premium user
 @Bot.on_message(filters.command('remove_premium') & filters.private & admin)
@@ -509,3 +488,26 @@ async def total_verify_count_cmd(client, message: Message):
 async def bcmd(bot: Bot, message: Message):        
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
+
+@Client.on_message(filters.command("plan"))
+async def plan(client, message):
+    user_id = message.from_user.id 
+    users = message.from_user.mention 
+    btn = [[
+            InlineKeyboardButton('• Rᴇғᴇʀ •', callback_data='reffff')
+        ],[
+            InlineKeyboardButton('• ʙʀᴏɴᴢᴇ ', callback_data='broze'),
+            InlineKeyboardButton('• ꜱɪʟᴠᴇʀ ', callback_data='silver')
+        ],[
+            InlineKeyboardButton('• ɢᴏʟᴅ ', callback_data='gold'),
+            InlineKeyboardButton('• ᴘʟᴀᴛɪɴᴜᴍ ', callback_data='platinum')
+        ],[
+            InlineKeyboardButton('• ᴅɪᴀᴍᴏɴᴅ ', callback_data='diamond'),
+            InlineKeyboardButton('• ᴏᴛʜᴇʀ ', callback_data='other')
+        ],[
+            InlineKeyboardButton('• ꜰʀᴇᴇ ᴛʀɪᴀʟ ', callback_data='free')
+        ],[            
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+    ]]
+    await message.reply_photo(photo="https://envs.sh/Wdj.jpg", caption=script.PREMIUM_TEXT.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(btn))
+    
