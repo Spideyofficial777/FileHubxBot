@@ -4,7 +4,7 @@ from config import *
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from database.database import *
 from Script import script
-
+from pyrogram.types import InputMediaPhoto
 
 @Bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
