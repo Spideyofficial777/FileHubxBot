@@ -499,8 +499,8 @@ async def bcmd(bot: Bot, message: Message):
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
 
-@Client.on_message(filters.command("plan"))
-async def plan(client, message):
+@Bot.on_message(filters.command("plan"))
+async def plan(Bot, message):
     user_id = message.from_user.id 
     users = message.from_user.mention 
     btn = [[
