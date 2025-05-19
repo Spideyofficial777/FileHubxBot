@@ -234,7 +234,7 @@ async def start_command(client: Client, message: Message):
 chat_data_cache = {}
 
 async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>Checking Subscription...</i></b>")
+    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>")
 
     user_id = message.from_user.id
     buttons = []
@@ -317,6 +317,7 @@ async def not_joined(client: Client, message: Message):
             f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
         )
 
+
 #=====================================================================================##
 
 @Bot.on_message(filters.command('myplan') & filters.private)
@@ -335,18 +336,18 @@ async def check_plan(client: Client, message: Message):
 async def add_premium_user_command(client, msg):
     if len(msg.command) != 4:
         await msg.reply_text(
-            "➤ **ᴜꜱᴀɢᴇ :** `/addpremium <user_id> <time_value> <time_unit>`\n\n"
-            "**ᴛɪᴍᴇ ᴜɴɪᴛꜱ :**\n"
+            "<b>➤ ᴜꜱᴀɢᴇ : `/addpremium <user_id> <time_value> <time_unit>`\n\n"
+            "ᴛɪᴍᴇ ᴜɴɪᴛꜱ :\n"
             "`s` → ꜱᴇᴄᴏɴᴅꜱ\n"
             "`m` → ᴍɪɴᴜᴛᴇꜱ\n"
             "`h` → ʜᴏᴜʀꜱ\n"
             "`d` → ᴅᴀʏꜱ\n"
             "`y` → ʏᴇᴀʀꜱ\n\n"
-            "**ᴇxᴀᴍᴘʟᴇꜱ :**\n"
+            "ᴇxᴀᴍᴘʟᴇꜱ :\n"
             "`/addpremium 123456789 30 m` → 30 ᴍɪɴᴜᴛᴇꜱ\n"
             "`/addpremium 123456789 2 h` → 2 ʜᴏᴜʀꜱ\n"
             "`/addpremium 123456789 1 d` → 1 ᴅᴀʏ\n"
-            "`/addpremium 123456789 1 y` → 1 ʏᴇᴀʀ"
+            "`/addpremium 123456789 1 y` → 1 ʏᴇᴀʀ</b>"
         )
         return
 
@@ -358,16 +359,23 @@ async def add_premium_user_command(client, msg):
         # Call add_premium function
         expiration_time = await add_premium(user_id, time_value, time_unit)
 
+        # Convert to datetime if it's a string
+        if isinstance(expiration_time, str):
+            expiration_time = datetime.fromisoformat(expiration_time)
+            expiration_time = expiration_time.replace(tzinfo=pytz.UTC)
+
         # Format Time for IST
         time_zone = datetime.now(pytz.timezone("Asia/Kolkata"))
         current_time = time_zone.strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")
-        expiry_ist = expiration_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p")
+        expiry_ist = expiration_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime(
+            "%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p"
+        )
 
         # Notify the admin
         await msg.reply_text(
-            f"✅ **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!**\n\n"
-            f"👤 **ᴜꜱᴇʀ ɪᴅ :** `{user_id}`\n"
-            f"⏳ **ᴅᴜʀᴀᴛɪᴏɴ :** `{time_value} {time_unit}`\n"
+            f"✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!\n\n"
+            f"👤 ᴜꜱᴇʀ ɪᴅ : `{user_id}`\n"
+            f"⏳ ᴅᴜʀᴀᴛɪᴏɴ : `{time_value} {time_unit}`\n"
             f"{current_time}\n{expiry_ist}"
         )
 
@@ -375,8 +383,8 @@ async def add_premium_user_command(client, msg):
         await client.send_message(
             chat_id=user_id,
             text=(
-                f"🎉 **ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!**\n\n"
-                f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ **{time_value} {time_unit}** ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
+                f"🎉 ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!\n\n"
+                f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ {time_value} {time_unit} ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
                 f"{current_time}\n{expiry_ist}"
             )
         )
@@ -394,9 +402,10 @@ async def add_premium_user_command(client, msg):
         )
 
     except ValueError:
-        await msg.reply_text("❌ **ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!**\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.")
+        await msg.reply_text("❌ ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.")
     except Exception as e:
-        await msg.reply_text(f"⚠️ **ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ :** `{str(e)}`")
+        await msg.reply_text(f"⚠️ ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ : `{str(e)}`")
+
 
 
 # Command to remove premium user
@@ -490,7 +499,7 @@ async def bcmd(bot: Bot, message: Message):
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
 
-"""@Client.on_message(filters.command("plan"))
+@Client.on_message(filters.command("plan"))
 async def plan(client, message):
     user_id = message.from_user.id 
     users = message.from_user.mention 
@@ -510,5 +519,4 @@ async def plan(client, message):
         ],[            
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
     ]]
-    await message.reply_photo(photo="https://envs.sh/Wdj.jpg", caption=script.PREMIUM_TEXT.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(btn))"""
-    
+    await message.reply_photo(photo="https://envs.sh/Wdj.jpg", caption=script.PREMIUM_TEXT.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(btn))
