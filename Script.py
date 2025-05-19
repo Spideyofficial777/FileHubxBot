@@ -38,7 +38,7 @@ class script(object):
 <blockquote>🌿 ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href='https://telegram.me/Hacker_x_official_777'>ʜᴀᴄᴋᴇʀ_x_ᴏꜰꜰɪᴄɪᴀʟ_777</a></b>
 """
 
-  #  ABOUT_TEXT = """
+#    ABOUT_TEXT = """
 #<b>❍ ᴍʏ ɴᴀᴍᴇ : <a href="https://t.me/SpideyCinemaX_AI_Bot">SᴘɪᴅᴇʏCɪɴᴇᴍᴀX_AI_Bᴏᴛ</a>
 #❍ ᴄʀᴇᴀᴛᴏʀ : <a href="https://t.me/Hacker_X_official_777">ʜᴀᴄᴋᴇʀ_x_ᴏꜰꜰɪᴄɪᴀʟ_777</a>
 #❍ ʟɪʙʀᴀʀʏ : <a href="https://pyrogram.org/">ᴘʏʀᴏɢʀᴀᴍ</a>
@@ -80,16 +80,16 @@ class script(object):
 
 """
     
-#    RESTART_TXT = """
-#<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !
-#> {} 
-#📅 Dᴀᴛᴇ : <code>{}</code>
-#⏰ Tɪᴍᴇ : <code>{}</code>
-#🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>
-#🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code> ᴠ𝟶.𝟽.𝟹 [ Sᴛᴀʙʟᴇ ]</code>
+    RESTART_TXT = """
+<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !
+> {} 
+📅 Dᴀᴛᴇ : <code>{}</code>
+⏰ Tɪᴍᴇ : <code>{}</code>
+🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>
+🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code> ᴠ𝟶.𝟽.𝟹 [ Sᴛᴀʙʟᴇ ]</code>
 
-# 🌿 ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ: <a href='https://telegram.me/Hacker_x_official_777'>ʜᴀᴄᴋᴇʀ_x_ᴏꜰꜰɪᴄɪᴀʟ_777</a></b>
-#"""
+ 🌿 ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ: <a href='https://telegram.me/Hacker_x_official_777'>ʜᴀᴄᴋᴇʀ_x_ᴏꜰꜰɪᴄɪᴀʟ_777</a></b>
+"""
         
     
   #  STATUS_TXT = """<b><u>🗃 ᴅᴀᴛᴀʙᴀsᴇ 1 🗃</u>
