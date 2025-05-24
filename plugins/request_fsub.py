@@ -1,14 +1,3 @@
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 import asyncio
 import os
 import random
@@ -23,19 +12,6 @@ from config import *
 from helper_func import *
 from database.database import *
 
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
-#Request force sub mode commad,,,,,,
 @Bot.on_message(filters.command('fsub_mode') & filters.private & admin)
 async def change_force_sub_mode(client: Client, message: Message):
     temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>", quote=True)
@@ -98,84 +74,51 @@ async def handle_join_request(client, chat_join_request):
             await db.req_user(chat_id, user_id)
             #print(f"Added user {user_id} to request list for {chat_id}")
 
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 
-# Add channel
 @Bot.on_message(filters.command('addchnl') & filters.private & admin)
 async def add_force_sub(client: Client, message: Message):
-    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>", quote=True)
+    temp = await message.reply("Wait a sec...", quote=True)
     args = message.text.split(maxsplit=1)
 
     if len(args) != 2:
         return await temp.edit(
-            "<b>Usage:</b> <code>/addchnl -100XXXXXXXXXX</code>\n<b>Add only one channel at a time.</b>",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Close ✖️", callback_data="close")]])
+            "Usage:\n<code>/addchnl -100xxxxxxxxxx</code>"
         )
 
     try:
-        channel_id = int(args[1])
+        chat_id = int(args[1])
     except ValueError:
-        return await temp.edit("<b>❌ Invalid Channel ID!</b>")
+        return await temp.edit("❌ Invalid chat ID!")
 
-    all_channels = await db.show_channels()
-    channel_ids_only = [cid if isinstance(cid, int) else cid[0] for cid in all_channels]
-    if channel_id in channel_ids_only:
-        return await temp.edit(f"<b>Channel already exists:</b> <code>{channel_id}</code>")
+    all_chats = await db.show_channels()
+    if chat_id in [c if isinstance(c, int) else c[0] for c in all_chats]:
+        return await temp.edit(f"Already exists:\n<code>{chat_id}</code>")
 
     try:
-        chat = await client.get_chat(channel_id)
+        chat = await client.get_chat(chat_id)
+        if chat.type not in [ChatType.CHANNEL, ChatType.SUPERGROUP]:
+            return await temp.edit("❌ Only channels/supergroups allowed.")
 
-        if chat.type != ChatType.CHANNEL:
-            return await temp.edit("<b>❌ Only public or private channels are allowed.</b>")
+        bot_member = await client.get_chat_member(chat.id, "me")
+        if bot_member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return await temp.edit("❌ Bot must be admin in that chat.")
 
-        member = await client.get_chat_member(chat.id, "me")
-        print(f"Bot status: {member.status} in chat: {chat.title} ({chat.id})")  # Debug
-
-        # FIXED ENUM COMPARISON
-        if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            return await temp.edit("<b>❌ Bot must be an admin in that channel.</b>")
-
-        # Get invite link
+        # Try to get invite link
         try:
             link = await client.export_chat_invite_link(chat.id)
         except Exception:
             link = f"https://t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id)[4:]}"
 
-        await db.add_channel(channel_id)
+        await db.add_channel(chat_id)
         return await temp.edit(
-            f"<b>✅ Force-sub channel added successfully!</b>\n\n"
+            f"✅ Added Successfully!\n\n"
             f"<b>Name:</b> <a href='{link}'>{chat.title}</a>\n"
-            f"<b>ID:</b> <code>{channel_id}</code>",
+            f"<b>ID:</b> <code>{chat_id}</code>",
             disable_web_page_preview=True
         )
 
     except Exception as e:
-        return await temp.edit(
-            f"<b>❌ Failed to add channel:</b>\n<code>{channel_id}</code>\n\n<i>{e}</i>"
-        )
-
-
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
+        return await temp.edit(f"❌ Failed to add chat:\n<code>{chat_id}</code>\n\n<i>{e}</i>")
 
 # Delete channel
 @Bot.on_message(filters.command('delchnl') & filters.private & admin)
