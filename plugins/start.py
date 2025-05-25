@@ -4,7 +4,7 @@ import random
 import sys
 import re
 import string 
-import string as rohit
+import string as Spidey
 import time
 from datetime import datetime, timedelta
 from pyrogram import Client, filters, __version__
@@ -19,6 +19,7 @@ from database.database import *
 from database.db_premium import *
 from Script import script
 import pytz
+import traceback
 
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
@@ -77,7 +78,7 @@ async def start_command(client: Client, message: Message):
                 )
 
             if not verify_status['is_verified'] and not is_premium:
-                token = ''.join(random.choices(rohit.ascii_letters + rohit.digits, k=10))
+                token = ''.join(random.choices(Spidey.ascii_letters + Spidey.digits, k=10))
                 await db.update_verify_status(id, verify_token=token, link="")
                 link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 btn = [
@@ -425,7 +426,7 @@ async def add_premium_user_command(client, msg: Message):
 
         # Log it
         await client.send_message(
-            chat_id=LOG_CHANNEL,
+            chat_id=CHANNEL_ID,
             text=(
                 f"#Added_Premium\n\n"
                 f"👤 **User ID:** `{user_id}`\n"
@@ -443,7 +444,7 @@ async def add_premium_user_command(client, msg: Message):
         )
     except Exception as e:
         error_log = traceback.format_exc()
-        await client.send_message(LOG_CHANNEL, f"⚠️ #addpremium error:\n<code>{error_log}</code>")
+        await client.send_message(CHANNEL_ID, f"⚠️ #addpremium error:\n<code>{error_log}</code>")
         await msg.reply_text("⚠️ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ. ʟᴏɢ ʜᴀꜱ ʙᴇᴇɴ ꜱᴇɴᴛ.")
 
 
