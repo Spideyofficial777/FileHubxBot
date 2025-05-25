@@ -11,8 +11,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data
 
     if data == "help":
+        await query.message.edit_text(text="● ◌ ◌")
+        await query.message.edit_text(text="● ● ◌")
+        await query.message.edit_text(text="● ● ●")    
         await query.message.edit_text(
-            text=HELP_TXT.format(first=query.from_user.first_name),
+            text=script.HELP_TXT.format(first=query.from_user.first_name),
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton('ʜᴏᴍᴇ', callback_data='start'),
