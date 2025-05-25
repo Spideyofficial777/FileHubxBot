@@ -2,7 +2,7 @@ from aiohttp import web
 from .route import routes
 from asyncio import sleep 
 from datetime import datetime
-from database.db_premium import db
+from database.database import db
 from info import CHANNEL_ID
 
 async def web_server():
