@@ -151,3 +151,25 @@ async def check_user_plan(user_id):
             return "Your premium plan has expired."
     else:
         return "You do not have a premium plan."
+
+
+async def has_premium_access(self, user_id):
+        user_data = await self.get_user(user_id)
+        if user_data:
+            expiry_time = user_data.get("expiry_time")
+            if expiry_time is None:
+                # User previously used the free trial, but it has ended.
+                return False
+            elif isinstance(expiry_time, datetime.datetime) and datetime.datetime.now() <= expiry_time:
+                return True
+            else:
+                await self.users.update_one({"id": user_id}, {"$set": {"expiry_time": None}})
+        return False
+
+async def check_remaining_uasge(self, user_id):
+        user_id = user_id
+        user_data = await self.get_user(user_id)        
+        expiry_time = user_data.get("expiry_time")
+        # Calculate remaining time
+        remaining_time = expiry_time - datetime.datetime.now()
+        return remaining_time        
