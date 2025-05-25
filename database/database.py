@@ -1,6 +1,3 @@
-#Codeflix_Botz
-#rohit_1888 on Tg
-
 import motor, asyncio
 import motor.motor_asyncio
 import time
@@ -32,7 +29,7 @@ def new_user(id):
         }
     }
 
-class Rohit:
+class Spidey:
 
     def __init__(self, DB_URI, DB_NAME):
         self.dbclient = motor.motor_asyncio.AsyncIOMotorClient(DB_URI)
@@ -262,4 +259,4 @@ class Rohit:
         return result[0]["total"] if result else 0
 
 
-db = Rohit(DB_URI, DB_NAME)
+db = Spidey(DB_URI, DB_NAME)
