@@ -153,23 +153,25 @@ async def check_user_plan(user_id):
         return "You do not have a premium plan."
 
 
-async def has_premium_access(self, user_id):
-        user_data = await self.get_user(user_id)
-        if user_data:
-            expiry_time = user_data.get("expiry_time")
-            if expiry_time is None:
-                # User previously used the free trial, but it has ended.
-                return False
-            elif isinstance(expiry_time, datetime.datetime) and datetime.datetime.now() <= expiry_time:
-                return True
-            else:
-                await self.users.update_one({"id": user_id}, {"$set": {"expiry_time": None}})
+# ✅ Check if user has premium
+async def has_premium_access(user_id):
+    user = await collection.find_one({"user_id": user_id})
+    if not user:
         return False
+    expiration = user.get("expiration_timestamp")
+    if not expiration:
+        return False
+    expiration_time = datetime.fromisoformat(expiration).astimezone(timezone("Asia/Kolkata"))
+    return expiration_time > datetime.now(timezone("Asia/Kolkata"))
 
-async def check_remaining_uasge(self, user_id):
-        user_id = user_id
-        user_data = await self.get_user(user_id)        
-        expiry_time = user_data.get("expiry_time")
-        # Calculate remaining time
-        remaining_time = expiry_time - datetime.datetime.now()
-        return remaining_time        
+# ✅ Return timedelta of remaining usage
+async def check_remaining_uasge(user_id):
+    user = await collection.find_one({"user_id": user_id})
+    if not user:
+        return timedelta(0)
+    expiration = user.get("expiration_timestamp")
+    if not expiration:
+        return timedelta(0)
+    expiration_time = datetime.fromisoformat(expiration).astimezone(timezone("Asia/Kolkata"))
+    remaining = expiration_time - datetime.now(timezone("Asia/Kolkata"))
+    return remaining if remaining.total_seconds() > 0 else timedelta(0)
