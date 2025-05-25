@@ -1,10 +1,22 @@
+# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
+# Ask Doubt on telegram @CodeflixSupport
+#
+# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
+#
+# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
+# and is released under the MIT License.
+# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
+#
+# All rights reserved.
+#
+
 import asyncio
 import os
 import random
 import sys
 import re
 import string 
-import string as Spidey
+import string as rohit
 import time
 from datetime import datetime, timedelta
 from pyrogram import Client, filters, __version__
@@ -17,9 +29,6 @@ from config import *
 from helper_func import *
 from database.database import *
 from database.db_premium import *
-from Script import script
-import pytz
-import traceback
 
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
@@ -78,7 +87,7 @@ async def start_command(client: Client, message: Message):
                 )
 
             if not verify_status['is_verified'] and not is_premium:
-                token = ''.join(random.choices(Spidey.ascii_letters + Spidey.digits, k=10))
+                token = ''.join(random.choices(rohit.ascii_letters + rohit.digits, k=10))
                 await db.update_verify_status(id, verify_token=token, link="")
                 link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 btn = [
@@ -200,7 +209,7 @@ async def start_command(client: Client, message: Message):
     else:
         reply_markup = InlineKeyboardMarkup(
             [
-                    [InlineKeyboardButton("• ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟs •", url="https://t.me/spideyofficialupdatez")],
+                    [InlineKeyboardButton("• ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟs •", url="https://t.me/Nova_Flix/50")],
 
     [
                     InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data = "about"),
@@ -226,7 +235,7 @@ async def start_command(client: Client, message: Message):
 
 
 #=====================================================================================##
-# Don't Remove Credit @CodeFlix_Bots, @Spideyofficial777
+# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
 # Ask Doubt on telegram @CodeflixSupport
 
 
@@ -235,7 +244,7 @@ async def start_command(client: Client, message: Message):
 chat_data_cache = {}
 
 async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>")
+    temp = await message.reply("<b><i>Checking Subscription...</i></b>")
 
     user_id = message.from_user.id
     buttons = []
@@ -284,7 +293,7 @@ async def not_joined(client: Client, message: Message):
                 except Exception as e:
                     print(f"Error with chat {chat_id}: {e}")
                     return await temp.edit(
-                        f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Spideyofficial777</i></b>\n"
+                        f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n"
                         f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
                     )
 
@@ -314,138 +323,71 @@ async def not_joined(client: Client, message: Message):
     except Exception as e:
         print(f"Final Error: {e}")
         await temp.edit(
-            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Spideyofficial777</i></b>\n"
+            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n"
             f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
         )
 
-
 #=====================================================================================##
 
-@Bot.on_message(filters.command("myplan") & filters.private)
-async def check_plans_cmd(client, message: Message):
-    user_id = message.from_user.id
-    mention = message.from_user.mention
+@Bot.on_message(filters.command('myplan') & filters.private)
+async def check_plan(client: Client, message: Message):
+    user_id = message.from_user.id  # Get user ID from the message
 
-    if await db.has_premium_access(user_id):        
-        remaining_time = await db.check_remaining_uasge(user_id)  # returns timedelta
-        days = remaining_time.days
-        hours, rem = divmod(remaining_time.seconds, 3600)
-        minutes, seconds = divmod(rem, 60)
+    # Get the premium status of the user
+    status_message = await check_user_plan(user_id)
 
-        formatted_remaining = f"{days} ᴅᴀʏꜱ, {hours} ʜᴏᴜʀꜱ, {minutes} ᴍɪɴᴜᴛᴇꜱ, {seconds} ꜱᴇᴄᴏɴᴅꜱ"
-        expiry = datetime.now() + remaining_time
-        expiry_date = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y")
-        expiry_time = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%I:%M:%S %p")
-
-        await message.reply_text(
-            f"<b>📝 <u>ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴅᴇᴛᴀɪʟꜱ</u> :</b>\n\n"
-            f"👤 ᴜꜱᴇʀ : {mention}\n"
-            f"🆔 ᴜꜱᴇʀ ɪᴅ : <code>{user_id}</code>\n"
-            f"⏱️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ : <code>{expiry_date}</code>\n"
-            f"⌛ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : <code>{expiry_time}</code>\n"
-            f"⏳ ʀᴇᴍᴀɪɴɪɴɢ : <code>{formatted_remaining}</code>"
-        )
-    else:
-        btn = [
-            [InlineKeyboardButton("ɢᴇᴛ ꜰʀᴇᴇ ᴛʀɪᴀʟ ꜰᴏʀ 𝟻 ᴍɪɴᴜᴛᴇꜱ ☺️", callback_data="give_trial")],
-            [InlineKeyboardButton("ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ (ʀᴇᴍᴏᴠᴇ ᴀᴅꜱ)", callback_data="seeplans")]
-        ]
-        await message.reply_text(
-            "😔 ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴀɴʏ ᴘʀᴇᴍɪᴜᴍ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ.\n\n"
-            "ᴛᴏ ᴛʀʏ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ ꜰᴏʀ 5 ᴍɪɴᴜᴛᴇꜱ, ᴄʟɪᴄᴋ 'ғʀᴇᴇ ᴛʀɪᴀʟ'.\n\n"
-            "ᴛᴏ ʙᴜʏ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴ, ᴄʟɪᴄᴋ 'ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ'.",
-            reply_markup=InlineKeyboardMarkup(btn)
-        )
+    # Send the response message to the user
+    await message.reply(status_message)
 
 #=====================================================================================##
 # Command to add premium user
-
 @Bot.on_message(filters.command('addpremium') & filters.private & admin)
-async def add_premium_user_command(client, msg: Message):
+async def add_premium_user_command(client, msg):
     if len(msg.command) != 4:
         await msg.reply_text(
-            "<b>➤ ᴜꜱᴀɢᴇ : `/addpremium <user_id> <time_value> <time_unit>`\n\n"
-            "ᴛɪᴍᴇ ᴜɴɪᴛꜱ :\n"
-            "`s` → ꜱᴇᴄᴏɴᴅꜱ\n"
-            "`m` → ᴍɪɴᴜᴛᴇꜱ\n"
-            "`h` → ʜᴏᴜʀꜱ\n"
-            "`d` → ᴅᴀʏꜱ\n"
-            "`y` → ʏᴇᴀʀꜱ\n\n"
-            "ᴇxᴀᴍᴘʟᴇꜱ :\n"
-            "`/addpremium 123456789 30 m`\n"
-            "`/addpremium 123456789 2 h`\n"
-            "`/addpremium 123456789 1 d`\n"
-            "`/addpremium 123456789 1 y`</b>"
+            "Usage: /addpremium <user_id> <time_value> <time_unit>\n\n"
+            "Time Units:\n"
+            "s - seconds\n"
+            "m - minutes\n"
+            "h - hours\n"
+            "d - days\n"
+            "y - years\n\n"
+            "Examples:\n"
+            "/addpremium 123456789 30 m → 30 minutes\n"
+            "/addpremium 123456789 2 h → 2 hours\n"
+            "/addpremium 123456789 1 d → 1 day\n"
+            "/addpremium 123456789 1 y → 1 year"
         )
         return
 
     try:
-        user_id = str(msg.command[1])  # Keep it as string to support large IDs
+        user_id = int(msg.command[1])
         time_value = int(msg.command[2])
-        time_unit = msg.command[3].lower()
+        time_unit = msg.command[3].lower()  # supports: s, m, h, d, y
 
-        # Time calculation
-        now = datetime.utcnow()
-        time_units = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days", "y": "days"}
-        if time_unit not in time_units:
-            raise ValueError("Invalid time unit. Use s, m, h, d, or y.")
+        # Call add_premium function
+        expiration_time = await add_premium(user_id, time_value, time_unit)
 
-        delta_args = {time_units[time_unit]: time_value if time_unit != "y" else time_value * 365}
-        expiry_time = now + timedelta(**delta_args)
-
-        # Save to DB
-        await add_premium(user_id, time_value, time_unit)
-
-        # Format times in IST
-        ist = pytz.timezone("Asia/Kolkata")
-        now_ist = datetime.now(ist).strftime("%d-%m-%Y\n⏱️ ᴊᴏɪɴɪɴɢ ᴛɪᴍᴇ : %I:%M:%S %p")
-        expiry_ist = expiry_time.replace(tzinfo=pytz.UTC).astimezone(ist).strftime(
-            "%d-%m-%Y\n⌛️ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : %I:%M:%S %p"
-        )
-
-        # Confirm to admin
+        # Notify the admin
         await msg.reply_text(
-            f"✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ɢʀᴀɴᴛᴇᴅ!\n\n"
-            f"👤 ᴜꜱᴇʀ ɪᴅ : `{user_id}`\n"
-            f"⏳ ᴅᴜʀᴀᴛɪᴏɴ : `{time_value} {time_unit}`\n"
-            f"{now_ist}\n{expiry_ist}"
+            f"✅ User `{user_id}` added as a premium user for {time_value} {time_unit}.\n"
+            f"Expiration Time: `{expiration_time}`"
         )
 
         # Notify the user
-        try:
-            await client.send_message(
-                chat_id=int(user_id),
-                text=(
-                    f"🎉 ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!\n\n"
-                    f"➤ ʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ɢʀᴀɴᴛᴇᴅ {time_value} {time_unit} ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ.\n\n"
-                    f"{now_ist}\n{expiry_ist}"
-                )
-            )
-        except Exception as e:
-            await msg.reply_text(f"⚠️ ᴄᴏᴜʟᴅ ɴᴏᴛ ꜱᴇɴᴅ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴜꜱᴇʀ: `{e}`")
-
-        # Log it
         await client.send_message(
-            chat_id=CHANNEL_ID,
+            chat_id=user_id,
             text=(
-                f"#Added_Premium\n\n"
-                f"👤 **User ID:** `{user_id}`\n"
-                f"⏳ **Premium Duration:** `{time_value} {time_unit}`\n"
-                f"{now_ist}\n{expiry_ist}"
+                f"🎉 Premium Activated!\n\n"
+                f"You have received premium access for `{time_value} {time_unit}`.\n"
+                f"Expires on: `{expiration_time}`"
             ),
-            disable_web_page_preview=True
         )
 
-    except ValueError as ve:
-        await msg.reply_text(
-            f"❌ ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ!\n"
-            f"ᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ.\n\n"
-            f"<i>Error:</i> <code>{str(ve)}</code>"
-        )
+    except ValueError:
+        await msg.reply_text("❌ Invalid input. Please ensure user ID and time value are numbers.")
     except Exception as e:
-        error_log = traceback.format_exc()
-        await client.send_message(CHANNEL_ID, f"⚠️ #addpremium error:\n<code>{error_log}</code>")
-        await msg.reply_text("⚠️ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ. ʟᴏɢ ʜᴀꜱ ʙᴇᴇɴ ꜱᴇɴᴛ.")
+        await msg.reply_text(f"⚠️ An error occurred: `{str(e)}`")
 
 
 # Command to remove premium user
@@ -538,25 +480,3 @@ async def total_verify_count_cmd(client, message: Message):
 async def bcmd(bot: Bot, message: Message):        
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
-
-@Bot.on_message(filters.command("plan") & filters.private & admin)
-async def plan(Bot, message):
-    user_id = message.from_user.id 
-    users = message.from_user.mention 
-    btn = [[
-            InlineKeyboardButton('• Rᴇғᴇʀ •', callback_data='reffff')
-        ],[
-            InlineKeyboardButton('• ʙʀᴏɴᴢᴇ ', callback_data='broze'),
-            InlineKeyboardButton('• ꜱɪʟᴠᴇʀ ', callback_data='silver')
-        ],[
-            InlineKeyboardButton('• ɢᴏʟᴅ ', callback_data='gold'),
-            InlineKeyboardButton('• ᴘʟᴀᴛɪɴᴜᴍ ', callback_data='platinum')
-        ],[
-            InlineKeyboardButton('• ᴅɪᴀᴍᴏɴᴅ ', callback_data='diamond'),
-            InlineKeyboardButton('• ᴏᴛʜᴇʀ ', callback_data='other')
-        ],[
-            InlineKeyboardButton('• ꜰʀᴇᴇ ᴛʀɪᴀʟ ', callback_data='free')
-        ],[            
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
-    ]]
-    await message.reply_photo(photo="https://envs.sh/Wdj.jpg", caption=script.PREMIUM_TEXT.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(btn))
