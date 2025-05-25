@@ -80,10 +80,10 @@ async def start_command(client: Client, message: Message):
                 if verify_status["link"] == "":
                     reply_markup = None
                 else:
-    # Add a button to get the file again
+                    # Add a button to get the file again
                     reply_markup = InlineKeyboardMarkup(
                         [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
-           )
+                    )
 
                 return await message.reply_photo(
                     photo=VERIFY_IMG,
@@ -93,9 +93,8 @@ async def start_command(client: Client, message: Message):
                         f"Click the button below to get your requested file."
                     ),
                     reply_markup=reply_markup,
-                    protect_content=False,
                     quote=True
-)
+                )
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
