@@ -41,7 +41,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                     InlineKeyboardButton("• sᴏᴜʀᴄᴇ •", callback_data="source"),
                 ],
                 [InlineKeyboardButton("🛰️ ʀᴇɴᴅᴇʀɪɴɢ ꜱᴛᴀᴛᴜꜱ ☁️", callback_data="rendr")],
-                [InlineKeyboardButton("⋞ Back ᴛᴏ ʜᴏᴍᴇ ", callback_data="back")],
+                [InlineKeyboardButton("⋞ Back ᴛᴏ ʜᴏᴍᴇ ", callback_data="start")],
             ]
         )
 

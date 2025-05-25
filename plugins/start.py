@@ -17,6 +17,7 @@ from config import *
 from helper_func import *
 from database.database import *
 from database.db_premium import *
+from Script import script 
 
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
