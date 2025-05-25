@@ -31,7 +31,7 @@ VERIFY_IMG = environ.get("VERIFY_IMG", "https://graph.org/file/1669ab9af68eaa62c
 #--------------------------------------------
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "shortxlinks.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "09c3f9bc3a8b121b1e6b82a954e59da523dd188e")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 7200)) # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 10)) # Add time in seconds
 TUT_VID = os.environ.get("TUT_VID","https://t.me/spideyofficial_777/12")
 #--------------------------------------------
 #--------------------------------------------
