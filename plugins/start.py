@@ -360,7 +360,7 @@ async def check_plans_cmd(client, message: Message):
 #=====================================================================================##
 # Command to add premium user
 
-@Bot.on_message(filters.command('addpremium') & filters.private & admin)
+"""@Bot.on_message(filters.command('addpremium') & filters.private & admin)
 async def add_premium_user_command(client, msg: Message):
     if len(msg.command) != 4:
         await msg.reply_text(
@@ -445,7 +445,7 @@ async def add_premium_user_command(client, msg: Message):
     except Exception as e:
         error_log = traceback.format_exc()
         await client.send_message(CHANNEL_ID, f"⚠️ #addpremium error:\n<code>{error_log}</code>")
-        await msg.reply_text("⚠️ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ. ʟᴏɢ ʜᴀꜱ ʙᴇᴇɴ ꜱᴇɴᴛ.")
+        await msg.reply_text("⚠️ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ. ʟᴏɢ ʜᴀꜱ ʙᴇᴇɴ ꜱᴇɴᴛ.")"""
 
 
 # Command to remove premium user
