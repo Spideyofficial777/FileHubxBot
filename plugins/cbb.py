@@ -177,7 +177,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             InlineKeyboardButton('• 𝗕𝗮𝗰𝗸 •', callback_data='free')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             query.message.chat.id, 
             query.message.id, 
             InputMediaPhoto(random.choice(PAYPICS))
@@ -208,7 +208,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
@@ -233,7 +233,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
@@ -257,7 +257,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
@@ -281,7 +281,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
@@ -305,7 +305,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
@@ -329,7 +329,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
@@ -353,7 +353,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
@@ -373,7 +373,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
@@ -392,7 +392,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
@@ -411,7 +411,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
@@ -435,7 +435,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
 
-        await Bot.edit_message_media(
+        await client.edit_message_media(
             chat_id=query.message.chat.id,
             message_id=query.message.id,
             media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
