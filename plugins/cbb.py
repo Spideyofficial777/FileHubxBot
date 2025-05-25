@@ -187,6 +187,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
 	)
+
     elif data == "premium_info":
         buttons = [[
             InlineKeyboardButton('ʀᴇғᴇʀ ᴀɴᴅ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='reffff'),
@@ -201,55 +202,67 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             InlineKeyboardButton('ᴏᴛʜᴇʀ ', callback_data='other')
         ],[
             InlineKeyboardButton('ɢᴇᴛ ғʀᴇᴇ ᴛʀᴀɪʟ ғᴏʀ 𝟻 ᴍɪɴᴜᴛᴇs ☺️', callback_data='free')
-        ],[            
+        ],[
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
         ]]
-        
+
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
         )
+
         await query.message.edit_text(
             text=script.PREPLANS_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+
            
     elif data == "free":
-        buttons = [[
-            InlineKeyboardButton('⚜️ ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data="give_trial")
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='other'),
-            InlineKeyboardButton('1 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='broze')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('⚜️ ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data="give_trial")],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='other'),
+                InlineKeyboardButton('1 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='broze')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
+        await Bot.edit_message_media(
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
+        )
+
         await query.message.edit_text(
             text=script.FREE_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-        
+
     elif data == "broze":
-        buttons = [[
-            InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='free'),
-            InlineKeyboardButton('2 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='silver')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='free'),
+                InlineKeyboardButton('2 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='silver')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
         )
+
         await query.message.edit_text(
             text=script.BRONZE_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
@@ -257,43 +270,47 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "silver":
-        buttons = [[
-            InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='broze'),
-            InlineKeyboardButton('3 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='gold')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='broze'),
+                InlineKeyboardButton('3 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='gold')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
         )
+
         await query.message.edit_text(
             text=script.SILVER_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-        
+
     elif data == "gold":
-        buttons = [[
-            InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='silver'),
-            InlineKeyboardButton('4 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='platinum')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='silver'),
+                InlineKeyboardButton('4 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='platinum')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
         )
+
         await query.message.edit_text(
             text=script.GOLD_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
@@ -301,21 +318,23 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "platinum":
-        buttons = [[
-            InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='gold'),
-            InlineKeyboardButton('5 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='diamond')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='gold'),
+                InlineKeyboardButton('5 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='diamond')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
         )
+
         await query.message.edit_text(
             text=script.PLATINUM_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
@@ -323,52 +342,62 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "diamond":
-        buttons = [[
-            InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='platinum'),
-            InlineKeyboardButton('6 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='other')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='platinum'),
+                InlineKeyboardButton('6 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='other')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
+        await Bot.edit_message_media(
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+        )
+
         await query.message.edit_text(
             text=script.DIAMOND_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+
     elif data == "purchase":
-        buttons = [[
-            InlineKeyboardButton('💵 ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ ɪᴅ 💵', callback_data='upi_info')
-        ],[
-            InlineKeyboardButton('📸 ꜱᴄᴀɴ ǫʀ ᴄᴏᴅᴇ 📸', callback_data='qr_info')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('💵 ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ ɪᴅ 💵', callback_data='upi_info')],
+            [InlineKeyboardButton('📸 ꜱᴄᴀɴ ǫʀ ᴄᴏᴅᴇ 📸', callback_data='qr_info')],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
         )
+
         await query.message.edit_text(
             text=script.PURCHASE_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
+
     elif data == "upi_info":
-        buttons = [[
-            InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
         )
+
         await query.message.edit_text(
             text=script.UPI_TXT.format(query.from_user.mention, OWNER_UPI_ID),
             reply_markup=reply_markup,
@@ -376,44 +405,48 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "qr_info":
-        buttons = [[
-            InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/7519d226226bec1090db7.jpg")
         )
+
         await query.message.edit_text(
             text=script.QR_TXT.format(query.from_user.mention, QR_CODE),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
-        )        
+        )     
+          
     elif data == "other":
-        buttons = [[
-            InlineKeyboardButton('☎️ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ ᴛᴏ ᴋɴᴏᴡ ᴍᴏʀᴇ', url="t.me/hacker_x_official_777")
-        ],[
-            InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='diamond'),
-            InlineKeyboardButton('7 / 7', callback_data='pagesn1'),
-            InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='free')
-        ],[
-            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')
-        ]]
+        buttons = [
+            [InlineKeyboardButton('☎️ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ ᴛᴏ ᴋɴᴏᴡ ᴍᴏʀᴇ', url="t.me/hacker_x_official_777")],
+            [
+                InlineKeyboardButton('⋞ ʙᴀᴄᴋ', callback_data='diamond'),
+                InlineKeyboardButton('7 / 7', callback_data='pagesn1'),
+                InlineKeyboardButton('ɴᴇxᴛ ⋟', callback_data='free')
+            ],
+            [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='premium_info')]
+        ]
         reply_markup = InlineKeyboardMarkup(buttons)
+
         await Bot.edit_message_media(
-            query.message.chat.id, 
-            query.message.id, 
-            InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
+            chat_id=query.message.chat.id,
+            message_id=query.message.id,
+            media=InputMediaPhoto("https://graph.org/file/670f6df9f755dc2c9a00a.jpg")
         )
+
         await query.message.edit_text(
             text=script.OTHER_TXT.format(query.from_user.mention),
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
         )
-    
+
     elif data == "group_info":
         await query.message.edit_text(text="● ◌ ◌")
         await query.message.edit_text(text="● ● ◌")
@@ -434,7 +467,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             [
                 InlineKeyboardButton("• ʜᴀᴄᴋ •", url="https://t.me/+cMlrPqMjUwtmNTI1"),
                 InlineKeyboardButton(
-                    "• 𝟷𝟾+ 🚫 •", url="https://t.me/movie_flex_official"
+                    "• 𝟷𝟾+ 🚫 •", url="https://t.me/"
                 ),
             ],
             [
