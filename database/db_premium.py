@@ -25,6 +25,10 @@ class Spidey:
         ist = timezone("Asia/Kolkata")
         current_time = datetime.now(ist)
 
+async def remove_expired_users():
+    ist = timezone("Asia/Kolkata")
+    current_time = datetime.now(ist)
+
     async for user in collection.find({}):
         expiration = user.get("expiration_timestamp")
         if not expiration:
@@ -36,6 +40,8 @@ class Spidey:
                 await collection.delete_one({"user_id": user["user_id"]})
         except Exception as e:
             print(f"Error removing user {user.get('user_id')}: {e}")
+
+
 
     # List active premium users
     async def list_premium_users():
