@@ -79,12 +79,23 @@ async def start_command(client: Client, message: Message):
                 await db.set_verify_count(id, current + 1)
                 if verify_status["link"] == "":
                     reply_markup = None
-                return await message.reply(
-                    f"Your token has been successfully verified and is valid for {get_exp_time(VERIFY_EXPIRE)}",
+                else:
+    # Add a button to get the file again
+                    reply_markup = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
+           )
+
+                return await message.reply_photo(
+                    photo=VERIFY_IMG,
+                    caption=(
+                        f"✅ Your token has been successfully verified!\n\n"
+                        f"⏰ Valid for: <b>{get_exp_time(VERIFY_EXPIRE)}</b>\n\n"
+                        f"Click the button below to get your requested file."
+                    ),
                     reply_markup=reply_markup,
                     protect_content=False,
                     quote=True
-                )
+)
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
