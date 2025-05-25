@@ -7,7 +7,6 @@ from pyrogram.enums import ParseMode
 import sys
 import pytz
 from datetime import datetime
-#rohit_1888 on Tg
 from config import *
 from database.db_premium import *
 from database.database import *
@@ -85,7 +84,7 @@ class Bot(Client):
         await web.TCPSite(app, "0.0.0.0", PORT).start()
 
 
-        try: await self.send_message(OWNER_ID, text = f"<b><blockquote> Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ by @Spideyxofficial777</blockquote></b>")
+        try: await self.send_message(OWNER_ID, text = f"<b><blockquote> Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ by @Spideyofficial777</blockquote></b>")
         except: pass
 
     async def stop(self, *args):
