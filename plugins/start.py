@@ -320,15 +320,41 @@ async def not_joined(client: Client, message: Message):
 
 #=====================================================================================##
 
-@Bot.on_message(filters.command('myplan') & filters.private)
-async def check_plan(client: Client, message: Message):
-    user_id = message.from_user.id  # Get user ID from the message
+@Bot.on_message(filters.command("myplan") & filters.private)
+async def check_plans_cmd(client, message: Message):
+    user_id = message.from_user.id
+    mention = message.from_user.mention
 
-    # Get the premium status of the user
-    status_message = await check_user_plan(user_id)
+    if await db.has_premium_access(user_id):        
+        remaining_time = await db.check_remaining_uasge(user_id)  # returns timedelta
+        days = remaining_time.days
+        hours, rem = divmod(remaining_time.seconds, 3600)
+        minutes, seconds = divmod(rem, 60)
 
-    # Send the response message to the user
-    await message.reply(status_message)
+        formatted_remaining = f"{days} ᴅᴀʏꜱ, {hours} ʜᴏᴜʀꜱ, {minutes} ᴍɪɴᴜᴛᴇꜱ, {seconds} ꜱᴇᴄᴏɴᴅꜱ"
+        expiry = datetime.now() + remaining_time
+        expiry_date = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y")
+        expiry_time = expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%I:%M:%S %p")
+
+        await message.reply_text(
+            f"<b>📝 <u>ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴅᴇᴛᴀɪʟꜱ</u> :</b>\n\n"
+            f"👤 ᴜꜱᴇʀ : {mention}\n"
+            f"🆔 ᴜꜱᴇʀ ɪᴅ : <code>{user_id}</code>\n"
+            f"⏱️ ᴇxᴘɪʀʏ ᴅᴀᴛᴇ : <code>{expiry_date}</code>\n"
+            f"⌛ ᴇxᴘɪʀʏ ᴛɪᴍᴇ : <code>{expiry_time}</code>\n"
+            f"⏳ ʀᴇᴍᴀɪɴɪɴɢ : <code>{formatted_remaining}</code>"
+        )
+    else:
+        btn = [
+            [InlineKeyboardButton("ɢᴇᴛ ꜰʀᴇᴇ ᴛʀɪᴀʟ ꜰᴏʀ 𝟻 ᴍɪɴᴜᴛᴇꜱ ☺️", callback_data="give_trial")],
+            [InlineKeyboardButton("ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ (ʀᴇᴍᴏᴠᴇ ᴀᴅꜱ)", callback_data="seeplans")]
+        ]
+        await message.reply_text(
+            "😔 ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴀɴʏ ᴘʀᴇᴍɪᴜᴍ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ.\n\n"
+            "ᴛᴏ ᴛʀʏ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ ꜰᴏʀ 5 ᴍɪɴᴜᴛᴇꜱ, ᴄʟɪᴄᴋ 'ғʀᴇᴇ ᴛʀɪᴀʟ'.\n\n"
+            "ᴛᴏ ʙᴜʏ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴ, ᴄʟɪᴄᴋ 'ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ'.",
+            reply_markup=InlineKeyboardMarkup(btn)
+        )
 
 #=====================================================================================##
 # Command to add premium user
