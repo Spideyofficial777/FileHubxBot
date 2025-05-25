@@ -218,8 +218,8 @@ async def start_command(client: Client, message: Message):
             reply_markup=reply_markup,
             message_effect_id=int(random.choice([
                 5104841245755180586,  # 🔥 Fire
-                5104841245755180579,  # 🎈 Balloons
-                5104841245755180583   # 🎊 Confetti
+                5159385139981059251,  # 🎈 Balloons
+                5046509860389126442   # 🎊 Confetti
             ]))
         )
 
