@@ -15,18 +15,15 @@ from database.database import *
 
 
 
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
+class temp(object):
+   
+    BANNED_USERS = []
+    BANNED_CHATS = []
+    ME = None
+    U_NAME = None
+    B_NAME = None
+    B_LINK = None
+   
 #used for cheking if a user is admin ~Owner also treated as admin level
 async def check_admin(filter, client, update):
     try:
@@ -35,19 +32,6 @@ async def check_admin(filter, client, update):
     except Exception as e:
         print(f"! Exception in check_admin: {e}")
         return False
-
-
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
 
 async def is_subscribed(client, user_id):
     channel_ids = await db.show_channels()
