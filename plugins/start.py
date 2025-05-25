@@ -71,29 +71,59 @@ async def start_command(client: Client, message: Message):
 
             if "verify_" in message.text:
                 _, token = message.text.split("_", 1)
-                if verify_status['verify_token'] != token:
-                    return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
-                await db.update_verify_status(id, is_verified=True, verified_time=time.time())
                 
+                if verify_status['verify_token'] != token:
+                    await client.send_message(
+                        chat_id=VERIFIED_LOG,
+                        text=f"❌ Invalid token attempt by {message.from_user.mention}"
+                    )
+                    return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
+                
+                await db.update_verify_status(id, is_verified=True, verified_time=time.time())
                 current = await db.get_verify_count(id)
                 await db.set_verify_count(id, current + 1)
-                if verify_status["link"] == "":
-                    reply_markup = None
-                else:
-                    # Add a button to get the file again
-                    reply_markup = InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
-                    )
 
-                return await message.reply_photo(
-                    photo=VERIFY_IMG,
+                btn = [[
+                    InlineKeyboardButton(
+                        "ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ",
+                        url=f"https://telegram.me/{temp.U_NAME}?start=files_{fileid}"
+                    )
+                ]]
+
+                await message.reply_photo(
+                    photo="https://graph.org/file/6928de1539e2e80e47fb8.jpg",
                     caption=(
-                        f"✅ Your token has been successfully verified!\n\n"
-                        f"⏰ Valid for: <b>{get_exp_time(VERIFY_EXPIRE)}</b>\n\n"
-                        f"Click the button below to get your requested file."
+                        f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\n"
+                        f"ɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs 🎉</b></blockquote>"
                     ),
-                    reply_markup=reply_markup,
-                    quote=True
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
+
+                await verify_user(client, userid, token)
+                await vr_db.save_verification(message.from_user.id)
+
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                current_date = now.strftime("%Y-%m-%d")
+
+                log_msg = (
+                    f"✅ <b>Verification Successful</b>\n\n"
+                    f"👤 User: {message.from_user.mention}\n"
+                    f"🕒 Time: {current_time}\n"
+                    f"📅 Date: {current_date}\n"
+                    f"🆔 ID: <code>{message.from_user.id}</code>\n"
+                    f"#verify_completed"
+                )
+                await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
+
+            else:
+                await client.send_message(
+                    chat_id=VERIFIED_LOG,
+                    text=f"⚠️ Verification failed or expired link used by {message.from_user.mention}"
+                )
+                return await message.reply_text(
+                    text="<b>Invalid link or Expired link !</b>",
+                    protect_content=False
                 )
 
             if not verify_status['is_verified'] and not is_premium:
