@@ -3,7 +3,7 @@ from .route import routes
 from asyncio import sleep 
 from datetime import datetime
 from database.database import db
-from info import CHANNEL_ID
+from config import CHANNEL_ID
 
 async def web_server():
     web_app = web.Application(client_max_size=30000000)
