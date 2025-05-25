@@ -206,7 +206,7 @@ async def start_command(client: Client, message: Message):
 
     ]
             ]
-        )
+        
         await message.reply_photo(
             photo=START_PIC,
             caption=START_MSG.format(
@@ -217,11 +217,13 @@ async def start_command(client: Client, message: Message):
                 id=message.from_user.id
             ),
             reply_markup=reply_markup,
-            message_effect_id=random.choice([
-    5104841245755180586,  # Fire
-    5104841245755180579,  # Balloons
-    5104841245755180583   # Confetti
-])
+            message_effect_id=int(random.choice([
+                5104841245755180586,  # 🔥 Fire
+                5104841245755180579,  # 🎈 Balloons
+                5104841245755180583   # 🎊 Confetti
+            ]))
+        )
+
         return
 
 
