@@ -1,22 +1,10 @@
-# Don't Remove Credit @CodeFlix_Bots, @Spideyofficialupdatez
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
 import asyncio
 import os
 import random
 import sys
 import re
 import string 
-import string as rohit
+import string as Spidey
 import time
 from datetime import datetime, timedelta
 from pyrogram import Client, filters, __version__
@@ -87,7 +75,7 @@ async def start_command(client: Client, message: Message):
                 )
 
             if not verify_status['is_verified'] and not is_premium:
-                token = ''.join(random.choices(rohit.ascii_letters + rohit.digits, k=10))
+                token = ''.join(random.choices(Spidey.ascii_letters + Spidey.digits, k=10))
                 await db.update_verify_status(id, verify_token=token, link="")
                 link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 btn = [
@@ -480,3 +468,33 @@ async def total_verify_count_cmd(client, message: Message):
 async def bcmd(bot: Bot, message: Message):        
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
+
+#=====================================================================================##
+
+@Bot.on_message(filters.command("plan") & filters.private)
+async def plan_command(client: Client, message: Message):
+    mention = message.from_user.mention
+
+    buttons = [[
+        InlineKeyboardButton('ʀᴇғᴇʀ ᴀɴᴅ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='reffff'),
+    ],[
+        InlineKeyboardButton('ʙʀᴏɴᴢᴇ ', callback_data='broze'),
+        InlineKeyboardButton('ꜱɪʟᴠᴇʀ ', callback_data='silver')
+    ],[
+        InlineKeyboardButton('ɢᴏʟᴅ ', callback_data='gold'),
+        InlineKeyboardButton('ᴘʟᴀᴛɪɴᴜᴍ ', callback_data='platinum')
+    ],[
+        InlineKeyboardButton('ᴅɪᴀᴍᴏɴᴅ ', callback_data='diamond'),
+        InlineKeyboardButton('ᴏᴛʜᴇʀ ', callback_data='other')
+    ],[
+        InlineKeyboardButton('ɢᴇᴛ ғʀᴇᴇ ᴛʀᴀɪʟ ғᴏʀ 𝟻 ᴍɪɴᴜᴛᴇs ☺️', callback_data='free')
+    ],[
+        InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
+    ]]
+
+    await message.reply_photo(
+        photo="https://graph.org/file/7519d226226bec1090db7.jpg",
+        caption=script.PREPLANS_TXT.format(mention),
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+    
