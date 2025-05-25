@@ -116,7 +116,7 @@ async def start_command(client: Client, message: Message):
             await db.add_user(user_id)
         except:
             pass
-       await client.send_message(CHANNEL_ID, script.NEW_USER_TXT.format(temp.B_LINK, message.from_user.id, message.from_user.mention))
+        await client.send_message(CHANNEL_ID, script.NEW_USER_TXT.format(temp.B_LINK, message.from_user.id, message.from_user.mention))
     # Handle normal message flow
     text = message.text
     if len(text) > 7:
