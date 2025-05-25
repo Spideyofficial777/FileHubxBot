@@ -217,9 +217,23 @@ async def start_command(client: Client, message: Message):
                 id=message.from_user.id
             ),
             reply_markup=reply_markup,
-            message_effect_id=5104841245755180586)  # 🔥
-        
+            message_effect_id=random.choice([
+                5104841245755180586,  # 🔥 Fire
+                5104841245755180579,  # 🎈 Balloons
+                5104841245755180578,  # ✨ Stars
+                5104841245755180577,  # ❤️ Hearts
+                5104841245755180576,  # ⚡ Lightning
+                5104841245755180575,  # 🎵 Music
+                5104841245755180581,  # ❄️ Snow
+                5104841245755180583,  # 🎊 Confetti   
+                5104841245755180584, # 🌸 Flower petals
+                5104841245755180585 # 🦋 Flying butterflies
+               
+            ])
+        )
+
         return
+
 
 
 
