@@ -18,7 +18,7 @@ from helper_func import *
 from database.database import *
 from database.db_premium import *
 from Script import script 
-
+import random
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
@@ -218,20 +218,10 @@ async def start_command(client: Client, message: Message):
             ),
             reply_markup=reply_markup,
             message_effect_id=random.choice([
-                5104841245755180586,  # 🔥 Fire
-                5104841245755180579,  # 🎈 Balloons
-                5104841245755180578,  # ✨ Stars
-                5104841245755180577,  # ❤️ Hearts
-                5104841245755180576,  # ⚡ Lightning
-                5104841245755180575,  # 🎵 Music
-                5104841245755180581,  # ❄️ Snow
-                5104841245755180583,  # 🎊 Confetti   
-                5104841245755180584, # 🌸 Flower petals
-                5104841245755180585 # 🦋 Flying butterflies
-               
-            ])
-        )
-
+    5104841245755180586,  # Fire
+    5104841245755180579,  # Balloons
+    5104841245755180583   # Confetti
+])
         return
 
 
