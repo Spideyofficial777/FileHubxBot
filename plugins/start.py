@@ -18,7 +18,7 @@ from helper_func import *
 from database.database import *
 from database.db_premium import *
 from Script import script 
-import random
+
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
@@ -105,7 +105,7 @@ async def start_command(client: Client, message: Message):
             await db.add_user(user_id)
         except:
             pass
-
+        await client.send_message(LOG_CHANNEL, script.NEW_USER_TXT.format(temp.B_LINK, message.from_user.id, message.from_user.mention))
     # Handle normal message flow
     text = message.text
     if len(text) > 7:
@@ -219,7 +219,8 @@ async def start_command(client: Client, message: Message):
             message_effect_id=int(random.choice([
                 5104841245755180586,  # 🔥 Fire
                 5159385139981059251,  # 🎈 Balloons
-                5046509860389126442   # 🎊 Confetti
+                5046509860389126442,   # 🎊 Confetti
+                5107584321108051014                
             ]))
         )
 
