@@ -34,7 +34,8 @@ class Spidey:
     def __init__(self, DB_URI, DB_NAME):
         self.dbclient = motor.motor_asyncio.AsyncIOMotorClient(DB_URI)
         self.database = self.dbclient[DB_NAME]
-
+        self.col = self.db.users
+        
         self.channel_data = self.database['channels']
         self.admins_data = self.database['admins']
         self.user_data = self.database['users']
