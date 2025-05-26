@@ -77,13 +77,13 @@ async def start_command(client: Client, message: Message):
                 
                 current = await db.get_verify_count(id)
                 await db.set_verify_count(id, current + 1)
-                if verify_status["link"] == "":
-                    reply_markup = None
-                else:
-                    # Add a button to get the file again
-                    reply_markup = InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
-                    )
+
+                # Button is shown always
+                button_text = "📁 Click Here To Get File"
+                button_url = verify_status["link"] if verify_status["link"] else "https://t.me/YourChannel"  # fallback URL or dummy
+                reply_markup = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton(button_text, url=button_url)]]
+                )
 
                 await message.reply_photo(
                     photo=VERIFY_IMG,
@@ -106,8 +106,7 @@ async def start_command(client: Client, message: Message):
                     f"🆔 ID: <code>{message.from_user.id}</code>\n"
                     f"#verify_completed"
                 )
-                return await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
-
+                await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
