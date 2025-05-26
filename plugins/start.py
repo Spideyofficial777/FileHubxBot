@@ -85,12 +85,11 @@ async def start_command(client: Client, message: Message):
                         [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
                     )
 
-                return await message.reply_photo(
-                photo=VERIFY_IMG,
-                caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-
+                await message.reply_photo(
+                    photo=VERIFY_IMG,
+                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
+                    reply_markup=reply_markup
+                )
 
                 await verify_user(client, userid, token)
                 await vr_db.save_verification(message.from_user.id)
@@ -108,6 +107,7 @@ async def start_command(client: Client, message: Message):
                     f"#verify_completed"
                 )
                 return await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
+
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
