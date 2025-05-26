@@ -16,6 +16,7 @@ CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002423451263"))
 VERIFIED_LOG = int(environ.get('VERIFIED_LOG', '-1002423451263'))  #Your db channel Id
 OWNER = os.environ.get("OWNER", "hacker_x_official_777") # Owner username without @
 OWNER_ID = int(os.environ.get("OWNER_ID", "7965267063")) # Owner id
+LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002294764885'))
 #--------------------------------------------
 PORT = os.environ.get("PORT", "8001")
 #--------------------------------------------
