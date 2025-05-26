@@ -80,7 +80,7 @@ async def start_command(client: Client, message: Message):
 
                 # Button is shown always
                 button_text = "📁 Click Here To Get File"
-                button_url = verify_status["link"] if verify_status["link"] else "https://t.me/YourChannel"  # fallback URL or dummy
+                button_url = verify_status["link"] if verify_status["link"] else "https://t.me/spideyofficialupdatez"  # fallback URL or dummy
                 reply_markup = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(button_text, url=button_url)]]
                 )
@@ -91,7 +91,7 @@ async def start_command(client: Client, message: Message):
                     reply_markup=reply_markup
                 )
 
-                await verify_user(client, userid, token)
+                await verify_user(client, id, token)
                 await vr_db.save_verification(message.from_user.id)
 
                 now = datetime.now()
