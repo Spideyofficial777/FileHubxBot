@@ -71,32 +71,26 @@ async def start_command(client: Client, message: Message):
 
             if "verify_" in message.text:
                 _, token = message.text.split("_", 1)
-                
                 if verify_status['verify_token'] != token:
-                    await client.send_message(
-                        chat_id=VERIFIED_LOG,
-                        text=f"❌ Invalid token attempt by {message.from_user.mention}"
-                    )
                     return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
                 
                 await db.update_verify_status(id, is_verified=True, verified_time=time.time())
+
                 current = await db.get_verify_count(id)
                 await db.set_verify_count(id, current + 1)
 
-                btn = [[
-                    InlineKeyboardButton(
-                        "ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ",
-                        url=f"https://telegram.me/{temp.U_NAME}?start=files_{fileid}"
+                if verify_status["link"] == "":
+                    reply_markup = None
+                else:
+                    # Add a button to get the file again
+                    reply_markup = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
                     )
-                ]]
 
                 await message.reply_photo(
-                    photo="https://graph.org/file/6928de1539e2e80e47fb8.jpg",
-                    caption=(
-                        f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\n"
-                        f"ɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs 🎉</b></blockquote>"
-                    ),
-                    reply_markup=InlineKeyboardMarkup(btn)
+                    photo=VERIFY_IMG,
+                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
+                    reply_markup=reply_markup
                 )
 
                 await verify_user(client, userid, token)
@@ -114,7 +108,7 @@ async def start_command(client: Client, message: Message):
                     f"🆔 ID: <code>{message.from_user.id}</code>\n"
                     f"#verify_completed"
                 )
-                await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
+                return await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
 
             else:
                 await client.send_message(
@@ -125,6 +119,7 @@ async def start_command(client: Client, message: Message):
                     text="<b>Invalid link or Expired link !</b>",
                     protect_content=False
                 )
+
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
