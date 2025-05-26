@@ -79,7 +79,7 @@ async def start_command(client: Client, message: Message):
                 await db.set_verify_count(id, current + 1)
 
                 # Button is shown always
-                button_text = "📁 Click Here To Get File"
+                button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
                 button_url = verify_status["link"] if verify_status["link"] else "https://t.me/spideyofficialupdatez"  # fallback URL or dummy
                 reply_markup = InlineKeyboardMarkup(
                     [[InlineKeyboardButton(button_text, url=button_url)]]
@@ -87,7 +87,7 @@ async def start_command(client: Client, message: Message):
 
                 await message.reply_photo(
                     photo=VERIFY_IMG,
-                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
+                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}🎉</blockquote></b>",
                     reply_markup=reply_markup
                 )
 
