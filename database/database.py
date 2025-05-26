@@ -18,6 +18,22 @@ default_verify = {
     'link': ""
 }
 
+async def add_name(user_id, filename):
+    user_db = mydb[str(user_id)]
+    user = {'_id': filename}
+    existing_user = user_db.find_one({'_id': filename})
+    if existing_user is not None:
+        return False
+    try:
+        user_db.insert_one(user)
+        return True
+    except DuplicateKeyError:
+        return False
+      
+async def delete_all_msg(user_id):
+    user_db = mydb[str(user_id)]
+    user_db.delete_many({})
+    
 def new_user(id):
     return {
         '_id': id,
@@ -34,7 +50,7 @@ class Spidey:
     def __init__(self, DB_URI, DB_NAME):
         self.dbclient = motor.motor_asyncio.AsyncIOMotorClient(DB_URI)
         self.database = self.dbclient[DB_NAME]
-        self.col = self.db.users
+        self.col = self.database['users']
         
         self.channel_data = self.database['channels']
         self.admins_data = self.database['admins']
@@ -270,12 +286,12 @@ class Spidey:
         if user_id is None:
             # Reset for all users
             update_data = {"$set": {"has_free_trial": False}}
-            result = await self.users.update_many({}, update_data)  # Empty query to match all users
+            result = await self.col.update_many({}, update_data)  # Empty query to match all users
             return result.modified_count
         else:
             # Reset for a specific user
             update_data = {"$set": {"has_free_trial": False}}
-            result = await self.users.update_one({"id": user_id}, update_data)
+            result = await self.col.update_one({"id": user_id}, update_data)
             return 1 if result.modified_count > 0 else 0  # Return 1 if updated, 0 if not
             
 
@@ -285,11 +301,12 @@ class Spidey:
         seconds = 5*60         
         expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
         user_data = {"id": user_id, "expiry_time": expiry_time, "has_free_trial": True}
-        await self.users.update_one({"id": user_id}, {"$set": user_data}, upsert=True)
+        await self.col.update_one({"id": user_id}, {"$set": user_data}, upsert=True)
 
     async def add_user(self, id, name):
-        user = self.new_(id, name)
+        user = new_user(id)
         await self.col.insert_one(user)
+
     
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id':int(id)})
