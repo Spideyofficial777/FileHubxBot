@@ -155,6 +155,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "seeplans":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")
         btn = [[
             InlineKeyboardButton('🍁 𝗖𝗹𝗶𝗰𝗸 𝗔𝗹𝗹 𝗣𝗹𝗮𝗻𝘀 & 𝗣𝗿𝗶𝗰𝗲𝘀 🍁', callback_data='free')
         ],[
@@ -171,6 +174,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 	)
     #Spidey        
     elif data == "xyz":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")        
         buttons = [[
             InlineKeyboardButton('☎️ 𝗖𝗼𝗻𝘁𝗮𝗰𝘁 𝗢𝘄𝗻𝗲𝗿 𝗧𝗼 𝗞𝗻𝗼𝘄 𝗠𝗼𝗿𝗲', user_id = ADMINS[0])
         ],[
@@ -189,6 +195,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 	)
 
     elif data == "premium_info":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [[
             InlineKeyboardButton('ʀᴇғᴇʀ ᴀɴᴅ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='reffff'),
         ],[
@@ -222,6 +231,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
 
            
     elif data == "free":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('⚜️ ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data="give_trial")],
             [
@@ -246,6 +258,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "broze":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
             [
@@ -270,6 +285,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "silver":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
             [
@@ -294,6 +312,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "gold":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
             [
@@ -318,6 +339,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "platinum":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
             [
@@ -342,6 +366,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "diamond":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('🔐 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='purchase')],
             [
@@ -366,6 +393,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "purchase":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('💵 ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ ɪᴅ 💵', callback_data='upi_info')],
             [InlineKeyboardButton('📸 ꜱᴄᴀɴ ǫʀ ᴄᴏᴅᴇ 📸', callback_data='qr_info')],
@@ -386,6 +416,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "upi_info":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)],
             [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')]
@@ -405,6 +438,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "qr_info":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")        
         buttons = [
             [InlineKeyboardButton('📲 ꜱᴇɴᴅ ᴘᴀʏᴍᴇɴᴛ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ʜᴇʀᴇ', url=OWNER_LNK)],
             [InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='purchase')]
@@ -424,6 +460,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )     
           
     elif data == "other":
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")            
         buttons = [
             [InlineKeyboardButton('☎️ ᴄᴏɴᴛᴀᴄᴛ ᴏᴡɴᴇʀ ᴛᴏ ᴋɴᴏᴡ ᴍᴏʀᴇ', url="t.me/hacker_x_official_777")],
             [
@@ -448,9 +487,9 @@ async def cb_handler(client: Bot, query: CallbackQuery):
         )
 
     elif data == "group_info":
-        await query.message.edit_text(text="● ◌ ◌")
-        await query.message.edit_text(text="● ● ◌")
-        await query.message.edit_text(text="● ● ●")
+        await query.message.edit_text(text="▰ ▱ ▱")
+        await query.message.edit_text(text="▰ ▰ ▱")
+        await query.message.edit_text(text="▰ ▰ ▰")       
 
         buttons = [
             [
@@ -467,7 +506,7 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             [
                 InlineKeyboardButton("• ʜᴀᴄᴋ •", url="https://t.me/+cMlrPqMjUwtmNTI1"),
                 InlineKeyboardButton(
-                    "• 𝟷𝟾+ 🚫 •", url="https://t.me/"
+                    "• 𝟷𝟾+ 🚫 •", url="https://t.me/+WCbiy07x2uVjNzVl"
                 ),
             ],
             [
