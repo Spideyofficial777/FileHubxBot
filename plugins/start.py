@@ -73,12 +73,10 @@ async def start_command(client: Client, message: Message):
                 _, token = message.text.split("_", 1)
                 if verify_status['verify_token'] != token:
                     return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
-
                 await db.update_verify_status(id, is_verified=True, verified_time=time.time())
-
+                
                 current = await db.get_verify_count(id)
                 await db.set_verify_count(id, current + 1)
-
                 if verify_status["link"] == "":
                     reply_markup = None
                 else:
@@ -87,11 +85,12 @@ async def start_command(client: Client, message: Message):
                         [[InlineKeyboardButton("📁 Click Here To Get File", url=verify_status["link"])]]
                     )
 
-                await message.reply_photo(
-                    photo=VERIFY_IMG,
-                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
-                    reply_markup=reply_markup
-                )
+                return await message.reply_photo(
+                photo=VERIFY_IMG,
+                caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {VERIFY_EXPIRE} ʜᴏᴜʀs🎉</blockquote></b>",
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+
 
                 await verify_user(client, userid, token)
                 await vr_db.save_verification(message.from_user.id)
@@ -109,17 +108,6 @@ async def start_command(client: Client, message: Message):
                     f"#verify_completed"
                 )
                 return await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
-
-            else:
-                await client.send_message(
-                    chat_id=VERIFIED_LOG,
-                    text=f"⚠️ Verification failed or expired link used by {message.from_user.mention}"
-                )
-                return await message.reply_text(
-                    text="<b>Invalid link or Expired link !</b>",
-                    protect_content=False
-                )
-
 
             if not verify_status['is_verified'] and not is_premium:
                 token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
