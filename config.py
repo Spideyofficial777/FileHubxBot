@@ -33,7 +33,7 @@ VERIFY_IMG = environ.get("VERIFY_IMG", "https://graph.org/file/1669ab9af68eaa62c
 #--------------------------------------------
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "shortxlinks.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "09c3f9bc3a8b121b1e6b82a954e59da523dd188e")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 10)) # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 3600)) # Add time in seconds
 TUT_VID = os.environ.get("TUT_VID","https://t.me/spideyofficial_777/12")
 #--------------------------------------------
 #--------------------------------------------
@@ -75,7 +75,7 @@ USER_REPLY_TEXT = "ʙᴀᴋᴋᴀ ! ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴍʏ ꜱᴇɴᴘ
 #==========================(BUY PREMIUM)====================#
 
 OWNER_TAG = os.environ.get("OWNER_TAG", "hacker_x_official_777")
-UPI_ID = os.environ.get("UPI_ID", "xyz@axl")
+UPI_ID = os.environ.get("UPI_ID", "https://operational-dania-gam-inghatyar777-3a4bd9c8.koyeb.app/")
 QR_PIC = os.environ.get("QR_PIC", "https://telegra.ph/file/3e83c69804826b3cba066-16cffa90cd682570da.jpg")
 SCREENSHOT_URL = os.environ.get("SCREENSHOT_URL", f"https://telegram.me/Hacker_x_official_777")
 #--------------------------------------------
