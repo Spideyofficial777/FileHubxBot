@@ -388,6 +388,25 @@ Nᴀᴍᴇ - {}
 
 ★ ᴅᴏɴ'ᴛ ᴡᴀɪᴛ ᴀɴʏ ʟᴏɴɢᴇʀ ᴛᴏ ꜱᴛᴀʀᴛ ᴇᴀʀɴɪɴɢ ᴍᴏɴᴇʏ ꜰʀᴏᴍ ʏᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴜᴘ. ᴀᴅᴅ ᴏᴜʀ ʙᴏᴛ ᴛᴏᴅᴀʏ ᴀɴᴅ ꜱᴛᴀʀᴛ ᴍᴀᴋɪɴɢ ᴍᴏɴᴇʏ 💰! </b>
 """
+    # ===== Script Templates ===== #
+
+MEDIA_CAPTION = """<b>
+✨ {type} Alert ✨
+
+📌 Name: `{name}`
+📊 Size: `{size}`
+🕒 Duration: `{duration}`
+🎚️ Quality: `{quality}`
+📅 Uploaded: `{upload_time}`
+
+{premium_tag}{nsfw_warning}
+
+🔻 Download Now 🔻</b>
+"""
+
+PREMIUM_TAG = """<b>\n⭐ Premium Content ⭐\n</b>"""
+NSFW_WARNING = """<b>\n🔞 NSFW Content 🔞\n</b>"""
+
 
    # SUCCESS_EFFECT_IDS: Final[list[str]] = [
   #  "5104841245755180586",  # 🔥 Fire
@@ -395,3 +414,4 @@ Nᴀᴍᴇ - {}
   #  "5044134455711629726",  # ❤️ Heart
   #  "5046509860389126442",  # 🎉 Celebration (Confetti)
 #]
+
