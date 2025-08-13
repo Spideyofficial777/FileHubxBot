@@ -1,6 +1,6 @@
 # Core Telegram Libraries
 pyrofork==2.3.61  # Updated Pyrogram fork
-TgCrypto==1.2.6  # Encryption
+TgCrypto # Encryption
 pyromod==2.0.0  # Updated extensions
 
 # Schedulers (Lightweight)
