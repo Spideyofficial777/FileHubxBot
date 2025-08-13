@@ -117,7 +117,7 @@ async def get_media_info(message: Message) -> Tuple[str, str, str, str, str]:
 
 async def generate_caption(file_name, file_size, duration, media_type, upload_time, is_nsfw=False, is_premium=False) -> str:
     """Generate beautiful formatted caption"""
-    base_caption = script.MEDIA_UPDATE_TXT.format(
+    base_caption = script.MEDIA_CAPTION.format(
         type=media_type,
         name=file_name,
         size=file_size,
