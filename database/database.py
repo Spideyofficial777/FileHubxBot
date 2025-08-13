@@ -56,16 +56,16 @@ async def save_file(media):
 
     file_type = mime_type.split('/')[0] if mime_type else None
 
-    try:
-        file = Media(
-            file_id=file_id,
-            file_ref=file_ref,
-            file_name=file_name,
-            file_size=file_size,
-            mime_type=mime_type,
-            caption=caption,
-            file_type=file_type
-        )
+    try:
+        file = Media(
+            file_id=file_id,
+            file_ref=file_ref,
+            file_name=file_name,
+            file_size=file_size,
+            mime_type=mime_type,
+            caption=getattr(media, "caption", None),
+            file_type=file_type
+        )
     except ValidationError:
         print(f"❌ Validation error for file: {file_name}")
         return "err"
