@@ -42,33 +42,43 @@ class Media(Document):
 
 async def save_file(media):
     """Save file in database"""
+    
+    # Extract attributes safely
+    file_id, file_ref = unpack_new_file_id(getattr(media, "file_id", ""))
+    file_name = re.sub(r"(_|\-|\.|\+)", " ", str(getattr(media, "file_name", "NO_FILE")))
+    file_size = getattr(media, "file_size", 0)
+    mime_type = getattr(media, "mime_type", None)
 
-    # TODO: Find better way to get same file_id for same media to avoid duplicates
-    file_id, file_ref = unpack_new_file_id(media.file_id)
-    file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
+    # Handle caption safely
+    caption = getattr(media, "caption", None)
+    if hasattr(caption, "html"):
+        caption = caption.html
+
+    file_type = mime_type.split('/')[0] if mime_type else None
+
     try:
         file = Media(
             file_id=file_id,
             file_ref=file_ref,
             file_name=file_name,
-            file_size=media.file_size,
-            mime_type=media.mime_type,
-            caption=media.caption.html if media.caption else None,
-            file_type=media.mime_type.split('/')[0]
+            file_size=file_size,
+            mime_type=mime_type,
+            caption=caption,
+            file_type=file_type
         )
     except ValidationError:
-        print('Error occurred while saving file in database')
-        return 'err'
-    else:
-        try:
-            await file.commit()
-        except DuplicateKeyError:      
-            print(f'{getattr(media, "file_name", "NO_FILE")} is already saved in database') 
-            return 'dup'
-        else:
-            print(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
-            return 'suc'
-            
+        print(f"❌ Validation error for file: {file_name}")
+        return "err"
+
+    try:
+        await file.commit()
+    except DuplicateKeyError:
+        print(f"⚠️ {file_name} is already saved in database")
+        return "dup"
+
+    print(f"✅ {file_name} saved successfully")
+    return "suc"
+        
 
 async def add_name(user_id, filename):
     user_db = mydb[str(user_id)]
