@@ -14,7 +14,7 @@ from pyrogram.errors import FloodWait
 
 from config import * #CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, LOG_CHANNEL
 from database.database import save_file, unpack_new_file_id
-from utils import get_poster, temp
+#from utils import get_poster, temp
 from database.database import Spidey as db
 from Script import script
 
@@ -34,16 +34,28 @@ media_filter = filters.document | filters.video | filters.audio
 
 
 # ===== Utility Functions ===== #
-def humanbytes(size: int) -> str:
-    """Convert bytes to human-readable format"""
-    if not size:
-        return "0 B"
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size < 1024:
-            return f"{size:.2f} {unit}"
-        size /= 1024
-    return f"{size:.2f} PB"
+def humanbytes(size: int, precision: int = 2) -> str:
+    """
+    Convert a size in bytes to a human-readable string.
+    
+    :param size: Size in bytes (must be >= 0)
+    :param precision: Number of decimal places in the output
+    :return: Formatted string with appropriate size unit
+    """
+    if size is None or size < 0:
+        return "Invalid size"
 
+    if size == 0:
+        return f"0 B"
+
+    units = ["B", "KB", "MB", "GB", "TB", "PB", "EB"]
+    index = 0
+
+    while size >= 1024 and index < len(units) - 1:
+        size /= 1024
+        index += 1
+
+    return f"{size:.{precision}f} {units[index]}"
 
 def time_formatter(seconds: int) -> str:
     """Convert seconds to H:M:S format"""
