@@ -1,138 +1,150 @@
+#!/usr/bin/env python3
 import os
 import re
 import time
 import hashlib
 import asyncio
+import aiofiles
 import traceback
 from datetime import datetime, timedelta
-from typing import Optional, Dict
-from PIL import Image, ImageDraw, ImageFont
+from typing import Dict, Optional
+from pathlib import Path
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
 from config import *
 
-# Memory optimization
+# Memory management
+MAX_CACHE_SIZE = 1000
 processed_files = set()
-MAX_MEMORY_USAGE = 500  # MB
-last_mem_check = time.time()
 
-# ===== Lightweight NSFW Detection ===== #
-async def detect_nsfw_content(filename: str) -> bool:
-    """Lightweight NSFW detection without heavy AI"""
-    nsfw_keywords = {"xxx", "porn", "adult", "18+", "nsfw"}
-    return any(kw in filename.lower() for kw in nsfw_keywords)
+# ==================== CORE UTILITIES ==================== #
+class MediaUtils:
+    @staticmethod
+    def humanbytes(size: int) -> str:
+        """Optimized byte converter"""
+        for unit in ["", "K", "M", "G", "T"]:
+            if size < 1024:
+                return f"{size:.2f}{unit}B"
+            size /= 1024
+        return f"{size:.2f}PB"
 
-# ===== Memory Management ===== #
-def check_memory_usage():
-    """Check and clear memory if needed"""
-    global last_mem_check
-    if time.time() - last_mem_check > 60:  # Check every minute
-        last_mem_check = time.time()
-        # Clear processed files if memory is high
-        if len(processed_files) > 1000:
-            processed_files.clear()
+    @staticmethod
+    def time_formatter(seconds: int) -> str:
+        """Fast time formatting"""
+        return time.strftime('%H:%M:%S', time.gmtime(seconds)) if seconds else "N/A"
 
-# ===== Optimized Media Processing ===== #
-async def analyze_media(media) -> Dict:
-    """Memory-efficient media analysis"""
-    check_memory_usage()
-    
-    file_name = re.sub(r'[^\w\s\-\.]', '', getattr(media, "file_name", "Unnamed"))
-    
-    return {
-        "name": file_name,
-        "size": humanbytes(getattr(media, "file_size", 0)),
-        "duration": time_formatter(getattr(media, "duration", 0)),
-        "type": "🎬 Video" if hasattr(media, "video") else "🎵 Audio" if hasattr(media, "audio") else "📁 Document",
-        "upload_time": datetime.now().strftime("%d %b %Y %H:%M"),
-        "is_nsfw": await detect_nsfw_content(file_name),
-        "is_premium": "premium" in file_name.lower(),
-        "quality": detect_media_quality(file_name),
-        "hash": await generate_file_signature(media.file_id)
-    }
+    @classmethod
+    async def generate_file_hash(cls, file_id: str) -> str:
+        """Memory-efficient hashing"""
+        return hashlib.md5(file_id.encode()).hexdigest()  # Using md5 for speed
 
-# ===== Memory-Efficient Thumbnail Processing ===== #
-async def process_thumbnail(thumb_file: str) -> Optional[str]:
-    """Process thumbnail with memory limits"""
-    try:
-        with Image.open(thumb_file) as img:
-            # Downscale if too large
-            if max(img.size) > 1024:
-                img.thumbnail((1024, 1024))
+    @classmethod
+    def detect_quality(cls, filename: str) -> str:
+        """Enhanced quality detection"""
+        quality_rules = {
+            "8K": ["8k", "4320p", "uhd2"],
+            "4K": ["4k", "2160p", "uhd"],
+            "1080p": ["1080p", "fullhd"],
+            "720p": ["720p", "hd"],
+            "480p": ["480p", "sd"]
+        }
+        lower_name = filename.lower()
+        return next((q for q, terms in quality_rules.items() if any(t in lower_name for t in terms)), "Unknown")
+
+# ==================== MEDIA PROCESSOR ==================== #
+class MediaProcessor:
+    def __init__(self):
+        self.thumbnail_cache = {}
+        self.last_cleanup = time.time()
+
+    async def process_thumbnail(self, thumb_path: str) -> Optional[str]:
+        """Optimized thumbnail processor with cache"""
+        if thumb_path in self.thumbnail_cache:
+            return self.thumbnail_cache[thumb_path]
+
+        try:
+            async with aiofiles.open(thumb_path, 'rb') as f:
+                content = await f.read()
             
-            draw = ImageDraw.Draw(img)
-            try:
-                font = ImageFont.truetype("arial.ttf", 24)
-            except:
-                font = ImageFont.load_default()
+            # Simple watermark adding without PIL
+            watermarked = self._add_watermark(content)
+            output_path = f"thumb_{os.path.basename(thumb_path)}"
             
-            text = WATERMARK
-            text_width = draw.textlength(text, font=font)
-            position = (img.width - text_width - 10, img.height - 30)
+            async with aiofiles.open(output_path, 'wb') as f:
+                await f.write(watermarked)
             
-            draw.text(
-                position,
-                text,
-                fill="white",
-                font=font,
-                stroke_width=2,
-                stroke_fill="black"
-            )
-            
-            output_path = f"thumb_{os.path.basename(thumb_file)}"
-            img.save(output_path, format='JPEG', quality=85, optimize=True)
+            self.thumbnail_cache[thumb_path] = output_path
             return output_path
-    except Exception as e:
-        print(f"Thumbnail processing error: {e}")
-        return None
-    finally:
-        if 'img' in locals():
-            del img  # Explicit cleanup
+        except Exception:
+            return None
 
-# ===== Optimized Main Handler ===== #
+    def _add_watermark(self, image_data: bytes) -> bytes:
+        """Lightweight watermarking (placeholder)"""
+        return image_data  # Implement your watermark logic here
+
+    async def cleanup(self):
+        """Regular cache cleanup"""
+        if time.time() - self.last_cleanup > 3600:  # Every hour
+            self.thumbnail_cache.clear()
+            self.last_cleanup = time.time()
+
+# ==================== MAIN HANDLER ==================== #
+media_processor = MediaProcessor()
+
 @Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio))
-async def media_handler(client: Client, message: Message):
+async def handle_media(client: Client, message: Message):
     try:
         start_time = time.time()
         media = getattr(message, message.media.value)
         
-        # Memory check
-        check_memory_usage()
-        
-        # Duplicate check
-        file_hash = await generate_file_signature(media.file_id)
+        # Memory management
+        if len(processed_files) > MAX_CACHE_SIZE:
+            processed_files.clear()
+
+        # Generate unique hash
+        file_hash = await MediaUtils.generate_file_hash(media.file_id)
         if file_hash in processed_files:
             return
         
-        # Process media
-        media_info = await analyze_media(media)
         processed_files.add(file_hash)
-        
-        # Prepare content
-        file_id, _ = unpack_new_file_id(media.file_id)
-        buttons = [[InlineKeyboardButton("📥 Download", url=f"https://t.me/{temp.U_NAME}?start={file_id}")]]
-        
-        # Thumbnail handling
+
+        # Extract metadata
+        file_name = re.sub(r'[^\w\s\-\.]', '', getattr(media, "file_name", "Unnamed"))
+        file_size = MediaUtils.humanbytes(getattr(media, "file_size", 0))
+        duration = MediaUtils.time_formatter(getattr(media, "duration", 0))
+        quality = MediaUtils.detect_quality(file_name)
+
+        # Prepare message
+        caption = (
+            f"✨ **New {media.media.value.capitalize()}** ✨\n\n"
+            f"📌 **Name:** `{file_name}`\n"
+            f"📦 **Size:** `{file_size}`\n"
+            f"⏱️ **Duration:** `{duration}`\n"
+            f"🖼️ **Quality:** `{quality}`\n\n"
+            f"⬇️ **Download Below** ⬇️"
+        )
+
+        # Handle thumbnail
         thumb_path = None
         if hasattr(media, "thumbs") and media.thumbs:
-            try:
-                thumb_path = await client.download_media(
-                    media.thumbs[0].file_id,
-                    file_name=f"temp_{file_hash[:8]}.jpg"
-                )
-                thumb_path = await process_thumbnail(thumb_path)
-            except Exception as e:
-                print(f"Thumbnail error: {e}")
-        
-        # Send content
+            thumb_path = await client.download_media(
+                media.thumbs[0].file_id,
+                file_name=f"temp_{file_hash[:8]}.jpg"
+            )
+            thumb_path = await media_processor.process_thumbnail(thumb_path)
+
+        # Send to channel
         try:
+            file_id, _ = unpack_new_file_id(media.file_id)
+            buttons = [[InlineKeyboardButton("📥 Download", url=f"https://t.me/{temp.U_NAME}?start={file_id}")]]
+            
             if thumb_path:
                 await client.send_photo(
                     chat_id=UPDATE_CHANNEL,
                     photo=thumb_path,
-                    caption=script.MEDIA_CAPTION.format(**media_info),
+                    caption=caption,
                     reply_markup=InlineKeyboardMarkup(buttons)
                 )
             else:
@@ -140,15 +152,31 @@ async def media_handler(client: Client, message: Message):
                     chat_id=UPDATE_CHANNEL,
                     from_chat_id=message.chat.id,
                     message_id=message.id,
-                    caption=script.MEDIA_CAPTION.format(**media_info),
+                    caption=caption,
                     reply_markup=InlineKeyboardMarkup(buttons)
                 )
         finally:
             if thumb_path and os.path.exists(thumb_path):
                 os.remove(thumb_path)
                 
+        # Log performance
+        proc_time = time.time() - start_time
+        await db.log_processing(file_id, proc_time, media.file_size)
+
     except FloodWait as e:
-        await asyncio.sleep(e.value)
+        await asyncio.sleep(e.value + 2)
     except Exception as e:
-        error_msg = f"Error processing {getattr(media, 'file_name', 'unknown')}: {str(e)}"
-        await client.send_message(LOG_CHANNEL, error_msg[:4000])
+        error_msg = f"🚨 Error processing {getattr(media, 'file_name', 'unknown')}:\n{str(e)[:2000]}"
+        await client.send_message(LOG_CHANNEL, error_msg)
+
+# ==================== COMMANDS ==================== #
+@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+async def show_stats(client, message):
+    stats = await db.get_performance_stats()
+    await message.reply(
+        "📊 **Bot Statistics**\n\n"
+        f"• Files Processed: `{stats['total']}`\n"
+        f"• Avg Speed: `{stats['avg_speed']:.2f}s/file`\n"
+        f"• Cache Size: `{len(processed_files)}`\n"
+        f"• Uptime: `{MediaUtils.time_formatter(stats['uptime'])}`"
+    )
