@@ -1,5 +1,9 @@
 import motor, asyncio
 import motor.motor_asyncio
+from struct import pack
+import re
+import base64
+from pymongo.errors import DuplicateKeyError
 import time
 import pymongo, os
 from pyrogram.file_id import FileId
