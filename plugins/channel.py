@@ -230,7 +230,7 @@ async def process_media(client: Client, message: Message):
 async def media_handler(client: Client, message: Message):
     await process_media(client, message)
 
-@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+@Client.on_message(filters.command("stats") & filters.user(OWNER_ID))
 async def show_stats(client: Client, message: Message):
     """Enhanced stats command with more metrics"""
     stats = await db.get_performance_stats()
