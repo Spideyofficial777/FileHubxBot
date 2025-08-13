@@ -8,7 +8,7 @@ from marshmallow.exceptions import ValidationError
 import time
 import pymongo, os
 from pyrogram.file_id import FileId
-from config import DB_URI, DB_NAME
+from config import DB_URI, DB_NAME, COLLECTION_NAME
 import logging
 from datetime import datetime, timedelta
 from umongo import Instance, Document, fields
