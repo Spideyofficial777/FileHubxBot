@@ -28,18 +28,18 @@ default_verify = {
 
 @instance.register
 class Media(Document):
-    file_id = fields.StrField(attribute='_id')
-    file_ref = fields.StrField(allow_none=True)
+    file_id = fields.StrField(attribute='_id', required=True)
+    file_ref = fields.StrField(allow_none=True, required=False, missing=None)
     file_name = fields.StrField(required=True)
     file_size = fields.IntField(required=True)
-    mime_type = fields.StrField(allow_none=True)
-    caption = fields.StrField(allow_none=True)
-    file_type = fields.StrField(allow_none=True)
+    mime_type = fields.StrField(allow_none=True, required=False, missing=None)
+    caption = fields.StrField(allow_none=True, required=False, missing=None)
+    file_type = fields.StrField(allow_none=True, required=False, missing=None)
 
     class Meta:
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
-        
+
 async def save_file(media):
     """Save file in database"""
 
