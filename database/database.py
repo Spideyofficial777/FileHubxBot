@@ -15,6 +15,7 @@ from umongo import Instance, Document, fields
 
 dbclient = pymongo.MongoClient(DB_URI)
 database = dbclient[DB_NAME]
+instance = Instance.from_db(database)
 
 logging.basicConfig(level=logging.INFO)
 
