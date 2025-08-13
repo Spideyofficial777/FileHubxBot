@@ -170,7 +170,7 @@ async def handle_media(client: Client, message: Message):
         await client.send_message(LOG_CHANNEL, error_msg)
 
 # ==================== COMMANDS ==================== #
-@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+@Client.on_message(filters.command("stats") & filters.user(OWNER_ID))
 async def show_stats(client, message):
     stats = await db.get_performance_stats()
     await message.reply(
