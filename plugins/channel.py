@@ -13,9 +13,9 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
 
 from config import * #CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, LOG_CHANNEL
-from database.ia_filterdb import save_file, unpack_new_file_id
+from database.database import save_file, unpack_new_file_id
 from utils import get_poster, temp
-from database.users_chats_db import db
+from database.database import Spidey as db
 from Script import script
 
 # ===== Configuration ===== #
@@ -27,7 +27,7 @@ MEDIA_TYPES = {
 
 NSFW_KEYWORDS = {"xxx", "porn", "adult", "18+", "nsfw"}
 PREMIUM_TAG = "⭐ PREMIUM CONTENT"
-WATERMARK_TEXT = "© YourBrand"
+WATERMARK_TEXT = "©filehubxbot"
 
 processed_files = set()
 media_filter = filters.document | filters.video | filters.audio
