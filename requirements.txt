@@ -1,29 +1,26 @@
-# Core Telegram Libraries
-pyrofork==2.3.61  # Updated Pyrogram fork
-TgCrypto # Encryption
-pyromod==2.0.0  # Updated extensions
+pyrofork==2.3.61
+TgCrypto
+pyromod==2.0.0
 
-# Schedulers (Lightweight)
-schedule==1.2.1  # Basic scheduling
-APScheduler==3.10.4  # Advanced scheduling
+schedule==1.2.1
+APScheduler==3.10.4
 
-# Database (Optimized)
-pymongo==4.6.2  # Sync MongoDB
-motor==3.3.2  # Async MongoDB
-dnspython==2.4.2  # DNS support
+pymongo==4.6.2
+motor==3.3.2
+dnspython==2.4.2
 
-# Web & Networking
-aiohttp==3.9.3  # Async HTTP
-requests==2.31.0  # Sync HTTP
-python-dotenv==1.0.1  # Env vars
+aiohttp==3.9.3
+requests==2.31.0
+python-dotenv==1.0.1
 
-# Utilities (Memory-Friendly)
-beautifulsoup4==4.12.3  # HTML parsing
-aiofiles==23.2.1  # Async file ops
-pytz==2023.3.post1  # Timezones
-tzlocal==5.2  # Local timezone
+beautifulsoup4==4.12.3
+aiofiles==23.2.1
+pytz==2023.3.post1
+tzlocal==5.2
+
 shortzy
-PIL
-# Optional (Add as needed):
- pillow==10.2.0  # Only if image processing needed
- uvloop==0.19.0  # Linux performance boost
+Pillow
+
+# Optional
+pillow==10.2.0
+uvloop==0.19.0
