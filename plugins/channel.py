@@ -5,62 +5,40 @@ import hashlib
 import asyncio
 import traceback
 from datetime import datetime, timedelta
-from typing import Optional, Tuple, Union
+from typing import Optional, Dict
 from PIL import Image, ImageDraw, ImageFont
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
-from transformers import pipeline  # For AI moderation
 from config import *
 
-# Config
-"""class Config:
-    CHANNELS = CHANNELS  # From your info.py
-    UPDATE_CHANNEL = MOVIE_UPDATE_CHANNEL
-    ADMINS = ADMINS
-    LOG_CHANNEL = LOG_CHANNEL
-    NSFW_MODEL = "Falconsai/nsfw_image_detection"
-    WATERMARK = "© MediaHub"
-    PREMIUM_TAG = "🌟 PREMIUM"
-    MIRROR_REGIONS = {
-        "US": "https://us-cdn.example.com",
-        "EU": "https://eu-cdn.example.com",
-        "ASIA": "https://asia-cdn.example.com"
-    }"""
+# Memory optimization
+processed_files = set()
+MAX_MEMORY_USAGE = 500  # MB
+last_mem_check = time.time()
 
-# Initialize AI models
-nsfw_classifier = pipeline("image-classification", model=NSFW_MODEL)
+# ===== Lightweight NSFW Detection ===== #
+async def detect_nsfw_content(filename: str) -> bool:
+    """Lightweight NSFW detection without heavy AI"""
+    nsfw_keywords = {"xxx", "porn", "adult", "18+", "nsfw"}
+    return any(kw in filename.lower() for kw in nsfw_keywords)
 
-# ===== Core Utilities ===== #
-def humanbytes(size: int) -> str:
-    """Convert bytes to human-readable format"""
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size < 1024:
-            return f"{size:.2f} {unit}"
-        size /= 1024
-    return f"{size:.2f} PB"
+# ===== Memory Management ===== #
+def check_memory_usage():
+    """Check and clear memory if needed"""
+    global last_mem_check
+    if time.time() - last_mem_check > 60:  # Check every minute
+        last_mem_check = time.time()
+        # Clear processed files if memory is high
+        if len(processed_files) > 1000:
+            processed_files.clear()
 
-def time_formatter(seconds: int) -> str:
-    """Convert seconds to H:M:S format"""
-    if not seconds:
-        return "N/A"
-    minutes, seconds = divmod(int(seconds), 60)
-    hours, minutes = divmod(minutes, 60)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes:02d}:{seconds:02d}"
-
-async def generate_file_signature(file_id: str) -> str:
-    """Create unique signature for duplicate detection"""
-    return hashlib.sha3_256(file_id.encode()).hexdigest()
-
-async def secure_download_url(file_id: str, expiry_hours: int = 24) -> str:
-    """Generate time-limited download URL"""
-    expiry = int((datetime.now() + timedelta(hours=expiry_hours)).timestamp())
-    return f"https://t.me/{temp.U_NAME}?start=secure_{file_id}_{expiry}"
-
-# ===== Media Processing ===== #
-async def analyze_media(media) -> dict:
-    """Extract comprehensive media metadata"""
+# ===== Optimized Media Processing ===== #
+async def analyze_media(media) -> Dict:
+    """Memory-efficient media analysis"""
+    check_memory_usage()
+    
     file_name = re.sub(r'[^\w\s\-\.]', '', getattr(media, "file_name", "Unnamed"))
     
     return {
@@ -75,159 +53,102 @@ async def analyze_media(media) -> dict:
         "hash": await generate_file_signature(media.file_id)
     }
 
-async def detect_nsfw_content(filename: str) -> bool:
-    """AI-powered NSFW detection"""
-    nsfw_keywords = ["xxx", "porn", "adult", "18+", "nsfw"]
-    if any(kw in filename.lower() for kw in nsfw_keywords):
-        return True
-    return False
-
-def detect_media_quality(filename: str) -> str:
-    """Auto-detect resolution/quality"""
-    quality_map = {
-        "4K": ["2160p", "4k", "uhd"],
-        "1080p": ["1080p", "fullhd"],
-        "720p": ["720p", "hd"],
-        "480p": ["480p", "sd"]
-    }
-    lower_name = filename.lower()
-    for quality, terms in quality_map.items():
-        if any(term in lower_name for term in terms):
-            return quality
-    return "Unknown"
-
-# ===== Content Enhancement ===== #
-async def enhance_thumbnail(image_path: str) -> str:
-    """Apply professional enhancements to thumbnails"""
+# ===== Memory-Efficient Thumbnail Processing ===== #
+async def process_thumbnail(thumb_file: str) -> Optional[str]:
+    """Process thumbnail with memory limits"""
     try:
-        with Image.open(image_path) as img:
-            # Add watermark
+        with Image.open(thumb_file) as img:
+            # Downscale if too large
+            if max(img.size) > 1024:
+                img.thumbnail((1024, 1024))
+            
             draw = ImageDraw.Draw(img)
-            font = ImageFont.truetype("arial.ttf", 24)
-            text_width = draw.textlength(WATERMARK, font=font)
+            try:
+                font = ImageFont.truetype("arial.ttf", 24)
+            except:
+                font = ImageFont.load_default()
+            
+            text = WATERMARK
+            text_width = draw.textlength(text, font=font)
+            position = (img.width - text_width - 10, img.height - 30)
+            
             draw.text(
-                (img.width - text_width - 10, img.height - 30),
-                WATERMARK,
+                position,
+                text,
                 fill="white",
                 font=font,
                 stroke_width=2,
                 stroke_fill="black"
             )
             
-            # Contrast adjustment
-            enhanced_path = f"enhanced_{os.path.basename(image_path)}"
-            img.save(enhanced_path, quality=95)
-            return enhanced_path
-    except Exception:
-        return image_path
+            output_path = f"thumb_{os.path.basename(thumb_file)}"
+            img.save(output_path, format='JPEG', quality=85, optimize=True)
+            return output_path
+    except Exception as e:
+        print(f"Thumbnail processing error: {e}")
+        return None
+    finally:
+        if 'img' in locals():
+            del img  # Explicit cleanup
 
-async def generate_mirror_buttons(file_id: str) -> InlineKeyboardMarkup:
-    """Create multi-CDN download options"""
-    buttons = []
-    for region, url in MIRROR_REGIONS.items():
-        buttons.append(
-            InlineKeyboardButton(
-                f"🌐 {region} Mirror",
-                url=f"{url}/download?file={file_id}"
-            )
-        )
-    
-    buttons.append(
-        [InlineKeyboardButton("📥 Direct Download", 
-         url=await secure_download_url(file_id))]
-    )
-    
-    return InlineKeyboardMarkup(buttons)
-
-# ===== Main Handler ===== #
+# ===== Optimized Main Handler ===== #
 @Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio))
-async def media_processing_handler(client: Client, message: Message):
+async def media_handler(client: Client, message: Message):
     try:
         start_time = time.time()
         media = getattr(message, message.media.value)
         
-        # Anti-flood delay
-        if len(processed_files) % 15 == 0:
-            await asyncio.sleep(3)
-            
+        # Memory check
+        check_memory_usage()
+        
         # Duplicate check
-        file_signature = await generate_file_signature(media.file_id)
-        if file_signature in processed_files:
+        file_hash = await generate_file_signature(media.file_id)
+        if file_hash in processed_files:
             return
-        processed_files.add(file_signature)
         
-        # Metadata extraction
+        # Process media
         media_info = await analyze_media(media)
+        processed_files.add(file_hash)
         
-        # Database operations
-        media.file_type = message.media.value
-        await save_file(media)  # Your existing DB function
-        
-        # Only proceed if forwarding enabled
-        if not await db.get_send_movie_update_status(client.me.id):
-            return
-            
         # Prepare content
         file_id, _ = unpack_new_file_id(media.file_id)
-        caption = script.MEDIA_CAPTION.format(**media_info)
-        buttons = await generate_mirror_buttons(file_id)
+        buttons = [[InlineKeyboardButton("📥 Download", url=f"https://t.me/{temp.U_NAME}?start={file_id}")]]
         
-        # Enhanced thumbnail processing
+        # Thumbnail handling
         thumb_path = None
         if hasattr(media, "thumbs") and media.thumbs:
-            thumb_path = await client.download_media(media.thumbs[0].file_id)
-            thumb_path = await enhance_thumbnail(thumb_path)
+            try:
+                thumb_path = await client.download_media(
+                    media.thumbs[0].file_id,
+                    file_name=f"temp_{file_hash[:8]}.jpg"
+                )
+                thumb_path = await process_thumbnail(thumb_path)
+            except Exception as e:
+                print(f"Thumbnail error: {e}")
         
-        # Content routing
-        target_channel = UPDATE_CHANNEL
-        if media_info["is_nsfw"]:
-            target_channel = await db.get_nsfw_channel() or target_channel
-            
-        # Smart delivery
+        # Send content
         try:
             if thumb_path:
                 await client.send_photo(
-                    chat_id=target_channel,
+                    chat_id=UPDATE_CHANNEL,
                     photo=thumb_path,
-                    caption=caption,
-                    reply_markup=buttons
+                    caption=script.MEDIA_CAPTION.format(**media_info),
+                    reply_markup=InlineKeyboardMarkup(buttons)
                 )
             else:
                 await client.copy_message(
-                    chat_id=target_channel,
+                    chat_id=UPDATE_CHANNEL,
                     from_chat_id=message.chat.id,
                     message_id=message.id,
-                    caption=caption,
-                    reply_markup=buttons
+                    caption=script.MEDIA_CAPTION.format(**media_info),
+                    reply_markup=InlineKeyboardMarkup(buttons)
                 )
         finally:
             if thumb_path and os.path.exists(thumb_path):
                 os.remove(thumb_path)
                 
-        # Performance logging
-        proc_time = time.time() - start_time
-        await db.log_processing(
-            file_id=file_id,
-            processing_time=proc_time,
-            file_size=media.file_size
-        )
-        
     except FloodWait as e:
-        await asyncio.sleep(e.value + 2)
+        await asyncio.sleep(e.value)
     except Exception as e:
-        error_msg = f"🚨 Processing Error:\n{traceback.format_exc()}\n\nMedia: {media_info.get('name')}"
-        await client.send_message(LOG_CHANNEL, error_msg)
-
-# ===== Monitoring Commands ===== #
-@Client.on_message(filters.command("stats") & filters.user(ADMINS))
-async def system_stats(client, message):
-    stats = await db.get_performance_stats()
-    await message.reply(
-        f"⚡ System Performance Report:\n\n"
-        f"• Files Processed: {stats['total']}\n"
-        f"• Avg Speed: {stats['avg_speed']:.2f}s/file\n"
-        f"• NSFW Filtered: {stats['nsfw_blocked']}\n"
-        f"• Bandwidth Saved: {humanbytes(stats['bandwidth_saved'])}\n"
-        f"• Uptime: {time_formatter(stats['uptime'])}"
-    )
-
+        error_msg = f"Error processing {getattr(media, 'file_name', 'unknown')}: {str(e)}"
+        await client.send_message(LOG_CHANNEL, error_msg[:4000])
