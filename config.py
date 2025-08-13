@@ -17,7 +17,7 @@ OWNER = os.environ.get("OWNER", "hacker_x_official_777") # Owner username withou
 OWNER_ID = int(os.environ.get("OWNER_ID", "7965267063")) # Owner id
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002294764885'))
 CHANNEL = int(os.environ.get("CHANNEL", "-1002423451263"))
-UPDATE_CHANNEL = int(os.environ.get("UPDATE_CHANNEL", ""))
+UPDATE_CHANNEL = int(os.environ.get("UPDATE_CHANNEL", "-1002461263750"))
 CHANNELS = int(os.environ.get("CHANNELS", "-1002423451263"))
 #--------------------------------------------
 PORT = os.environ.get("PORT", "8001")
@@ -94,7 +94,14 @@ PRICE4 = os.environ.get("PRICE4", "280 rs")
 PRICE5 = os.environ.get("PRICE5", "550 rs")
 
 #===================(END)========================#
-
+NSFW_MODEL = "Falconsai/nsfw_image_detection"
+WATERMARK = "© MediaHub"
+PREMIUM_TAG = "🌟 PREMIUM"
+MIRROR_REGIONS = {
+        "US": "https://us-cdn.example.com",
+        "EU": "https://eu-cdn.example.com",
+        "ASIA": "https://asia-cdn.example.com"
+    
 LOG_FILE_NAME = "filehubxbot.txt"
 
 logging.basicConfig(
