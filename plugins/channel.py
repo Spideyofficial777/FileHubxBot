@@ -12,9 +12,10 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
 from transformers import pipeline  # For AI moderation
+from config import *
 
 # Config
-class Config:
+"""class Config:
     CHANNELS = CHANNELS  # From your info.py
     UPDATE_CHANNEL = MOVIE_UPDATE_CHANNEL
     ADMINS = ADMINS
@@ -26,7 +27,7 @@ class Config:
         "US": "https://us-cdn.example.com",
         "EU": "https://eu-cdn.example.com",
         "ASIA": "https://asia-cdn.example.com"
-    }
+    }"""
 
 # Initialize AI models
 nsfw_classifier = pipeline("image-classification", model=Config.NSFW_MODEL)
