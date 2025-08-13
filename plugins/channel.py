@@ -7,74 +7,120 @@ import asyncio
 import aiofiles
 import traceback
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from pathlib import Path
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
-from pyrogram.file_id import FileId
 from config import *
 
 # ===== CONSTANTS ===== #
-MAX_CACHE_SIZE = 1500
+MAX_CACHE_SIZE = 2000
 TEMP_FILE_PREFIX = "temp_"
 MAX_RETRIES = 3
+CACHE_CLEAN_INTERVAL = 3600  # 1 hour
 
-# ===== GLOBALS ===== #
-processed_files = set()
-media_processor = None
+# ===== UTILITY FUNCTIONS (DEFINED FIRST) ===== #
+def humanbytes(size: Union[int, float]) -> str:
+    """Convert bytes to human-readable format"""
+    for unit in ["", "K", "M", "G", "T"]:
+        if abs(size) < 1024.0:
+            return f"{size:.2f}{unit}B"
+        size /= 1024.0
+    return f"{size:.2f}PB"
 
-# ===== FILE ID UTILITIES ===== #
-def unpack_new_file_id(file_id: str) -> Tuple[str, Optional[bytes]]:
-    """Modern Pyrogram file ID unpacking"""
+def time_formatter(seconds: Union[int, float]) -> str:
+    """Convert seconds to H:M:S format"""
+    minutes, seconds = divmod(int(seconds), 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes:02d}:{seconds:02d}"
+
+def clean_filename(filename: str) -> str:
+    """Sanitize filename for safe use"""
+    if not filename:
+        return "Unnamed_File"
+    return re.sub(r'[^\w\s\-\.]', '', filename).strip()[:128]
+
+async def generate_file_hash(file_id: str) -> str:
+    """Generate SHA-256 hash of file ID"""
+    return hashlib.sha256(file_id.encode()).hexdigest()
+
+# ===== FILE HANDLING ===== #
+async def unpack_file_id(file_id: str) -> Tuple[str, Optional[bytes]]:
+    """Universal file ID unpacker"""
     try:
-        decoded = FileId.decode(file_id)
-        # New Pyrogram versions use different attribute names
-        if hasattr(decoded, 'file_id'):  # Older versions
-            return decoded.file_id, decoded.file_reference
-        elif hasattr(decoded, 'media_id'):  # Newer versions
-            return str(decoded.media_id), decoded.file_reference
-        else:
-            raise ValueError("Unsupported FileId structure")
+        if hasattr(FileId, 'decode'):
+            decoded = FileId.decode(file_id)
+            file_unique_id = getattr(decoded, 'file_unique_id', None) or getattr(decoded, 'media_id', None)
+            file_ref = getattr(decoded, 'file_reference', None)
+            if file_unique_id:
+                return str(file_unique_id), file_ref
+        return file_id, None
     except Exception as e:
-        raise ValueError(f"Failed to decode file ID: {str(e)}")
+        raise ValueError(f"File ID decoding failed: {str(e)}")
 
-# ===== MEDIA PROCESSOR ===== #
+# ===== MEDIA PROCESSOR CLASS ===== #
 class MediaProcessor:
-    async def process_thumbnail(self, client: Client, thumb: object) -> Optional[str]:
-        """Reliable thumbnail processing"""
-        for attempt in range(MAX_RETRIES):
-            try:
-                thumb_path = f"{TEMP_FILE_PREFIX}{hashlib.md5(thumb.file_id.encode()).hexdigest()[:8]}.jpg"
-                if os.path.exists(thumb_path):
-                    return thumb_path
-                    
-                await client.download_media(
-                    thumb.file_id,
-                    file_name=thumb_path
-                )
-                return thumb_path
-            except FloodWait as e:
-                await asyncio.sleep(e.value)
-            except Exception:
-                if attempt == MAX_RETRIES - 1:
-                    return None
-                await asyncio.sleep(1)
+    def __init__(self):
+        self.thumbnail_cache = {}
+        self.last_cleanup = time.time()
 
-# ===== MAIN HANDLER ===== #
+    async def process_thumbnail(self, client: Client, thumb_obj) -> Optional[str]:
+        """Download and cache thumbnails"""
+        try:
+            thumb_hash = hashlib.md5(thumb_obj.file_id.encode()).hexdigest()
+            
+            if thumb_hash in self.thumbnail_cache:
+                cached_path = self.thumbnail_cache[thumb_hash]
+                if os.path.exists(cached_path):
+                    return cached_path
+
+            thumb_path = f"{TEMP_FILE_PREFIX}{thumb_hash[:8]}.jpg"
+            await client.download_media(thumb_obj.file_id, file_name=thumb_path)
+            
+            if os.path.exists(thumb_path) and os.path.getsize(thumb_path) > 0:
+                self.thumbnail_cache[thumb_hash] = thumb_path
+                return thumb_path
+            return None
+            
+        except Exception:
+            return None
+
+    async def cleanup(self):
+        """Periodic cache cleanup"""
+        if time.time() - self.last_cleanup > CACHE_CLEAN_INTERVAL:
+            for path in list(self.thumbnail_cache.values()):
+                try:
+                    if os.path.exists(path):
+                        os.remove(path)
+                except:
+                    pass
+            self.thumbnail_cache.clear()
+            self.last_cleanup = time.time()
+
+# ===== CORE FUNCTIONALITY ===== #
 media_processor = MediaProcessor()
+processed_files = set()
 
 async def process_media(client: Client, message: Message):
-    """Robust media processing with enhanced error handling"""
+    """Main media processing pipeline"""
+    thumb_path = None
+    file_name = "Unknown_File"
+    
     try:
-        # Media detection with fallbacks
-        media = (
-            message.document or 
-            message.video or 
-            message.audio or 
-            message.photo
-        )
+        await media_processor.cleanup()
+        start_time = time.time()
+
+        # Determine media type
+        media = None
+        media_type = "File"
+        for attr in ['document', 'video', 'audio', 'photo']:
+            if getattr(message, attr, None):
+                media = getattr(message, attr)
+                media_type = attr.capitalize()
+                break
+        
         if not media:
             return
 
@@ -83,43 +129,42 @@ async def process_media(client: Client, message: Message):
             processed_files.clear()
 
         # Duplicate prevention
-        file_hash = hashlib.sha256(media.file_id.encode()).hexdigest()
+        file_hash = await generate_file_hash(media.file_id)
         if file_hash in processed_files:
             return
         processed_files.add(file_hash)
 
-        # Metadata extraction
-        file_name = re.sub(r'[^\w\s\-\.]', '', getattr(media, "file_name", "Unnamed"))
+        # Extract metadata
+        file_name = clean_filename(getattr(media, "file_name", ""))
         file_size = humanbytes(getattr(media, "file_size", 0))
         duration = time_formatter(getattr(media, "duration", 0))
 
-        # File ID processing with retries
-        file_id = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                file_id, _ = unpack_new_file_id(media.file_id)
-                break
-            except Exception as e:
-                if attempt == MAX_RETRIES - 1:
-                    raise
-                await asyncio.sleep(1)
+        # Get file ID
+        file_id, file_ref = await unpack_file_id(media.file_id)
 
-        # Thumbnail handling
-        thumb_path = None
+        # Process thumbnail
         if hasattr(media, "thumbs") and media.thumbs:
             thumb_path = await media_processor.process_thumbnail(client, media.thumbs[0])
 
-        # Content delivery
+        # Prepare message
+        caption = (
+            f"✨ **New {media_type} Upload** ✨\n\n"
+            f"📌 **Name:** `{file_name}`\n"
+            f"📦 **Size:** `{file_size}`\n"
+            f"⏱️ **Duration:** `{duration}`\n\n"
+            f"⬇️ **Download Below** ⬇️"
+        )
+        
         buttons = [[
-            InlineKeyboardButton("📥 Download", 
-            url=f"https://t.me/{temp.U_NAME}?start={file_id}")
+            InlineKeyboardButton("📥 Download", url=f"https://t.me/{temp.U_NAME}?start={file_id}")
         ]]
 
+        # Deliver content
         if thumb_path:
             await client.send_photo(
                 chat_id=UPDATE_CHANNEL,
                 photo=thumb_path,
-                caption=build_caption(media, file_name, file_size, duration),
+                caption=caption,
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
         else:
@@ -127,14 +172,18 @@ async def process_media(client: Client, message: Message):
                 chat_id=UPDATE_CHANNEL,
                 from_chat_id=message.chat.id,
                 message_id=message.id,
-                caption=build_caption(media, file_name, file_size, duration),
+                caption=caption,
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
+
+        # Log processing
+        proc_time = time.time() - start_time
+        await db.log_processing(file_id, proc_time, getattr(media, "file_size", 0))
 
     except FloodWait as e:
         await asyncio.sleep(e.value + 2)
     except Exception as e:
-        await log_error(client, f"Error processing {file_name or 'unknown file'}", e)
+        await log_error(client, f"Processing {file_name}", e)
     finally:
         if thumb_path and os.path.exists(thumb_path):
             try:
@@ -142,32 +191,18 @@ async def process_media(client: Client, message: Message):
             except:
                 pass
 
-# ===== HELPER FUNCTIONS ===== #
-def build_caption(media, file_name, file_size, duration) -> str:
-    """Dynamic caption builder"""
-    media_type = (
-        "Video" if message.video else
-        "Audio" if message.audio else
-        "Document" if message.document else
-        "Photo" if message.photo else "Media"
-    )
-    return (
-        f"✨ **New {media_type} Upload** ✨\n\n"
-        f"📌 **Name:** `{file_name}`\n"
-        f"📦 **Size:** `{file_size}`\n"
-        f"⏱️ **Duration:** `{duration}`\n\n"
-        f"⬇️ **Download Below** ⬇️"
-    )
-
 async def log_error(client: Client, context: str, error: Exception):
-    """Enhanced error logging"""
+    """Error logging with traceback"""
     error_msg = (
         f"🚨 **Error**: {context}\n\n"
         f"• **Type**: `{type(error).__name__}`\n"
         f"• **Message**: `{str(error)[:500]}`\n\n"
         f"⚠️ **Traceback**:\n```{traceback.format_exc()[:3000]}```"
     )
-    await client.send_message(LOG_CHANNEL, error_msg)
+    try:
+        await client.send_message(LOG_CHANNEL, error_msg)
+    except:
+        pass
 
 # ===== HANDLERS ===== #
 @Client.on_message(filters.chat(CHANNELS) & (
@@ -179,5 +214,23 @@ async def log_error(client: Client, context: str, error: Exception):
 async def media_handler(client: Client, message: Message):
     await process_media(client, message)
 
+@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+async def show_stats(client: Client, message: Message):
+    stats = await db.get_performance_stats()
+    await message.reply(
+        "📊 **Bot Performance**\n\n"
+        f"• Files Processed: `{stats['total']:,}`\n"
+        f"• Avg Speed: `{stats['avg_speed']:.2f}s/file`\n"
+        f"• Cache Size: `{len(processed_files):,}`\n"
+        f"• Uptime: `{time_formatter(stats['uptime'])}`"
+    )
+
+# ===== INITIALIZATION ===== #
+async def initialize():
+    """Startup tasks"""
+    print("🚀 Starting media processor...")
+    processed_files.clear()
+    print("✅ System ready")
+
 if __name__ == "__main__":
-    print("✅ Bot utilities initialized")
+    asyncio.run(initialize())
