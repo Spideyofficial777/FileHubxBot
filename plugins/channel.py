@@ -30,7 +30,7 @@ from config import *
     }"""
 
 # Initialize AI models
-nsfw_classifier = pipeline("image-classification", model=Config.NSFW_MODEL)
+nsfw_classifier = pipeline("image-classification", model=NSFW_MODEL)
 
 # ===== Core Utilities ===== #
 def humanbytes(size: int) -> str:
@@ -104,10 +104,10 @@ async def enhance_thumbnail(image_path: str) -> str:
             # Add watermark
             draw = ImageDraw.Draw(img)
             font = ImageFont.truetype("arial.ttf", 24)
-            text_width = draw.textlength(Config.WATERMARK, font=font)
+            text_width = draw.textlength(WATERMARK, font=font)
             draw.text(
                 (img.width - text_width - 10, img.height - 30),
-                Config.WATERMARK,
+                WATERMARK,
                 fill="white",
                 font=font,
                 stroke_width=2,
@@ -124,7 +124,7 @@ async def enhance_thumbnail(image_path: str) -> str:
 async def generate_mirror_buttons(file_id: str) -> InlineKeyboardMarkup:
     """Create multi-CDN download options"""
     buttons = []
-    for region, url in Config.MIRROR_REGIONS.items():
+    for region, url in MIRROR_REGIONS.items():
         buttons.append(
             InlineKeyboardButton(
                 f"🌐 {region} Mirror",
@@ -140,7 +140,7 @@ async def generate_mirror_buttons(file_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(buttons)
 
 # ===== Main Handler ===== #
-@Client.on_message(filters.chat(Config.CHANNELS) & (filters.document | filters.video | filters.audio))
+@Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio))
 async def media_processing_handler(client: Client, message: Message):
     try:
         start_time = time.time()
@@ -179,7 +179,7 @@ async def media_processing_handler(client: Client, message: Message):
             thumb_path = await enhance_thumbnail(thumb_path)
         
         # Content routing
-        target_channel = Config.UPDATE_CHANNEL
+        target_channel = UPDATE_CHANNEL
         if media_info["is_nsfw"]:
             target_channel = await db.get_nsfw_channel() or target_channel
             
@@ -216,10 +216,10 @@ async def media_processing_handler(client: Client, message: Message):
         await asyncio.sleep(e.value + 2)
     except Exception as e:
         error_msg = f"🚨 Processing Error:\n{traceback.format_exc()}\n\nMedia: {media_info.get('name')}"
-        await client.send_message(Config.LOG_CHANNEL, error_msg)
+        await client.send_message(LOG_CHANNEL, error_msg)
 
 # ===== Monitoring Commands ===== #
-@Client.on_message(filters.command("stats") & filters.user(Config.ADMINS))
+@Client.on_message(filters.command("stats") & filters.user(ADMINS))
 async def system_stats(client, message):
     stats = await db.get_performance_stats()
     await message.reply(
