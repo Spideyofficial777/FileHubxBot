@@ -28,10 +28,7 @@ PORT = environ.get("PORT", "8001")
 
 # =========================[ DATABASE CONFIG ]========================= #
 
-DB_URI = environ.get(
-    "DATABASE_URL",
-    "mongodb+srv://username:password@cluster0.mongodb.net/?retryWrites=true&w=majority"
-)
+DB_URI = environ.get("DATABASE_URL", "mongodb+srv://vajoko2131:x3qqdqblhmi0s2fX@cluster0.xrpgiv7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = environ.get("DATABASE_NAME", "FileHubxBot")
 
 # =========================[ BOT BEHAVIOR SETTINGS ]=================== #
