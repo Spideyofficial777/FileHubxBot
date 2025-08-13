@@ -17,7 +17,7 @@ beautifulsoup4==4.12.3
 aiofiles==23.2.1
 pytz==2023.3.post1
 tzlocal==5.2
-
+marshmallow
 shortzy
 
 # Optional
