@@ -7,7 +7,7 @@ pyromod==2.0.0
 transformers==4.40.0
 torch==2.2.1
 sentencepiece==0.2.0
-accelerate==0.27.2  # For optimized AI inference
+accelerate==0.27.2
 
 # Database
 pymongo==4.6.2
@@ -28,8 +28,11 @@ aiofiles==23.2.1
 pytz==2023.3.post1
 tzlocal==5.2
 python-magic==0.4.27
-pillow==10.2.0  # Image processing
+pillow==10.2.0
 cachetools==5.3.2
 
 # Performance Boosters
-uvloop==0.19.0  # Linux only
+uvloop==0.19.0
+
+# Schedulers
+APScheduler==3.10.4
