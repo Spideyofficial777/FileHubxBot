@@ -10,7 +10,6 @@ TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 APP_ID = int(os.environ.get("APP_ID", "28519661")) #Your API ID from my.telegram.org
 API_HASH = os.environ.get("API_HASH", "d47c74c8a596fd3048955b322304109d") #Your API Hash from my.telegram.org
 #--------------------------------------------
-
 CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002423451263"))
 VERIFIED_LOG = int(environ.get('VERIFIED_LOG', '-1002423451263'))  #Your db channel Id
 OWNER = os.environ.get("OWNER", "hacker_x_official_777") # Owner username without @
@@ -18,7 +17,7 @@ OWNER_ID = int(os.environ.get("OWNER_ID", "7965267063")) # Owner id
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002294764885'))
 CHANNEL = int(os.environ.get("CHANNEL", "-1002423451263"))
 UPDATE_CHANNEL = int(os.environ.get("UPDATE_CHANNEL", "-1002461263750"))
-CHANNELS = int(os.environ.get("CHANNELS", "-1002423451263"))
+#CHANNELS = int(os.environ.get("CHANNELS", "-1002423451263"))
 #--------------------------------------------
 PORT = os.environ.get("PORT", "8001")
 #--------------------------------------------
@@ -27,8 +26,7 @@ DB_NAME = os.environ.get("DATABASE_NAME", "FileHubxBot")
 #--------------------------------------------
 FSUB_LINK_EXPIRY = int(os.getenv("FSUB_LINK_EXPIRY", "10"))  # 0 means no expiry
 BAN_SUPPORT = os.environ.get("BAN_SUPPORT", "https://t.me/Spideyofficial_777")
-TG_BOT_CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002423451263")
-WORKERS = int(os.environ.get("TG_BOT_WORKERS", "200"))
+TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "200"))
 #--------------------------------------------
 START_PIC = os.environ.get("START_PIC", "https://telegra.ph/file/ec17880d61180d3312d6a.jpg")
 FORCE_PIC = os.environ.get("FORCE_PIC", "https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg")
