@@ -29,12 +29,12 @@ default_verify = {
 @instance.register
 class Media(Document):
     file_id = fields.StrField(attribute='_id', required=True)
-    file_ref = fields.StrField(allow_none=True, required=False, missing=None)
+    file_ref = fields.StrField(allow_none=True, required=False, default=None)
     file_name = fields.StrField(required=True)
     file_size = fields.IntField(required=True)
-    mime_type = fields.StrField(allow_none=True, required=False, missing=None)
-    caption = fields.StrField(allow_none=True, required=False, missing=None)
-    file_type = fields.StrField(allow_none=True, required=False, missing=None)
+    mime_type = fields.StrField(allow_none=True, required=False, default=None)
+    caption = fields.StrField(allow_none=True, required=False, default=None)
+    file_type = fields.StrField(allow_none=True, required=False, default=None)
 
     class Meta:
         indexes = ('$file_name', )
