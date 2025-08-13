@@ -12,7 +12,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import FloodWait
 
-from info import CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, LOG_CHANNEL
+from config import * #CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, LOG_CHANNEL
 from database.ia_filterdb import save_file, unpack_new_file_id
 from utils import get_poster, temp
 from database.users_chats_db import db
