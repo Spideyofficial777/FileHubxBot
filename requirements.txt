@@ -19,7 +19,6 @@ pytz==2023.3.post1
 tzlocal==5.2
 
 shortzy
-Pillow
 
 # Optional
 pillow==10.2.0
