@@ -34,3 +34,4 @@ python-magic==0.4.27  # File detection
 
 # AI & NLP
 transformers==4.39.3  # AI moderation / NLP
+torch==2.2.2+cpu --index-url https://download.pytorch.org/whl/cpu  # Lightweight CPU-only PyTorch
