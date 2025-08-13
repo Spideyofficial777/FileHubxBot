@@ -4,6 +4,7 @@ from struct import pack
 import re
 import base64
 from pymongo.errors import DuplicateKeyError
+from marshmallow.exceptions import ValidationError
 import time
 import pymongo, os
 from pyrogram.file_id import FileId
