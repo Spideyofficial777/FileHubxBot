@@ -40,21 +40,53 @@ class Media(Document):
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
 
-
 async def save_file(message):
-    """Save file in database"""
-    media = message.document or message.video or message.audio or message.voice or message.photo
+    """
+    Save file in database with powerful features.
+    Pass full Message object.
+    """
+    # Detect supported media types
+    media = (
+        message.document
+        or message.video
+        or message.audio
+        or message.voice
+        or message.photo
+        or message.animation
+    )
+
     if not media:
         print("❌ No media found in this message.")
         return "err"
 
-    file_id, file_ref = unpack_new_file_id(media.file_id)
-    file_name = re.sub(r"(_|\-|\.|\+)", " ", str(getattr(media, "file_name", "NO_FILE")))
+    # Unpack file_id & file_ref safely
+    try:
+        file_id, file_ref = unpack_new_file_id(media.file_id)
+    except Exception as e:
+        print(f"❌ Failed to unpack file_id: {e}")
+        return "err"
+
+    # Clean file name
+    file_name = re.sub(
+        r"(_|\-|\.|\+)",
+        " ",
+        str(getattr(media, "file_name", "NO_FILE"))
+    )
+
+    # Get other attributes safely
     file_size = getattr(media, "file_size", 0)
     mime_type = getattr(media, "mime_type", None)
+    file_type = mime_type.split("/")[0] if mime_type else None
+    duration = getattr(media, "duration", 0)
     caption = message.caption or None
-    file_type = mime_type.split('/')[0] if mime_type else None
+    upload_time = datetime.now().strftime("%d %b %Y, %I:%M %p")
 
+    # NSFW & Premium detection
+    lower_caption_name = (file_name + " " + (caption or "")).lower()
+    is_nsfw = any(kw in lower_caption_name for kw in NSFW_KEYWORDS)
+    is_premium = "premium" in lower_caption_name
+
+    # Create DB document
     try:
         file = Media(
             file_id=file_id,
@@ -63,22 +95,28 @@ async def save_file(message):
             file_size=file_size,
             mime_type=mime_type,
             caption=caption,
-            file_type=file_type
+            file_type=file_type,
+            duration=duration,
+            upload_time=upload_time,
+            tags={"nsfw": is_nsfw, "premium": is_premium}
         )
     except ValidationError:
         print(f"❌ Validation error for file: {file_name}")
         return "err"
 
+    # Commit to DB
     try:
         await file.commit()
     except DuplicateKeyError:
         print(f"⚠️ {file_name} is already saved in database")
         return "dup"
+    except Exception as e:
+        print(f"❌ DB commit error for {file_name}: {e}")
+        return "err"
 
     print(f"✅ {file_name} saved successfully")
     return "suc"
         
-
 async def add_name(user_id, filename):
     user_db = mydb[str(user_id)]
     user = {'_id': filename}
