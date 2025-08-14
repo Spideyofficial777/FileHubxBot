@@ -97,6 +97,12 @@ MIRROR_REGIONS = {
     "ASIA": "https://asia-cdn.example.com"
 }
 
+class temp(object):
+    ME = None
+    U_NAME = None
+    B_NAME = None
+    B_LINK = None
+    
 LOG_FILE_NAME = "filehubxbot.txt"
 
 logging.basicConfig(
