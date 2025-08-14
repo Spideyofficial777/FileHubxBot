@@ -13,7 +13,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, 
 from pyrogram.errors import FloodWait, FileIdInvalid, FileReferenceEmpty
 from pyrogram.file_id import FileId
 
-from config import CHANNELS, MOVIE_UPDATE_CHANNEL, ADMINS, LOG_CHANNEL, temp
+from config import CHANNELS, UPDATE_CHANNEL, OWNER_ID, LOG_CHANNEL, temp
 from database.database import save_file, Media, db
 from Script import script
 from umongo.exceptions import ValidationError
