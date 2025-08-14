@@ -1,121 +1,108 @@
-import motor, asyncio
 import motor.motor_asyncio
 from struct import pack
 import re
 import base64
 from pymongo.errors import DuplicateKeyError
-from marshmallow.exceptions import ValidationError
-import time
-import pymongo, os
+from umongo import Instance, Document, fields, validate
+from pymongo import MongoClient
 from pyrogram.file_id import FileId
 from config import DB_URI, DB_NAME, COLLECTION_NAME
 import logging
-from datetime import datetime, timedelta
-from umongo import Instance, Document, fields
+from datetime import datetime
+from typing import Optional
 
-dbclient = pymongo.MongoClient(DB_URI)
-database = dbclient[DB_NAME]
-instance = Instance(database)
+# Database connection
+client = MongoClient(DB_URI)
+db = client[DB_NAME]
+instance = Instance(db)
 
 logging.basicConfig(level=logging.INFO)
-
-default_verify = {
-    'is_verified': False,
-    'verified_time': 0,
-    'verify_token': "",
-    'link': ""
-}
 
 @instance.register
 class Media(Document):
     file_id = fields.StrField(attribute='_id', required=True)
-    file_ref = fields.StrField(allow_none=True, required=False, default=None)
+    file_ref = fields.StrField(allow_none=True)
     file_name = fields.StrField(required=True)
     file_size = fields.IntField(required=True)
-    mime_type = fields.StrField(allow_none=True, required=False, default=None)
-    caption = fields.StrField(allow_none=True, required=False, default=None)
-    file_type = fields.StrField(allow_none=True, required=False, default=None)
-
+    file_type = fields.StrField(allow_none=True)
+    mime_type = fields.StrField(allow_none=True)
+    caption = fields.StrField(allow_none=True)
+    duration = fields.IntField(default=0)
+    upload_time = fields.DateTimeField(default=datetime.utcnow)
+    tags = fields.DictField(default={})
+    
     class Meta:
-        indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
+        indexes = ['file_name', 'file_type', 'upload_time']
 
-async def save_file(message):
+async def save_file(media) -> str:
     """
-    Save file in database with powerful features.
-    Pass full Message object.
+    Save media file to database with comprehensive error handling
+    
+    Returns:
+        'suc' - Successfully saved
+        'dup' - Duplicate file
+        'err' - Error occurred
     """
-    # Detect supported media types
-    media = (
-        message.document
-        or message.video
-        or message.audio
-        or message.voice
-        or message.photo
-        or message.animation
-    )
-
-    if not media:
-        print("❌ No media found in this message.")
-        return "err"
-
-    # Unpack file_id & file_ref safely
     try:
-        file_id, file_ref = unpack_new_file_id(media.file_id)
+        # Unpack file ID safely
+        try:
+            decoded = FileId.decode(media.file_id)
+            file_id = encode_file_id(
+                pack(
+                    "<iiqq",
+                    int(decoded.file_type),
+                    decoded.dc_id,
+                    decoded.media_id,
+                    decoded.access_hash
+                )
+            )
+            file_ref = encode_file_ref(decoded.file_reference) if decoded.file_reference else None
+        except Exception as e:
+            logging.error(f"File ID decoding error: {str(e)}")
+            return "err"
+
+        # Prepare file data
+        file_name = re.sub(r'[^\w\s\-\.\(\)]', ' ', getattr(media, "file_name", "Unknown")).strip()
+        file_size = getattr(media, "file_size", 0)
+        mime_type = getattr(media, "mime_type", None)
+        file_type = mime_type.split("/")[0] if mime_type else None
+        duration = getattr(media, "duration", 0)
+        
+        # Get caption safely
+        caption = None
+        if hasattr(media, "caption"):
+            caption = media.caption.html if media.caption and hasattr(media.caption, "html") else str(media.caption)
+
+        # Create document
+        file_data = {
+            "file_id": file_id,
+            "file_ref": file_ref,
+            "file_name": file_name,
+            "file_size": file_size,
+            "mime_type": mime_type,
+            "file_type": file_type,
+            "duration": duration,
+            "caption": caption,
+            "tags": {}
+        }
+
+        # Add to database
+        try:
+            file = Media(**file_data)
+            await file.commit()
+            logging.info(f"Saved file: {file_name}")
+            return "suc"
+        except DuplicateKeyError:
+            logging.info(f"Duplicate file: {file_name}")
+            return "dup"
+        except Exception as e:
+            logging.error(f"Database save error: {str(e)}")
+            return "err"
+
     except Exception as e:
-        print(f"❌ Failed to unpack file_id: {e}")
+        logging.error(f"General save error: {str(e)}")
         return "err"
-
-    # Clean file name
-    file_name = re.sub(
-        r"(_|\-|\.|\+)",
-        " ",
-        str(getattr(media, "file_name", "NO_FILE"))
-    )
-
-    # Get other attributes safely
-    file_size = getattr(media, "file_size", 0)
-    mime_type = getattr(media, "mime_type", None)
-    file_type = mime_type.split("/")[0] if mime_type else None
-    duration = getattr(media, "duration", 0)
-    caption = message.caption or None
-    upload_time = datetime.now().strftime("%d %b %Y, %I:%M %p")
-
-    # NSFW & Premium detection
-    lower_caption_name = (file_name + " " + (caption or "")).lower()
-    is_nsfw = any(kw in lower_caption_name for kw in NSFW_KEYWORDS)
-    is_premium = "premium" in lower_caption_name
-
-    # Create DB document
-    try:
-        file = Media(
-            file_id=file_id,
-            file_ref=file_ref,
-            file_name=file_name,
-            file_size=file_size,
-            mime_type=mime_type,
-            caption=caption,
-            file_type=file_type,
-            duration=duration,
-            upload_time=upload_time,
-            tags={"nsfw": is_nsfw, "premium": is_premium}
-        )
-    except ValidationError:
-        print(f"❌ Validation error for file: {file_name}")
-        return "err"
-
-    # Commit to DB
-    try:
-        await file.commit()
-    except DuplicateKeyError:
-        print(f"⚠️ {file_name} is already saved in database")
-        return "dup"
-    except Exception as e:
-        print(f"❌ DB commit error for {file_name}: {e}")
-        return "err"
-
-    print(f"✅ {file_name} saved successfully")
-    return "suc"
         
 async def add_name(user_id, filename):
     user_db = mydb[str(user_id)]
