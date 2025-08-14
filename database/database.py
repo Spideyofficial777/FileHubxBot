@@ -40,32 +40,31 @@ class Media(Document):
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
 
-async def save_file(media):
+
+async def save_file(message):
     """Save file in database"""
-    
-    # Extract attributes safely
-    file_id, file_ref = unpack_new_file_id(getattr(media, "file_id", ""))
+    media = message.document or message.video or message.audio or message.voice or message.photo
+    if not media:
+        print("❌ No media found in this message.")
+        return "err"
+
+    file_id, file_ref = unpack_new_file_id(media.file_id)
     file_name = re.sub(r"(_|\-|\.|\+)", " ", str(getattr(media, "file_name", "NO_FILE")))
     file_size = getattr(media, "file_size", 0)
     mime_type = getattr(media, "mime_type", None)
-
-    # Handle caption safely
-    caption = getattr(media, "caption", None)
-    if hasattr(caption, "html"):
-        caption = caption.html
-
+    caption = message.caption or None
     file_type = mime_type.split('/')[0] if mime_type else None
 
-    try:
-        file = Media(
-            file_id=file_id,
-            file_ref=file_ref,
-            file_name=file_name,
-            file_size=file_size,
-            mime_type=mime_type,
-            caption=getattr(media, "caption", None),
-            file_type=file_type
-        )
+    try:
+        file = Media(
+            file_id=file_id,
+            file_ref=file_ref,
+            file_name=file_name,
+            file_size=file_size,
+            mime_type=mime_type,
+            caption=caption,
+            file_type=file_type
+        )
     except ValidationError:
         print(f"❌ Validation error for file: {file_name}")
         return "err"
