@@ -368,34 +368,34 @@ class Spidey:
         user = await self.col.find_one({'_id': int(id)})
         return bool(user)
         
-async def save_file(media):
+#async def save_file(media):
     """Save file in database"""
 
     # TODO: Find better way to get same file_id for same media to avoid duplicates
-    file_id, file_ref = unpack_new_file_id(media.file_id)
-    file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
-    try:
-        file = Media(
-            file_id=file_id,
-            file_ref=file_ref,
-            file_name=file_name,
-            file_size=media.file_size,
-            mime_type=media.mime_type,
-            caption=media.caption.html if media.caption else None,
-            file_type=media.mime_type.split('/')[0]
-        )
-    except ValidationError:
-        print('Error occurred while saving file in database')
-        return 'err'
-    else:
-        try:
-            await file.commit()
-        except DuplicateKeyError:      
-            print(f'{getattr(media, "file_name", "NO_FILE")} is already saved in database') 
-            return 'dup'
-        else:
-            print(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
-            return 'suc'
+#    file_id, file_ref = unpack_new_file_id(media.file_id)
+#    file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
+#    try:
+#        file = Media(
+#            file_id=file_id,
+#            file_ref=file_ref,
+#            file_name=file_name,
+#            file_size=media.file_size,
+#            mime_type=media.mime_type,
+#            caption=media.caption.html if media.caption else None,
+#            file_type=media.mime_type.split('/')[0]
+#        )
+#    except ValidationError:
+#        print('Error occurred while saving file in database')
+#        return 'err'
+#    else:
+#        try:
+#            await file.commit()
+#        except DuplicateKeyError:      
+#            print(f'{getattr(media, "file_name", "NO_FILE")} is already saved in database') 
+#            return 'dup'
+#        else:
+#            print(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
+#            return 'suc'
         
 def encode_file_id(s: bytes) -> str:
     r = b""
