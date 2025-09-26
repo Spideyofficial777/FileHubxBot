@@ -1,7 +1,7 @@
-# Don't Remove Credit @CodeFlix_Bots, @Spideyofficialupdatez
-# Ask Doubt on telegram @CodeflixSupport
+# Don't Remove Credit @Spideyofficial777
+# Ask Doubt on telegram @Spideyofficial777
 #
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
+# Copyright (C) 2025 by Spidey Official, < https://t.me/Spideyofficial777 >.
 #
 # This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
 # and is released under the MIT License.
@@ -19,6 +19,7 @@ import string
 import string as spidey
 import time
 from datetime import datetime, timedelta
+import pytz
 from pyrogram import Client, filters, __version__
 from pyrogram.enums import ParseMode, ChatAction
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, ChatInviteLink, ChatPrivileges
@@ -92,7 +93,6 @@ async def start_command(client: Client, message: Message):
                 )
 
                 await verify_user(client, id, token)
-                await vr_db.save_verification(message.from_user.id)
 
                 now = datetime.now()
                 current_time = now.strftime("%H:%M:%S")
@@ -265,8 +265,8 @@ async def start_command(client: Client, message: Message):
 
 
 #=====================================================================================##
-# Don't Remove Credit @CodeFlix_Bots, @Spideyofficialupdatez
-# Ask Doubt on telegram @CodeflixSupport
+# Don't Remove Credit @Spideyofficial777
+# Ask Doubt on telegram @Spideyofficial777
 
 
 
