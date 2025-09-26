@@ -1,10 +1,10 @@
 #(©)CodeFlix_Bots
-#rohit_1888 on Tg #Dont remove this line
-
 import base64
 import re
 import asyncio
 import time
+from datetime import datetime, timedelta, date
+import pytz
 from pyrogram import filters
 from pyrogram.enums import ChatMemberStatus
 from config import *
@@ -23,6 +23,10 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     B_LINK = None
+
+# Global variables
+TOKENS = {}
+vr_db = None  # Will be initialized later
    
 #used for cheking if a user is admin ~Owner also treated as admin level
 async def check_admin(filter, client, update):
@@ -55,10 +59,10 @@ async def is_subscribed(client, user_id):
     return True
 
 
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
+# Don't Remove Credit @Spideyofficial777
+# Ask Doubt on telegram @Spideyofficial777
 #
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
+# Copyright (C) 2025 by Spidey Official, < https://t.me/Spideyofficial777 >.
 #
 # This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
 # and is released under the MIT License.
@@ -90,19 +94,6 @@ async def is_sub(client, user_id, channel_id):
     except Exception as e:
         print(f"[!] Error in is_sub(): {e}")
         return False
-
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
 
 async def encode(string):
     string_bytes = string.encode("ascii")
@@ -195,18 +186,6 @@ def get_exp_time(seconds):
             result += f'{int(period_value)} {period_name}'
     return result
 
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
-
 
 async def get_shortlink(url, api, link):
     shortzy = Shortzy(api_key=api, base_site=url)
@@ -216,58 +195,26 @@ async def get_shortlink(url, api, link):
 async def verify_user(bot, userid, token):
     user = await bot.get_users(int(userid))
     if not await db.is_user_exist(user.id):
-        await db.add_user(user.id, user.first_name)
-        await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
+        await db.add_user(user.id)
+        await bot.send_message(LOG_CHANNEL, f"#NewUser\n\nId - <code>{user.id}</code>\nName - {user.mention}")
     TOKENS[user.id] = {token: True}
     tz = pytz.timezone('Asia/Kolkata')
-    date_var = datetime.now(tz)+timedelta(hours=VERIFY_EXPIRE)
+    date_var = datetime.now(tz)+timedelta(seconds=VERIFY_EXPIRE)
     temp_time = date_var.strftime("%H:%M:%S")
     date_var, time_var = str(date_var).split(" ")
-    await update_verify_status(user.id, date_var, temp_time)
+    await db.update_verify_status(user.id, verify_token=token, is_verified=True, verified_time=time.time())
 
 async def check_verification(bot, userid):
     user = await bot.get_users(int(userid))
     if not await db.is_user_exist(user.id):
-        await db.add_user(user.id, user.first_name)
-        await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
+        await db.add_user(user.id)
+        await bot.send_message(LOG_CHANNEL, f"#NewUser\n\nId - <code>{user.id}</code>\nName - {user.mention}")
     
-    tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
-    now = datetime.now(tz)
-    curr_time = now.strftime("%H:%M:%S")
-    hour1, minute1, second1 = curr_time.split(":")
-    curr_time = time(int(hour1), int(minute1), int(second1))
-    status = await get_verify_status(user.id)
-    date_var = status["date"]
-    time_var = status["time"]
-    years, month, day = date_var.split('-')
-    comp_date = date(int(years), int(month), int(day))
-    hour, minute, second = time_var.split(":")
-    comp_time = time(int(hour), int(minute), int(second))
-    if comp_date<today:
+    verify_status = await db.get_verify_status(user.id)
+    if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
+        await db.update_verify_status(user.id, is_verified=False)
         return False
-    else:
-        if comp_date == today:
-            if comp_time<curr_time:
-                return False
-            else:
-                return True
-        else:
-            return True
+    return verify_status['is_verified']
 
 subscribed = filters.create(is_subscribed)
 admin = filters.create(check_admin)
-
-#rohit_1888 on Tg :
-
-# Don't Remove Credit @CodeFlix_Bots, @rohit_1888
-# Ask Doubt on telegram @CodeflixSupport
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
-#
