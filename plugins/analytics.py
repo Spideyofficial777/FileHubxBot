@@ -21,7 +21,7 @@ from database.database import *
 from database.db_premium import *
 import pytz
 
-@Bot.on_message(filters.command('stats') & filters.private & OWNER_ID)
+@Bot.on_message(filters.command('stats') & filters.private & admin)
 async def bot_stats(client: Client, message: Message):
     """Display comprehensive bot statistics"""
     try:
@@ -150,7 +150,7 @@ async def detailed_stats_callback(client: Client, callback_query):
     except Exception as e:
         await callback_query.answer(f"❌ Error: {str(e)}", show_alert=True)
 
-@Bot.on_message(filters.command('userinfo') & filters.private & OWNER_ID)
+@Bot.on_message(filters.command('userinfo') & filters.private & admin)
 async def user_info(client: Client, message: Message):
     """Get detailed information about a specific user"""
     try:
@@ -220,7 +220,7 @@ async def user_info(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"❌ Error getting user info: {str(e)}")
 
-@Bot.on_message(filters.command('activity') & filters.private & OWNER_ID)
+@Bot.on_message(filters.command('activity') & filters.private & admin)
 async def activity_log(client: Client, message: Message):
     """Show recent bot activity"""
     try:
@@ -269,4 +269,3 @@ async def activity_log(client: Client, message: Message):
         
     except Exception as e:
         await message.reply_text(f"❌ Error getting activity: {str(e)}")
-
