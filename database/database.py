@@ -15,6 +15,7 @@ from typing import Optional
 client = MongoClient(DB_URI)
 db = client[DB_NAME]
 instance = Instance(db)
+mydb = db  # Add mydb reference
 
 logging.basicConfig(level=logging.INFO)
 
@@ -315,6 +316,12 @@ class Spidey:
 
     # VERIFICATION MANAGEMENT
     async def db_verify_status(self, user_id):
+        default_verify = {
+            'is_verified': False,
+            'verified_time': 0,
+            'verify_token': "",
+            'link': ""
+        }
         user = await self.user_data.find_one({'_id': user_id})
         if user:
             return user.get('verify_status', default_verify)
