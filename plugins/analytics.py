@@ -21,6 +21,9 @@ from database.database import *
 from database.db_premium import *
 import pytz
 
+admin = filters.user([int(OWNER_ID)]) 
+
+
 @Bot.on_message(filters.command('stats') & filters.private & admin)
 async def bot_stats(client: Client, message: Message):
     """Display comprehensive bot statistics"""
@@ -269,3 +272,4 @@ async def activity_log(client: Client, message: Message):
         
     except Exception as e:
         await message.reply_text(f"❌ Error getting activity: {str(e)}")
+
