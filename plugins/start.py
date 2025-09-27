@@ -31,6 +31,7 @@ from helper_func import *
 from database.database import *
 from database.db_premium import *
 from Script import script
+from plugins.email import email_system, initialize_email_system, shutdown_email_system
 
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
@@ -481,9 +482,6 @@ async def user_status(client: Client, message: Message):
     ]
     
     await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
-
-# Add these imports at the top
-from email_system import email_system, initialize_email_system, shutdown_email_system
 
 # email notifications system 
 @Bot.on_message(filters.command('email_notify') & filters.private)
