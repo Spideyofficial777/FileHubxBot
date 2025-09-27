@@ -1,5 +1,3 @@
-# this is the test email for the testing our service to gate the send the email on the user 
-
 # Don't Remove Credit @hacker_x_official_777
 # Ask Doubt on telegram @hacker_x_official_777
 #
@@ -86,8 +84,63 @@ class SpideyEmailNotificationSystem:
     # Email Validation
     def is_valid_email(self, email: str) -> bool:
         """Validate email format"""
+        if not email:
+            return False
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
+
+    # ==================== MISSING METHODS ADDED ====================
+    async def get_subscription_status(self, user_id: int) -> Dict:
+        """Get user's subscription status - MISSING METHOD ADDED"""
+        try:
+            email_info = await self.db.get_email(user_id)
+            if email_info and email_info.get('is_active'):
+                return {
+                    'success': True,
+                    'subscribed': True,
+                    'email': email_info.get('email'),
+                    'subscription_date': email_info.get('joined_date'),
+                    'name': email_info.get('name')
+                }
+            else:
+                return {'success': True, 'subscribed': False}
+        except Exception as e:
+            logger.error(f"Error getting subscription status for user {user_id}: {e}")
+            return {'success': False, 'error': str(e)}
+
+    async def unsubscribe_user(self, user_id: int) -> Dict:
+        """Unsubscribe user from email notifications - MISSING METHOD ADDED"""
+        try:
+            success = await self.db.remove_email(user_id)
+            if success:
+                return {'success': True, 'message': '✅ Successfully unsubscribed from email notifications.'}
+            else:
+                return {'success': False, 'error': '❌ You are not currently subscribed.'}
+        except Exception as e:
+            logger.error(f"Error unsubscribing user {user_id}: {e}")
+            return {'success': False, 'error': str(e)}
+
+    async def get_system_stats(self) -> Dict:
+        """Get email system statistics - MISSING METHOD ADDED"""
+        try:
+            total_users = await self.db.get_total_users()
+            active_subscribers = await self.db.get_active_subscribers()
+            recent_activity = await self.db.get_recent_activity()
+            
+            return {
+                'success': True,
+                'stats': {
+                    'total_subscribers': total_users,
+                    'active_subscribers': active_subscribers,
+                    'recent_activity': recent_activity,
+                    'smtp_status': 'Connected' if self.is_connected else 'Disconnected',
+                    'admin_email': self.smtp_config['admin_email']
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error getting system stats: {e}")
+            return {'success': False, 'error': str(e)}
+    # ==================== END OF MISSING METHODS ====================
 
     # Test Email Template
     def get_test_template(self, test_type: str, user_data: Dict = None) -> str:
@@ -226,6 +279,179 @@ class SpideyEmailNotificationSystem:
                     <p><strong>Maintained by:</strong> @hacker_x_official_777</p>
                     <p><strong>Test ID:</strong> {test_details.get('test_id', 'N/A')}</p>
                 </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    def get_thankyou_template(self, user_data: Dict) -> str:
+        """Thank you email template after subscription"""
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Thank You for Subscribing! - FileHubX Bot</title>
+            <style>
+                body {{ 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                }}
+                .container {{ 
+                    max-width: 600px; 
+                    margin: 20px auto; 
+                    background: #ffffff; 
+                    border-radius: 15px; 
+                    overflow: hidden; 
+                    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                }}
+                .header {{ 
+                    background: linear-gradient(45deg, #FF416C, #FF4B2B); 
+                    padding: 40px; 
+                    text-align: center; 
+                    color: white; 
+                }}
+                .content {{ 
+                    padding: 40px; 
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                .footer {{ 
+                    background: #2c3e50; 
+                    padding: 30px; 
+                    text-align: center; 
+                    color: white; 
+                }}
+                .button {{ 
+                    display: inline-block; 
+                    padding: 15px 30px; 
+                    background: linear-gradient(45deg, #FF416C, #FF4B2B); 
+                    color: white; 
+                    text-decoration: none; 
+                    border-radius: 25px; 
+                    margin: 20px 0; 
+                    font-weight: bold;
+                }}
+                .channel-grid {{
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 15px;
+                    margin: 25px 0;
+                }}
+                .channel-item {{
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border-left: 4px solid #FF416C;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin:0;">🎉 Thank You for Subscribing!</h1>
+                    <p style="margin:10px 0 0 0;">Welcome to FileHubX Bot Family</p>
+                </div>
+                <div class="content">
+                    <h2>Hello {user_data.get('name', 'Valued Member')}! 👋</h2>
+                    
+                    <p>We're absolutely thrilled to welcome you to <strong>FileHubX Bot</strong> - your ultimate destination for premium file sharing and exclusive content!</p>
+                    
+                    <h3>🚀 What You'll Receive:</h3>
+                    <ul>
+                        <li><strong>Instant Notifications</strong> about new features and updates</li>
+                        <li><strong>Exclusive Content</strong> before anyone else</li>
+                        <li><strong>Premium Access</strong> to special files and resources</li>
+                        <li><strong>Security Alerts</strong> and important announcements</li>
+                    </ul>
+
+                    <h3>📢 Join Our Official Channels:</h3>
+                    <div class="channel-grid">
+                        <div class="channel-item">
+                            <strong>🕷️ Main Channel</strong><br>
+                            <a href="https://t.me/spideyofficial777" style="color: #FF416C; text-decoration: none;">
+                                @SpideyOfficial777
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🌟 Backup Channel</strong><br>
+                            <a href="https://t.me/spideyofficial_777" style="color: #FF416C; text-decoration: none;">
+                                @SpideyOfficial_777
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🎬 CineFlix Official</strong><br>
+                            <a href="https://t.me/+QVmLP_hlHNw3M2I1" style="color: #FF416C; text-decoration: none;">
+                                Join CineFlix Community
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🎮 Gaming Channel</strong><br>
+                            <a href="https://t.me/+cMlrPqMjUwtmNTI1" style="color: #FF416C; text-decoration: none;">
+                                Spidey Official Gaming
+                            </a>
+                        </div>
+                    </div>
+
+                    <center>
+                        <a href="https://t.me/{BOT_USERNAME}" class="button">
+                            🚀 Start Using FileHubX Bot
+                        </a>
+                    </center>
+
+                    <p style="text-align: center; color: #666; font-size: 14px;">
+                        <em>Maintained by: @hacker_x_official_777</em>
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>© 2025 FileHubX Bot. All rights reserved.</p>
+                    <p style="font-size: 12px; opacity: 0.8;">
+                        This is an automated message. Please do not reply directly.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    def get_admin_notification_template(self, user_data: Dict, email: str) -> str:
+        """Admin notification template for new subscriptions"""
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Email Subscription - FileHubX Bot</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .header {{ background: #2c3e50; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
+                .info-box {{ background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #3498db; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>📧 New Email Subscription</h1>
+                    <p>FileHubX Bot Notification System</p>
+                </div>
+                
+                <div class="info-box">
+                    <h3>🔔 New Subscriber Details:</h3>
+                    <p><strong>User ID:</strong> {user_data.get('user_id', 'N/A')}</p>
+                    <p><strong>Name:</strong> {user_data.get('name', 'Not Provided')}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Subscription Date:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p><strong>Telegram Username:</strong> @{user_data.get('username', 'N/A')}</p>
+                </div>
+
+                <p><strong>Total Subscribers:</strong> {user_data.get('total_subscribers', 'N/A')}</p>
+                <p><strong>Bot:</strong> @{BOT_USERNAME}</p>
+                <p><strong>Maintained by:</strong> @hacker_x_official_777</p>
             </div>
         </body>
         </html>
@@ -459,17 +685,6 @@ class SpideyEmailNotificationSystem:
         except Exception as e:
             logger.error(f"Error subscribing user {user_id}: {e}")
             return {'success': False, 'error': f'❌ Subscription failed: {str(e)}'}
-
-    # Existing template functions (keep your previous templates)
-    def get_thankyou_template(self, user_data: Dict) -> str:
-        """Thank you email template after subscription"""
-        # ... (keep your existing thank you template code)
-        return "Thank you template HTML"
-
-    def get_admin_notification_template(self, user_data: Dict, email: str) -> str:
-        """Admin notification template"""
-        # ... (keep your existing admin template code)
-        return "Admin template HTML"
 
 # Global email system instance
 email_system = SpideyEmailNotificationSystem()
