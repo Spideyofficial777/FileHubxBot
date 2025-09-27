@@ -8,15 +8,15 @@
 
 import motor.motor_asyncio
 from datetime import datetime, timedelta
-from config import DATABASE_URL, DATABASE_NAME
+from config import * # DB_URI, DB_NAME
 import logging
 
 logger = logging.getLogger(__name__)
 
 class EmailDatabase:
     def __init__(self):
-        self.client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URL)
-        self.db = self.client[DATABASE_NAME]
+        self.client = motor.motor_asyncio.AsyncIOMotorClient(DB_URI)
+        self.db = self.client[DB_NAME]
         self.email_collection = self.db['email_subscriptions']
         self.email_stats = self.db['email_stats']
 
