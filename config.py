@@ -88,14 +88,38 @@ PRICE4 = os.environ.get("PRICE4", "280 rs")
 PRICE5 = os.environ.get("PRICE5", "550 rs")
 
 # ===================(EMAIL NOTIFICATION SYSTEM)==============#
+# Add these enhanced SMTP configurations to your config.py
+
+# ===================(ENHANCED EMAIL NOTIFICATION SYSTEM)==============#
 SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "gaminghatyar777@gmail.com")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "xvjxaszgbseqjwon")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "xvjxaszgbseqjwon")  # Use App Password for Gmail
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "gaminghatyar777@gmail.com")
-FROM_NAME = os.environ.get("FROM_NAME", "Spidey Official")
+FROM_NAME = os.environ.get("FROM_NAME", "FileHubX Bot")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "spideyofficial777@gmail.com")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "FileHubxBot")
+
+# Enhanced SMTP Settings
+SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "True") == "True"
+SMTP_USE_SSL = os.environ.get("SMTP_USE_SSL", "False") == "False"
+SMTP_TIMEOUT = int(os.environ.get("SMTP_TIMEOUT", "30"))
+SMTP_RETRY_ATTEMPTS = int(os.environ.get("SMTP_RETRY_ATTEMPTS", "3"))
+SMTP_RETRY_DELAY = int(os.environ.get("SMTP_RETRY_DELAY", "5"))
+
+# Email System Settings
+EMAIL_ENABLED = os.environ.get("EMAIL_ENABLED", "True") == "True"
+EMAIL_MAX_RECIPIENTS = int(os.environ.get("EMAIL_MAX_RECIPIENTS", "50"))
+EMAIL_BATCH_SIZE = int(os.environ.get("EMAIL_BATCH_SIZE", "10"))
+EMAIL_RATE_LIMIT = int(os.environ.get("EMAIL_RATE_LIMIT", "10"))  # emails per minute
+
+# Backup SMTP Servers (fallback options)
+BACKUP_SMTP_SERVERS = [
+    {"server": "smtp.gmail.com", "port": 587},
+    {"server": "smtp-mail.outlook.com", "port": 587},
+    {"server": "smtp.office365.com", "port": 587},
+    {"server": "smtp.zoho.com", "port": 587},
+]
 
 # ===================(END)========================#
 NSFW_MODEL = "Falconsai/nsfw_image_detection"
