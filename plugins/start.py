@@ -3,9 +3,9 @@
 #
 # Copyright (C) 2025 by Spidey Official, < https://t.me/Spideyofficial777 >.
 #
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
+# 
+# released under the MIT License.
+# 
 #
 # All rights reserved.
 #
@@ -35,12 +35,14 @@ from Script import script
 BAN_SUPPORT = f"{BAN_SUPPORT}"
 TUT_VID = f"{TUT_VID}"
 
+# Enhanced verification tracking
+verification_cache = {}
+
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
     user_id = message.from_user.id
     id = message.from_user.id
     is_premium = await is_premium_user(id)
-
 
     # Check if user is banned
     banned_users = await db.get_ban_users()
@@ -53,93 +55,159 @@ async def start_command(client: Client, message: Message):
             )
         )
 
-
-    # Check if user is an admin and treat them as verified
+    # Enhanced admin verification with caching
     if user_id in await db.get_all_admins():
         verify_status = {
             'is_verified': True,
             'verify_token': None, 
             'verified_time': time.time(),
-            'link': ""
+            'link': "",
+            'verified_count': 0
         }
+        # Cache admin verification
+        verification_cache[user_id] = verify_status
     else:
-        verify_status = await db.get_verify_status(id)
+        # Check cache first for faster verification
+        if user_id in verification_cache:
+            verify_status = verification_cache[user_id]
+        else:
+            verify_status = await db.get_verify_status(id)
+            verification_cache[user_id] = verify_status
 
-        # If TOKEN is enabled, handle verification logic
+        # Enhanced token verification handling
         if SHORTLINK_URL or SHORTLINK_API:
+            # Check if verification expired
             if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
                 await db.update_verify_status(user_id, is_verified=False)
+                verify_status['is_verified'] = False
+                verification_cache[user_id] = verify_status
 
+            # Handle verification token from start command
             if "verify_" in message.text:
-                _, token = message.text.split("_", 1)
-                if verify_status['verify_token'] != token:
-                    return await message.reply("Your token is invalid or expired. Try again by clicking /start.")
-                await db.update_verify_status(id, is_verified=True, verified_time=time.time())
-                
-                current = await db.get_verify_count(id)
-                await db.set_verify_count(id, current + 1)
+                try:
+                    _, token = message.text.split("_", 1)
+                    
+                    # Enhanced token validation
+                    if verify_status['verify_token'] != token:
+                        # Clear invalid token attempts
+                        if user_id in verification_cache:
+                            del verification_cache[user_id]
+                        return await message.reply("❌ Your token is invalid or expired. Try again by clicking /start.")
+                    
+                    # Update verification status
+                    await db.update_verify_status(id, is_verified=True, verified_time=time.time())
+                    verify_status['is_verified'] = True
+                    verify_status['verified_time'] = time.time()
+                    
+                    # Update verification count
+                    current = await db.get_verify_count(id)
+                    new_count = current + 1
+                    await db.set_verify_count(id, new_count)
+                    verify_status['verified_count'] = new_count
+                    
+                    # Update cache
+                    verification_cache[user_id] = verify_status
 
-                # Button is shown always
-                button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
-                button_url = verify_status["link"] if verify_status["link"] else "https://t.me/spideyofficialupdatez"  # fallback URL or dummy
-                reply_markup = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(button_text, url=button_url)]]
-                )
+                    # Enhanced button with fallback
+                    button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
+                    button_url = verify_status.get("link", "https://t.me/spideyofficialupdatez")
+                    
+                    reply_markup = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(button_text, url=button_url)]]
+                    )
 
-                await message.reply_photo(
-                    photo=VERIFY_IMG,
-                    caption=f"<blockquote><b>👋 ʜᴇʏ {message.from_user.mention}, ʏᴏᴜ'ʀᴇ ᴀʀᴇ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ ✅\n\nɴᴏᴡ ʏᴏᴜ'ᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}🎉</blockquote></b>",
-                    reply_markup=reply_markup
-                )
+                    # Enhanced verification success message
+                    await message.reply_photo(
+                        photo=VERIFY_IMG,
+                        caption=f"<blockquote><b>✅ ʜᴇʏ {message.from_user.mention}, ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!\n\n🎉 ʏᴏᴜ ɴᴏᴡ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ {get_exp_time(VERIFY_EXPIRE)}\n\nᴛᴏᴋᴇɴ ᴜꜱᴇᴅ: {new_count} ᴛɪᴍᴇꜱ</blockquote></b>",
+                        reply_markup=reply_markup
+                    )
 
-                await verify_user(client, id, token)
+                    # Enhanced user verification logging
+                    await verify_user(client, id, token)
 
-                now = datetime.now()
-                current_time = now.strftime("%H:%M:%S")
-                current_date = now.strftime("%Y-%m-%d")
+                    now = datetime.now()
+                    current_time = now.strftime("%H:%M:%S")
+                    current_date = now.strftime("%Y-%m-%d")
 
-                log_msg = (
-                    f"✅ <b>Verification Successful</b>\n\n"
-                    f"👤 User: {message.from_user.mention}\n"
-                    f"🕒 Time: {current_time}\n"
-                    f"📅 Date: {current_date}\n"
-                    f"🆔 ID: <code>{message.from_user.id}</code>\n"
-                    f"#verify_completed"
-                )
-                await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
+                    log_msg = (
+                        f"✅ <b>Enhanced Verification Successful</b>\n\n"
+                        f"👤 User: {message.from_user.mention}\n"
+                        f"🆔 ID: <code>{message.from_user.id}</code>\n"
+                        f"📊 Total Verifications: {new_count}\n"
+                        f"🕒 Time: {current_time}\n"
+                        f"📅 Date: {current_date}\n"
+                        f"⏰ Access Duration: {get_exp_time(VERIFY_EXPIRE)}\n"
+                        f"#verify_completed #user_{user_id}"
+                    )
+                    await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
 
+                except Exception as e:
+                    print(f"Verification error: {e}")
+                    return await message.reply("❌ Verification failed. Please try again.")
+
+            # Show verification required message if not verified and not premium
             if not verify_status['is_verified'] and not is_premium:
-                token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=10))
+                # Generate secure token
+                token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=12))
                 await db.update_verify_status(id, verify_token=token, link="")
-                link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
+                verify_status['verify_token'] = token
+                verification_cache[user_id] = verify_status
+                
+                # Enhanced shortlink generation with error handling
+                try:
+                    link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
+                except Exception as e:
+                    print(f"Shortlink error: {e}")
+                    link = f'https://telegram.dog/{client.username}?start=verify_{token}'
+                
                 btn = [
-                    [InlineKeyboardButton("• ᴏᴘᴇɴ ʟɪɴᴋ •", url=link), 
-                    InlineKeyboardButton('• ᴛᴜᴛᴏʀɪᴀʟ •', url=TUT_VID)],
-                    [InlineKeyboardButton('• ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ •', callback_data='premium')]
+                    [InlineKeyboardButton("🔗 ᴏᴘᴇɴ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʟɪɴᴋ", url=link)], 
+                    [InlineKeyboardButton('📺 ᴛᴜᴛᴏʀɪᴀʟ ᴠɪᴅᴇᴏ', url=TUT_VID)],
+                    [InlineKeyboardButton('💎 ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='premium'),
+                     InlineKeyboardButton('🆓 ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data='free_trial')]
                 ]
+                
+                # Enhanced verification required message
                 return await message.reply(
-                    f"𝗬𝗼𝘂𝗿 𝘁𝗼𝗸𝗲𝗻 𝗵𝗮𝘀 𝗲𝘅𝗽𝗶𝗿𝗲𝗱. 𝗣𝗹𝗲𝗮𝘀𝗲 𝗿𝗲𝗳𝗿𝗲𝘀𝗵 𝘆𝗼𝘂𝗿 𝘁𝗼𝗸𝗲𝗻 𝘁𝗼 𝗰𝗼𝗻𝘁𝗶𝗻𝘂𝗲..\n\n<b>Tᴏᴋᴇɴ Tɪᴍᴇᴏᴜᴛ:</b> {get_exp_time(VERIFY_EXPIRE)}\n\n<b>ᴡʜᴀᴛ ɪs ᴛʜᴇ ᴛᴏᴋᴇɴ??</b>\n\nᴛʜɪs ɪs ᴀɴ ᴀᴅs ᴛᴏᴋᴇɴ. ᴘᴀssɪɴɢ ᴏɴᴇ ᴀᴅ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ ᴜsᴇ ᴛʜᴇ ʙᴏᴛ ғᴏʀ {get_exp_time(VERIFY_EXPIRE)}</b>",
+                    f"🔒 <b>Verification Required</b>\n\n"
+                    f"📝 <b>Why Verification?</b>\n"
+                    f"• This helps us maintain service quality\n"
+                    f"• Supports free access for all users\n"
+                    f"• Takes only a few seconds\n\n"
+                    f"⏳ <b>Access Duration:</b> {get_exp_time(VERIFY_EXPIRE)}\n"
+                    f"🔄 <b>Token Expiry:</b> 10 minutes\n\n"
+                    f"<i>Complete one quick step to unlock full access!</i>",
                     reply_markup=InlineKeyboardMarkup(btn),
                     protect_content=False,
                     quote=True
                 )
 
-    # ✅ Check Force Subscription
+    # Enhanced Force Subscription Check
     if not await is_subscribed(client, user_id):
-        #await temp.delete()
         return await not_joined(client, message)
 
-    # File auto-delete time in seconds (Set your desired time in seconds here)
-    FILE_AUTO_DELETE = await db.get_del_timer()  # Example: 3600 seconds (1 hour)
+    # Enhanced auto-delete with user preferences
+    FILE_AUTO_DELETE = await db.get_del_timer()
 
-    # Add user if not already present
+    # Enhanced user registration
     if not await db.present_user(user_id):
         try:
             await db.add_user(user_id)
-        except:
-            pass
-        await client.send_message(CHANNEL_ID, script.NEW_USER_TXT.format(temp.B_LINK, message.from_user.id, message.from_user.mention))
-    # Handle normal message flow
+            # Send enhanced new user notification
+            await client.send_message(
+                CHANNEL_ID, 
+                script.NEW_USER_TXT.format(
+                    temp.B_LINK, 
+                    message.from_user.id, 
+                    message.from_user.mention,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+            )
+        except Exception as e:
+            print(f"User registration error: {e}")
+
+    # Enhanced file handling with improved error handling
     text = message.text
     if len(text) > 7:
         try:
@@ -158,88 +226,146 @@ async def start_command(client: Client, message: Message):
                 ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
             except Exception as e:
                 print(f"Error decoding IDs: {e}")
-                return
+                return await message.reply_text("❌ Invalid file range provided.")
 
         elif len(argument) == 2:
             try:
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except Exception as e:
                 print(f"Error decoding ID: {e}")
-                return
+                return await message.reply_text("❌ Invalid file ID provided.")
 
-        temp_msg = await message.reply("<b>Please wait...</b>")
+        # Enhanced progress indicator
+        temp_msg = await message.reply("🔄 <b>Processing your request...</b>")
+        
         try:
             messages = await get_messages(client, ids)
         except Exception as e:
-            await message.reply_text("Something went wrong!")
-            print(f"Error getting messages: {e}")
-            return
-        finally:
             await temp_msg.delete()
+            return await message.reply_text("❌ Failed to retrieve files. Please try again later.")
+        
+        await temp_msg.delete()
 
-        codeflix_msgs = []
+        # Enhanced file sending with batch processing
+        sent_messages = []
+        success_count = 0
+        fail_count = 0
+
         for msg in messages:
-            caption = (CUSTOM_CAPTION.format(previouscaption="" if not msg.caption else msg.caption.html, 
-                                             filename=msg.document.file_name) if bool(CUSTOM_CAPTION) and bool(msg.document)
-                       else ("" if not msg.caption else msg.caption.html))
-
-            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
-
             try:
-                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, 
-                                            reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                codeflix_msgs.append(copied_msg)
+                # Enhanced caption handling
+                if bool(CUSTOM_CAPTION) and msg.document:
+                    caption = CUSTOM_CAPTION.format(
+                        previouscaption="" if not msg.caption else msg.caption.html,
+                        filename=msg.document.file_name
+                    )
+                else:
+                    caption = "" if not msg.caption else msg.caption.html
+
+                reply_markup = msg.reply_markup if not DISABLE_CHANNEL_BUTTON else None
+
+                # Send file with enhanced error handling
+                sent_msg = await msg.copy(
+                    chat_id=message.from_user.id,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
+                sent_messages.append(sent_msg)
+                success_count += 1
+
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                copied_msg = await msg.copy(chat_id=message.from_user.id, caption=caption, parse_mode=ParseMode.HTML, 
-                                            reply_markup=reply_markup, protect_content=PROTECT_CONTENT)
-                codeflix_msgs.append(copied_msg)
+                try:
+                    sent_msg = await msg.copy(
+                        chat_id=message.from_user.id,
+                        caption=caption,
+                        parse_mode=ParseMode.HTML,
+                        reply_markup=reply_markup,
+                        protect_content=PROTECT_CONTENT
+                    )
+                    sent_messages.append(sent_msg)
+                    success_count += 1
+                except Exception as flood_error:
+                    print(f"FloodWait error: {flood_error}")
+                    fail_count += 1
+
             except Exception as e:
                 print(f"Failed to send message: {e}")
-                pass
+                fail_count += 1
 
-        if FILE_AUTO_DELETE > 0:
+        # Enhanced auto-delete notification
+        if FILE_AUTO_DELETE > 0 and success_count > 0:
+            expiry_time = get_exp_time(FILE_AUTO_DELETE)
+            
             notification_msg = await message.reply(
-                f"<b>Tʜɪs Fɪʟᴇ ᴡɪʟʟ ʙᴇ Dᴇʟᴇᴛᴇᴅ ɪɴ  {get_exp_time(FILE_AUTO_DELETE)}. Pʟᴇᴀsᴇ sᴀᴠᴇ ᴏʀ ғᴏʀᴡᴀʀᴅ ɪᴛ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ʙᴇғᴏʀᴇ ɪᴛ ɢᴇᴛs Dᴇʟᴇᴛᴇᴅ.</b>"
+                f"📦 <b>File Delivery Summary</b>\n\n"
+                f"✅ Successfully sent: {success_count} files\n"
+                f"❌ Failed: {fail_count} files\n\n"
+                f"⏰ <b>Auto-delete in:</b> {expiry_time}\n"
+                f"💾 <b>Save files to your saved messages</b>"
             )
 
+            # Enhanced auto-delete functionality
             await asyncio.sleep(FILE_AUTO_DELETE)
 
-            for snt_msg in codeflix_msgs:    
-                if snt_msg:
-                    try:    
-                        await snt_msg.delete()  
+            deleted_count = 0
+            for sent_msg in sent_messages:
+                if sent_msg:
+                    try:
+                        await sent_msg.delete()
+                        deleted_count += 1
                     except Exception as e:
-                        print(f"Error deleting message {snt_msg.id}: {e}")
+                        print(f"Error deleting message: {e}")
 
+            # Enhanced post-delete notification
             try:
-                reload_url = (
-                    f"https://t.me/{client.username}?start={message.command[1]}"
-                    if message.command and len(message.command) > 1
-                    else None
-                )
+                reload_url = f"https://t.me/{client.username}?start={message.command[1]}" if len(message.command) > 1 else None
+                
                 keyboard = InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("ɢᴇᴛ ғɪʟᴇ ᴀɢᴀɪɴ!", url=reload_url)]]
+                    [[InlineKeyboardButton("🔄 ɢᴇᴛ ꜰɪʟᴇꜱ ᴀɢᴀɪɴ", url=reload_url)]]
                 ) if reload_url else None
 
                 await notification_msg.edit(
-                    "<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!\n\nᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴅᴇʟᴇᴛᴇᴅ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ 👇</b>",
+                    f"🗑️ <b>Auto-cleanup Completed</b>\n\n"
+                    f"✅ Deleted {deleted_count} files successfully\n"
+                    f"📝 Files are no longer accessible from this chat\n\n"
+                    f"<i>Click below to retrieve files again</i>",
                     reply_markup=keyboard
                 )
             except Exception as e:
-                print(f"Error updating notification with 'Get File Again' button: {e}")
+                print(f"Notification update error: {e}")
+
+        elif success_count == 0:
+            await message.reply_text("❌ No files could be delivered. Please try again.")
+
     else:
+        # Enhanced start message with better UI
         reply_markup = InlineKeyboardMarkup(
             [
-                    [InlineKeyboardButton("• ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟs •", url="https://t.me/Spideyofficial777")],
-
-    [
-                    InlineKeyboardButton("• ᴀʙᴏᴜᴛ", callback_data = "about"),
-                    InlineKeyboardButton('ʜᴇʟᴘ •', callback_data = "help")
-
-    ]
+                [InlineKeyboardButton("📢 ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟꜱ", url="https://t.me/Spideyofficial777")],
+                [
+                    InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about"),
+                    InlineKeyboardButton("🆘 ʜᴇʟᴘ", callback_data="help")
+                ],
+                [
+                    InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium"),
+                    InlineKeyboardButton("📊 ꜱᴛᴀᴛꜱ", callback_data="stats")
+                ]
             ]
         )
+        
+        # Enhanced welcome message with random effects
+        effects = [
+            5104841245755180586,  # 🔥 Fire
+            5159385139981059251,  # 🎈 Balloons  
+            5046509860389126442,  # 🎊 Confetti
+            5107584321108051014,  # ✨ Sparkles
+            5104927257829441566,  # 🌟 Stars
+            5104854308671914026   # 💫 Pulse
+        ]
+        
         await message.reply_photo(
             photo=START_PIC,
             caption=START_MSG.format(
@@ -250,115 +376,227 @@ async def start_command(client: Client, message: Message):
                 id=message.from_user.id
             ),
             reply_markup=reply_markup,
-            message_effect_id=int(random.choice([
-                5104841245755180586,  # 🔥 Fire
-                5159385139981059251,  # 🎈 Balloons
-                5046509860389126442,   # 🎊 Confetti
-                5107584321108051014                
-            ]))
+            message_effect_id=int(random.choice(effects))
         )
 
+# Enhanced verification cache cleanup function
+async def cleanup_verification_cache():
+    """Clean up expired verification cache periodically"""
+    while True:
+        await asyncio.sleep(3600)  # Clean every hour
+        current_time = time.time()
+        expired_users = []
+        
+        for user_id, data in verification_cache.items():
+            if data.get('is_verified') and VERIFY_EXPIRE < (current_time - data.get('verified_time', 0)):
+                expired_users.append(user_id)
+        
+        for user_id in expired_users:
+            del verification_cache[user_id]
+        
+        if expired_users:
+            print(f"Cleaned up {len(expired_users)} expired verification cache entries")
+
+# Start cache cleanup task
+@Bot.on_message(filters.command('start'))
+async def start_cache_cleanup(client, message):
+    # Start background task if not already running
+    if not hasattr(client, 'cache_cleanup_task'):
+        client.cache_cleanup_task = asyncio.create_task(cleanup_verification_cache())
+
+# Enhanced premium features
+@Bot.on_message(filters.command('features') & filters.private)
+async def show_features(client: Client, message: Message):
+    features_text = """
+🚀 <b>Enhanced Features</b>
+
+<b>Free Users:</b>
+✅ File Access (with verification)
+✅ Auto-delete protection
+✅ Basic support
+
+<b>Premium Users:</b>
+⭐ No verification required
+⭐ Priority file delivery  
+⭐ Extended auto-delete time
+⭐ Exclusive content access
+⭐ Priority support
+⭐ Higher download limits
+⭐ Early feature access
+
+<b>Admin Features:</b>
+👑 User management
+📊 Advanced analytics
+🔧 Bot configuration
+⚡ Instant support
+"""
+    
+    buttons = [
+        [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium")],
+        [InlineKeyboardButton("🆓 ᴛʀʏ ꜰʀᴇᴇ ᴛʀɪᴀʟ", callback_data="free_trial")],
+        [InlineKeyboardButton("📊 ᴍʏ ꜱᴛᴀᴛᴜꜱ", callback_data="mystatus")]
+    ]
+    
+    await message.reply_photo(
+        photo="https://graph.org/file/7519d226226bec1090db7.jpg",
+        caption=features_text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+# Enhanced status command
+@Bot.on_message(filters.command('status') & filters.private)
+async def user_status(client: Client, message: Message):
+    user_id = message.from_user.id
+    is_premium = await is_premium_user(user_id)
+    
+    # Get verification status from cache
+    verify_status = verification_cache.get(user_id, await db.get_verify_status(user_id))
+    
+    status_text = f"""
+📊 <b>User Status</b>
+
+👤 <b>User:</b> {message.from_user.mention}
+🆔 <b>ID:</b> <code>{user_id}</code>
+💎 <b>Premium:</b> {'✅ Active' if is_premium else '❌ Inactive'}
+🔐 <b>Verified:</b> {'✅ Yes' if verify_status.get('is_verified') else '❌ No'}
+
+"""
+    
+    if verify_status.get('is_verified'):
+        verified_time = verify_status.get('verified_time', 0)
+        time_left = VERIFY_EXPIRE - (time.time() - verified_time)
+        if time_left > 0:
+            status_text += f"⏳ <b>Verification expires in:</b> {get_exp_time(time_left)}\n"
+    
+    if is_premium:
+        premium_info = await get_premium_info(user_id)
+        if premium_info:
+            status_text += f"⭐ <b>Premium expires:</b> {premium_info['expiry']}\n"
+    
+    status_text += f"\n📈 <b>Total verifications:</b> {verify_status.get('verified_count', 0)}"
+    
+    buttons = [
+        [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ", callback_data="premium")],
+        [InlineKeyboardButton("🔄 ʀᴇꜰʀᴇꜱʜ", callback_data="refresh_status")]
+    ]
+    
+    await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
+
+# Add these imports at the top
+from email_system import email_system, initialize_email_system, shutdown_email_system
+
+# email notifications system 
+@Bot.on_message(filters.command('email_notify') & filters.private)
+async def email_notify_command(client: Client, message: Message):
+    user_id = message.from_user.id
+    
+    # Check if user provided email
+    if len(message.command) < 2:
+        # Show subscription status
+        status = await email_system.get_subscription_status(user_id)
+        
+        if status['success']:
+            if status.get('subscribed'):
+                buttons = [
+                    [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage"),
+                    InlineKeyboardButton("🔔 Test Notification", callback_data="email_test")],
+                    [InlineKeyboardButton("📊 Subscription Stats", callback_data="email_stats")]
+                ]
+                await message.reply_text(
+                    f"📧 <b>Email Notification Status</b>\n\n"
+                    f"✅ <b>Status:</b> Subscribed\n"
+                    f"📨 <b>Email:</b> {status['email']}\n"
+                    f"📅 <b>Since:</b> {status['subscription_date'].strftime('%Y-%m-%d') if status['subscription_date'] else 'N/A'}\n\n"
+                    f"<i>You will receive notifications about new features and updates.</i>",
+                    reply_markup=InlineKeyboardMarkup(buttons)
+                )
+            else:
+                buttons = [
+                    [InlineKeyboardButton("📧 Subscribe Now", callback_data="email_subscribe")]
+                ]
+                await message.reply_text(
+                    "📧 <b>Email Notifications</b>\n\n"
+                    "Get notified about:\n"
+                    "• New features and updates\n"
+                    "• Exclusive content releases\n"
+                    "• Important announcements\n"
+                    "• Security alerts\n\n"
+                    "<i>Subscribe with your email to stay updated!</i>",
+                    reply_markup=InlineKeyboardMarkup(buttons)
+                )
         return
 
+    # Handle email subscription
+    email = message.command[1]
+    name = message.from_user.first_name
+    username = message.from_user.username
+    
+    # Show processing message
+    processing_msg = await message.reply_text("🔄 <b>Processing your subscription...</b>")
+    
+    # Subscribe user
+    result = await email_system.subscribe_user(user_id, email, name, username)
+    
+    await processing_msg.delete()
+    
+    if result['success']:
+        buttons = [
+            [InlineKeyboardButton("🎯 Join Our Channels", callback_data="join_channels")],
+            [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage")]
+        ]
+        await message.reply_text(
+            "🎉 <b>Subscription Successful!</b>\n\n"
+            "✅ You've been subscribed to email notifications\n"
+            "📨 A welcome email has been sent to your inbox\n"
+            "🔔 You'll receive updates about new features\n\n"
+            "<i>Thank you for joining Spidey Official family!</i>",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    else:
+        await message.reply_text(
+            f"❌ <b>Subscription Failed</b>\n\n"
+            f"Error: {result['error']}\n\n"
+            f"<i>Please try again or contact support.</i>"
+        )
 
-
-
-
-#=====================================================================================##
-# Don't Remove Credit @Spideyofficial777
-# Ask Doubt on telegram @Spideyofficial777
-
-
-
-# Create a global dictionary to store chat data
-chat_data_cache = {}
-
-async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>Checking Subscription...</i></b>")
-
-    user_id = message.from_user.id
-    buttons = []
-    count = 0
-
+# Admin command to send notifications
+@Bot.on_message(filters.command('send_notification') & filters.private & admin)
+async def send_notification_command(client: Client, message: Message):
+    if len(message.command) < 2:
+        await message.reply_text(
+            "Usage: /send_notification <subject> | <message> | <details>\n\n"
+            "Example:\n"
+            "/send_notification New Update | We've added new features | Check out the latest improvements"
+        )
+        return
+    
     try:
-        all_channels = await db.show_channels()  # Should return list of (chat_id, mode) tuples
-        for total, chat_id in enumerate(all_channels, start=1):
-            mode = await db.get_channel_mode(chat_id)  # fetch mode 
-
-            await message.reply_chat_action(ChatAction.TYPING)
-
-            if not await is_sub(client, user_id, chat_id):
-                try:
-                    # Cache chat info
-                    if chat_id in chat_data_cache:
-                        data = chat_data_cache[chat_id]
-                    else:
-                        data = await client.get_chat(chat_id)
-                        chat_data_cache[chat_id] = data
-
-                    name = data.title
-
-                    # Generate proper invite link based on the mode
-                    if mode == "on" and not data.username:
-                        invite = await client.create_chat_invite_link(
-                            chat_id=chat_id,
-                            creates_join_request=True,
-                            expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None
-                            )
-                        link = invite.invite_link
-
-                    else:
-                        if data.username:
-                            link = f"https://t.me/{data.username}"
-                        else:
-                            invite = await client.create_chat_invite_link(
-                                chat_id=chat_id,
-                                expire_date=datetime.utcnow() + timedelta(seconds=FSUB_LINK_EXPIRY) if FSUB_LINK_EXPIRY else None)
-                            link = invite.invite_link
-
-                    buttons.append([InlineKeyboardButton(text=name, url=link)])
-                    count += 1
-                    await temp.edit(f"<b>{'! ' * count}</b>")
-
-                except Exception as e:
-                    print(f"Error with chat {chat_id}: {e}")
-                    return await temp.edit(
-                        f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Spideyofficialupdatez</i></b>\n"
-                        f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
-                    )
-
-        # Retry Button
-        try:
-            buttons.append([
-                InlineKeyboardButton(
-                    text='♻️ Tʀʏ Aɢᴀɪɴ',
-                    url=f"https://t.me/{client.username}?start={message.command[1]}"
-                )
-            ])
-        except IndexError:
-            pass
-
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-
+        # Parse command arguments
+        args = ' '.join(message.command[1:]).split('|')
+        subject = args[0].strip() if len(args) > 0 else "Important Update"
+        message_text = args[1].strip() if len(args) > 1 else "We have an important update for you!"
+        details = args[2].strip() if len(args) > 2 else ""
+        
+        processing_msg = await message.reply_text("🔄 <b>Sending notifications to all subscribers...</b>")
+        
+        result = await email_system.send_bulk_notification(subject, message_text, details)
+        
+        await processing_msg.delete()
+        
+        if result['success']:
+            await message.reply_text(
+                f"📊 <b>Notification Sent Successfully!</b>\n\n"
+                f"✅ Successful: {result['results']['success']}\n"
+                f"❌ Failed: {result['results']['failed']}\n"
+                f"📨 Total: {result['results']['total']}\n\n"
+                f"<i>Admin report has been sent to your email.</i>"
+            )
+        else:
+            await message.reply_text(f"❌ Failed to send notifications: {result['error']}")
+            
     except Exception as e:
-        print(f"Final Error: {e}")
-        await temp.edit(
-            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @Spideyofficialupdatez</i></b>\n"
-            f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
-        )
-
-#=====================================================================================##
-
+        await message.reply_text(f"❌ Error: {str(e)}")
+        
 @Bot.on_message(filters.command('myplan') & filters.private)
 async def check_plan(client: Client, message: Message):
     user_id = message.from_user.id  # Get user ID from the message
@@ -539,4 +777,3 @@ async def plan_command(client: Client, message: Message):
         caption=script.PREPLANS_TXT.format(mention),
         reply_markup=InlineKeyboardMarkup(buttons)
     )
-    

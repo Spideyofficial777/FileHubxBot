@@ -1,0 +1,565 @@
+# Don't Remove Credit @Spideyofficial777
+# Ask Doubt on telegram @Spideyofficial777
+#
+# Copyright (C) 2025 by Spidey Official, < https://t.me/Spideyofficial777 >.
+#
+# All rights reserved.
+#
+
+import smtplib
+import asyncio
+import aiosmtplib
+from email.mime.text import MimeText
+from email.mime.multipart import MimeMultipart
+from datetime import datetime, timedelta
+import logging
+from typing import List, Dict, Optional
+import re
+from database.db_email import EmailDatabase
+from config import *
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+class SpideyEmailNotificationSystem:
+    def __init__(self):
+        self.db = EmailDatabase()
+        self.smtp_config = {
+            'server': SMTP_SERVER,
+            'port': SMTP_PORT,
+            'username': SMTP_USERNAME,
+            'password': SMTP_PASSWORD,
+            'from_email': FROM_EMAIL,
+            'from_name': FROM_NAME,
+            'admin_email': ADMIN_EMAIL
+        }
+        self.is_connected = False
+        self.smtp_connection = None
+
+    async def connect_smtp(self):
+        """Establish SMTP connection with retry mechanism"""
+        try:
+            self.smtp_connection = aiosmtplib.SMTP(
+                hostname=self.smtp_config['server'],
+                port=self.smtp_config['port'],
+                use_tls=True
+            )
+            await self.smtp_connection.connect()
+            await self.smtp_connection.login(
+                self.smtp_config['username'],
+                self.smtp_config['password']
+            )
+            self.is_connected = True
+            logger.info("✅ SMTP connection established successfully")
+            return True
+        except Exception as e:
+            logger.error(f"❌ SMTP connection failed: {e}")
+            self.is_connected = False
+            return False
+
+    async def disconnect_smtp(self):
+        """Close SMTP connection"""
+        if self.smtp_connection and self.is_connected:
+            try:
+                await self.smtp_connection.quit()
+                self.is_connected = False
+                logger.info("🔌 SMTP connection closed")
+            except Exception as e:
+                logger.error(f"Error disconnecting SMTP: {e}")
+
+    # Email Validation
+    def is_valid_email(self, email: str) -> bool:
+        """Validate email format"""
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return re.match(pattern, email) is not None
+
+    # Beautiful Email Templates
+    def get_thankyou_template(self, user_data: Dict) -> str:
+        """Thank you email template after subscription"""
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Thank You for Subscribing! - Spidey Official</title>
+            <style>
+                body {{ 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background-attachment: fixed;
+                }}
+                .container {{ 
+                    max-width: 600px; 
+                    margin: 20px auto; 
+                    background: #ffffff; 
+                    border-radius: 20px; 
+                    overflow: hidden; 
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    border: 1px solid #e0e0e0;
+                }}
+                .header {{ 
+                    background: linear-gradient(45deg, #FF416C, #FF4B2B); 
+                    padding: 40px; 
+                    text-align: center; 
+                    color: white; 
+                    position: relative;
+                }}
+                .header::before {{
+                    content: '🕷️';
+                    font-size: 60px;
+                    position: absolute;
+                    top: 20px;
+                    opacity: 0.1;
+                }}
+                .content {{ 
+                    padding: 40px; 
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                .footer {{ 
+                    background: #2c3e50; 
+                    padding: 30px; 
+                    text-align: center; 
+                    color: white; 
+                    border-top: 5px solid #FF416C;
+                }}
+                .button {{ 
+                    display: inline-block; 
+                    padding: 15px 35px; 
+                    background: linear-gradient(45deg, #FF416C, #FF4B2B); 
+                    color: white; 
+                    text-decoration: none; 
+                    border-radius: 30px; 
+                    margin: 20px 0; 
+                    font-weight: bold;
+                    font-size: 16px;
+                    transition: transform 0.3s ease;
+                    box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3);
+                }}
+                .button:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(255, 65, 108, 0.4);
+                }}
+                .channel-grid {{
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 15px;
+                    margin: 25px 0;
+                }}
+                .channel-item {{
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 10px;
+                    border-left: 4px solid #FF416C;
+                    transition: transform 0.2s ease;
+                }}
+                .channel-item:hover {{
+                    transform: translateX(5px);
+                    background: #e9ecef;
+                }}
+                .welcome-badge {{
+                    background: linear-gradient(45deg, #28a745, #20c997);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    display: inline-block;
+                    margin: 10px 0;
+                    font-weight: bold;
+                }}
+                .highlight {{
+                    background: linear-gradient(45deg, #fff9c4, #ffecb3);
+                    padding: 15px;
+                    border-radius: 10px;
+                    border-left: 4px solid #ffc107;
+                    margin: 20px 0;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin:0; font-size: 32px;">🎉 Thank You for Subscribing!</h1>
+                    <p style="margin:10px 0 0 0; font-size: 18px; opacity: 0.9;">Welcome to the Spidey Official Family</p>
+                </div>
+                <div class="content">
+                    <div class="welcome-badge">🌟 Premium Member Access</div>
+                    
+                    <h2>Hello {user_data.get('name', 'Valued Member')}! 👋</h2>
+                    
+                    <p>We're absolutely thrilled to welcome you to <strong>Spidey Official</strong> - your ultimate destination for premium file sharing and exclusive content!</p>
+                    
+                    <div class="highlight">
+                        <h3>🚀 What You'll Receive:</h3>
+                        <ul>
+                            <li><strong>Instant Notifications</strong> about new features and updates</li>
+                            <li><strong>Exclusive Content</strong> before anyone else</li>
+                            <li><strong>Premium Access</strong> to special files and resources</li>
+                            <li><strong>Security Alerts</strong> and important announcements</li>
+                        </ul>
+                    </div>
+
+                    <h3>📢 Join Our Official Channels:</h3>
+                    <div class="channel-grid">
+                        <div class="channel-item">
+                            <strong>🕷️ Main Channel</strong><br>
+                            <a href="https://t.me/spideyofficial777" style="color: #FF416C; text-decoration: none;">
+                                @SpideyOfficial777
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🌟 Backup Channel</strong><br>
+                            <a href="https://t.me/spideyofficial_777" style="color: #FF416C; text-decoration: none;">
+                                @SpideyOfficial_777
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🎬 CineFlix Official</strong><br>
+                            <a href="https://t.me/+QVmLP_hlHNw3M2I1" style="color: #FF416C; text-decoration: none;">
+                                Join CineFlix Community
+                            </a>
+                        </div>
+                        <div class="channel-item">
+                            <strong>🎮 Gaming Channel</strong><br>
+                            <a href="https://t.me/+cMlrPqMjUwtmNTI1" style="color: #FF416C; text-decoration: none;">
+                                Spidey Official Gaming
+                            </a>
+                        </div>
+                    </div>
+
+                    <center>
+                        <a href="https://t.me/{BOT_USERNAME}" class="button">
+                            🚀 Start Using Our Bot Now
+                        </a>
+                    </center>
+
+                    <p style="text-align: center; color: #666; font-size: 14px;">
+                        <em>You're receiving this email because you subscribed to notifications from Spidey Official.</em>
+                    </p>
+                </div>
+                <div class="footer">
+                    <h3 style="margin:0; color: #FFD700;">Stay Connected with Spidey Official</h3>
+                    <p style="margin:10px 0; opacity: 0.8;">
+                        The Ultimate File Sharing Experience
+                    </p>
+                    <p style="font-size: 12px; opacity: 0.7;">
+                        © 2025 Spidey Official. All rights reserved.<br>
+                        This is an automated message. Please do not reply directly.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    def get_admin_notification_template(self, user_data: Dict, email: str) -> str:
+        """Admin notification template for new subscriptions"""
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Email Subscription - Spidey Official</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .header {{ background: #2c3e50; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
+                .info-box {{ background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #3498db; }}
+                .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>📧 New Email Subscription</h1>
+                    <p>Spidey Official Notification System</p>
+                </div>
+                
+                <div class="info-box">
+                    <h3>🔔 New Subscriber Details:</h3>
+                    <p><strong>User ID:</strong> {user_data.get('user_id', 'N/A')}</p>
+                    <p><strong>Name:</strong> {user_data.get('name', 'Not Provided')}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Subscription Date:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                    <p><strong>Telegram Username:</strong> {user_data.get('username', 'N/A')}</p>
+                </div>
+
+                <p><strong>Total Subscribers:</strong> {user_data.get('total_subscribers', 'N/A')}</p>
+                <p><strong>Recent Activity:</strong> This user has been added to the email notification system.</p>
+
+                <div class="footer">
+                    <p>This is an automated notification from Spidey Official Email System.</p>
+                    <p>© 2025 Spidey Official - All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    def get_notification_template(self, notification_data: Dict) -> str:
+        """General notification template for users"""
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{notification_data.get('subject', 'Notification')} - Spidey Official</title>
+            <style>
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; }}
+                .container {{ max-width: 600px; margin: 20px auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(45deg, #FF416C, #FF4B2B); padding: 30px; text-align: center; color: white; }}
+                .content {{ padding: 30px; line-height: 1.6; }}
+                .notification-box {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin: 20px 0; }}
+                .channels {{ background: #e8f4fd; padding: 20px; border-radius: 10px; margin: 20px 0; }}
+                .footer {{ background: #2c3e50; padding: 20px; text-align: center; color: white; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>📢 {notification_data.get('subject', 'Spidey Official Update')}</h1>
+                </div>
+                <div class="content">
+                    <div class="notification-box">
+                        <h3>💡 Important Update</h3>
+                        <p>{notification_data.get('message', 'This is an important notification from Spidey Official.')}</p>
+                    </div>
+
+                    <h3>🎯 What's New?</h3>
+                    <p>{notification_data.get('details', 'We have exciting updates and improvements for you!')}</p>
+
+                    <div class="channels">
+                        <h3>🌐 Join Our Channels:</h3>
+                        <ul>
+                            <li><a href="https://t.me/spideyofficial777" style="color: #FF416C;">🕷️ Main Channel</a></li>
+                            <li><a href="https://t.me/spideyofficial_777" style="color: #FF416C;">🌟 Backup Channel</a></li>
+                            <li><a href="https://t.me/+QVmLP_hlHNw3M2I1" style="color: #FF416C;">🎬 CineFlix Official</a></li>
+                            <li><a href="https://t.me/+cMlrPqMjUwtmNTI1" style="color: #FF416C;">🎮 Gaming Channel</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>© 2025 Spidey Official | Stay connected for more updates!</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    async def send_email(self, to_email: str, subject: str, html_content: str, text_content: str = None) -> bool:
+        """Send email with beautiful template"""
+        if not self.is_connected:
+            if not await self.connect_smtp():
+                return False
+
+        try:
+            # Create message
+            message = MimeMultipart('alternative')
+            message['From'] = f"{self.smtp_config['from_name']} <{self.smtp_config['from_email']}>"
+            message['To'] = to_email
+            message['Subject'] = subject
+
+            # Create text version
+            if text_content is None:
+                text_content = "Please enable HTML to view this email properly."
+            
+            part1 = MimeText(text_content, 'plain')
+            part2 = MimeText(html_content, 'html')
+            
+            message.attach(part1)
+            message.attach(part2)
+
+            # Send email
+            await self.smtp_connection.send_message(
+                message,
+                sender=self.smtp_config['from_email'],
+                recipients=[to_email]
+            )
+            
+            logger.info(f"✅ Email sent successfully to {to_email}")
+            return True
+
+        except Exception as e:
+            logger.error(f"❌ Failed to send email to {to_email}: {e}")
+            return False
+
+    # User Email Subscription Management
+    async def subscribe_user(self, user_id: int, email: str, name: str = None, username: str = None) -> Dict:
+        """Subscribe user to email notifications"""
+        try:
+            # Validate email
+            if not self.is_valid_email(email):
+                return {'success': False, 'error': 'Invalid email format'}
+
+            # Check if already subscribed
+            existing = await self.db.get_email(user_id)
+            if existing and existing.get('is_active'):
+                return {'success': False, 'error': 'Already subscribed to notifications'}
+
+            # Add/update user email
+            await self.db.add_email(user_id, email, name, username)
+            
+            # Get total subscribers for admin notification
+            total_subscribers = await self.db.get_total_users()
+
+            # Prepare user data
+            user_data = {
+                'user_id': user_id,
+                'name': name or 'User',
+                'username': username,
+                'total_subscribers': total_subscribers
+            }
+
+            # Send thank you email to user
+            thankyou_html = self.get_thankyou_template(user_data)
+            thankyou_sent = await self.send_email(
+                email,
+                "🎉 Welcome to Spidey Official - Thank You for Subscribing!",
+                thankyou_html,
+                f"Thank you for subscribing to Spidey Official notifications! We'll keep you updated with the latest features and content. Join our channels: t.me/spideyofficial777"
+            )
+
+            # Send notification to admin
+            admin_html = self.get_admin_notification_template(user_data, email)
+            admin_sent = await self.send_email(
+                self.smtp_config['admin_email'],
+                f"📧 New Subscription: {email}",
+                admin_html,
+                f"New subscriber: {name} ({email}) - User ID: {user_id}"
+            )
+
+            return {
+                'success': True,
+                'user_email_sent': thankyou_sent,
+                'admin_notification_sent': admin_sent,
+                'message': 'Successfully subscribed to email notifications'
+            }
+
+        except Exception as e:
+            logger.error(f"Error subscribing user {user_id}: {e}")
+            return {'success': False, 'error': str(e)}
+
+    async def unsubscribe_user(self, user_id: int) -> Dict:
+        """Unsubscribe user from email notifications"""
+        try:
+            success = await self.db.remove_email(user_id)
+            if success:
+                return {'success': True, 'message': 'Successfully unsubscribed from notifications'}
+            else:
+                return {'success': False, 'error': 'User not found in subscription list'}
+        except Exception as e:
+            logger.error(f"Error unsubscribing user {user_id}: {e}")
+            return {'success': False, 'error': str(e)}
+
+    async def get_subscription_status(self, user_id: int) -> Dict:
+        """Get user's subscription status"""
+        try:
+            email_info = await self.db.get_email(user_id)
+            if email_info and email_info.get('is_active'):
+                return {
+                    'success': True,
+                    'subscribed': True,
+                    'email': email_info.get('email'),
+                    'subscription_date': email_info.get('joined_date'),
+                    'name': email_info.get('name')
+                }
+            else:
+                return {'success': True, 'subscribed': False}
+        except Exception as e:
+            logger.error(f"Error getting subscription status for user {user_id}: {e}")
+            return {'success': False, 'error': str(e)}
+
+    # Admin Functions
+    async def send_bulk_notification(self, subject: str, message: str, details: str = "") -> Dict:
+        """Send notification to all subscribers (Admin function)"""
+        try:
+            subscribers = await self.db.get_all_emails()
+            if not subscribers:
+                return {'success': False, 'error': 'No subscribers found'}
+
+            results = {'success': 0, 'failed': 0, 'total': len(subscribers)}
+            notification_data = {
+                'subject': subject,
+                'message': message,
+                'details': details
+            }
+
+            html_content = self.get_notification_template(notification_data)
+            text_content = f"{subject}\n\n{message}\n\nDetails: {details}\n\nJoin our channels: t.me/spideyofficial777"
+
+            for subscriber in subscribers:
+                success = await self.send_email(
+                    subscriber['email'],
+                    subject,
+                    html_content,
+                    text_content
+                )
+                
+                if success:
+                    results['success'] += 1
+                else:
+                    results['failed'] += 1
+                
+                # Rate limiting
+                await asyncio.sleep(1)
+
+            # Notify admin about bulk send results
+            admin_html = f"""
+            <h3>📊 Bulk Notification Results</h3>
+            <p><strong>Subject:</strong> {subject}</p>
+            <p><strong>Total Subscribers:</strong> {results['total']}</p>
+            <p><strong>Successful:</strong> {results['success']}</p>
+            <p><strong>Failed:</strong> {results['failed']}</p>
+            <p><strong>Sent Date:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            """
+            
+            await self.send_email(
+                self.smtp_config['admin_email'],
+                f"📊 Bulk Notification Report: {subject}",
+                admin_html,
+                f"Bulk notification sent: {results['success']}/{results['total']} successful"
+            )
+
+            return {'success': True, 'results': results}
+
+        except Exception as e:
+            logger.error(f"Error sending bulk notification: {e}")
+            return {'success': False, 'error': str(e)}
+
+    async def get_system_stats(self) -> Dict:
+        """Get email system statistics"""
+        try:
+            total_users = await self.db.get_total_users()
+            active_subscribers = await self.db.get_active_subscribers()
+            recent_activity = await self.db.get_recent_activity()
+            
+            return {
+                'success': True,
+                'stats': {
+                    'total_subscribers': total_users,
+                    'active_subscribers': active_subscribers,
+                    'recent_activity': recent_activity,
+                    'smtp_status': 'Connected' if self.is_connected else 'Disconnected',
+                    'admin_email': self.smtp_config['admin_email']
+                }
+            }
+        except Exception as e:
+            logger.error(f"Error getting system stats: {e}")
+            return {'success': False, 'error': str(e)}
+
+# Global email system instance
+email_system = SpideyEmailNotificationSystem()
+
+# Utility functions for easy access
+async def initialize_email_system():
+    """Initialize the email system"""
+    return await email_system.connect_smtp()
+
+async def shutdown_email_system():
+    """Shutdown the email system gracefully"""
+    await email_system.disconnect_smtp()
