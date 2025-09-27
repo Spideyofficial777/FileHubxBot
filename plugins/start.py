@@ -485,150 +485,86 @@ async def user_status(client: Client, message: Message):
 
 # from pyrogram.types import CallbackQuery
 # from email_system import email_system
-
-# Email Test Callback Handler - FIXED VERSION
+# Fixed Email Test Callback Handler
 @Bot.on_callback_query(filters.regex(r"^email_test$"))
 async def email_test_callback(client: Client, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    await callback_query.answer("🧪 Starting email service test...")
+    await callback_query.answer("🧪 Starting enhanced email service test...")
     
     # Show testing message
     processing_msg = await callback_query.message.reply_text(
-        "🧪 <b>Email Service Test</b>\n\n"
+        "🧪 <b>Enhanced Email Service Test</b>\n\n"
         "🔍 Testing components:\n"
-        "• SMTP Connection\n"
-        "• Admin Email\n"
-        "• Template System\n"
-        "• Sending Capability\n\n"
-        "<i>Please wait...</i>"
+        "• SMTP Connection & Authentication\n"
+        "• Backup Server Fallback\n"
+        "• Admin Email Delivery\n"
+        "• User Email Delivery\n"
+        "• Connection Stability\n\n"
+        "<i>This may take 15-30 seconds...</i>"
     )
     
-    # FIX: Telegram User objects don't have email attribute
-    # Get user's email from database if they're subscribed
+    # Get user's email from database
     user_email = None
-    subscription_status = await email_system.get_subscription_status(user_id)
-    if subscription_status.get('success') and subscription_status.get('subscribed'):
-        user_email = subscription_status.get('email')
+    try:
+        status = await email_system.get_subscription_status(user_id)
+        if status.get('success') and status.get('subscribed'):
+            user_email = status.get('email')
+    except Exception as e:
+        logger.error(f"Error getting user email: {e}")
     
     # Run comprehensive test
     test_results = await email_system.test_email_service(
         user_id=user_id,
-        user_email=user_email  # Use email from database, not from User object
+        user_email=user_email
     )
     
     await processing_msg.delete()
     
-    # Prepare result message
+    # Prepare detailed result message
     if test_results.get('overall_success'):
         result_text = "✅ <b>Email Test Completed Successfully!</b>\n\n"
         result_text += f"📊 <b>Test ID:</b> <code>{test_results['test_id']}</code>\n"
-        result_text += f"🕒 <b>Time:</b> {test_results['timestamp']}\n"
-        result_text += f"🎯 <b>Success Rate:</b> {test_results['success_rate']}\n\n"
+        result_text += f"🕒 <b>Duration:</b> {test_results.get('duration', 'N/A')}s\n"
+        result_text += f"🎯 <b>Success Rate:</b> {test_results.get('success_percentage', 0)}%\n"
+        result_text += f"🔗 <b>Server:</b> {test_results['configuration']['smtp_server']}\n\n"
         
+        result_text += "<b>Detailed Results:</b>\n"
         for test_name, test_result in test_results['tests'].items():
             status = "✅" if test_result.get('success') else "❌"
-            result_text += f"{status} <b>{test_name}:</b> {test_result.get('message', 'N/A')}\n"
+            emoji = "🔗" if "connection" in test_name else "📧"
+            result_text += f"{emoji} {status} <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'N/A')}\n"
         
-        result_text += "\n📨 <i>Test emails have been sent to admin and user (if subscribed).</i>"
+        result_text += f"\n📨 <i>Test completed at {test_results['timestamp']}</i>"
         
     else:
         result_text = "❌ <b>Email Test Failed!</b>\n\n"
         result_text += f"📊 <b>Test ID:</b> <code>{test_results.get('test_id', 'N/A')}</code>\n"
-        result_text += f"🕒 <b>Time:</b> {test_results.get('timestamp', 'N/A')}\n"
         result_text += f"🚫 <b>Error:</b> {test_results.get('error', 'Unknown error')}\n\n"
         
-        for test_name, test_result in test_results['tests'].items():
-            status = "✅" if test_result.get('success') else "❌"
-            result_text += f"{status} <b>{test_name}:</b> {test_result.get('message', 'N/A')}\n"
+        result_text += "<b>Failed Tests:</b>\n"
+        for test_name, test_result in test_results.get('tests', {}).items():
+            if not test_result.get('success'):
+                result_text += f"❌ <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'N/A')}\n"
         
-        result_text += "\n🔧 <i>Please check your SMTP configuration.</i>"
+        result_text += "\n🔧 <b>Possible Solutions:</b>\n"
+        result_text += "• Check SMTP credentials in environment variables\n"
+        result_text += "• Verify email password (use App Password for Gmail)\n"
+        result_text += "• Ensure less secure apps are enabled (if using Gmail)\n"
+        result_text += "• Check firewall/port restrictions\n"
     
-    # Add retry button
+    # Enhanced buttons with diagnostics
     buttons = [
         [InlineKeyboardButton("🔄 Run Test Again", callback_data="email_test")],
-        [InlineKeyboardButton("📊 View Detailed Log", callback_data="email_logs")],
-        [InlineKeyboardButton("⚙️ SMTP Settings", callback_data="email_settings")]
+        [InlineKeyboardButton("📊 System Diagnostics", callback_data="email_diagnostics")],
+        [InlineKeyboardButton("⚙️ SMTP Settings Help", callback_data="smtp_help")],
+        [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage")]
     ]
     
     await callback_query.message.edit_text(
         result_text,
-        reply_markup=InlineKeyboardMarkup(buttons)
+        reply_markup=InlineKeyboardMarkup(buttons),
+        disable_web_page_preview=True
     )
-
-# Fixed email_notify command
-@Bot.on_message(filters.command('email_notify') & filters.private)
-async def email_notify_command(client: Client, message: Message):
-    user_id = message.from_user.id
-    
-    if len(message.command) < 2:
-        # Show subscription status with test button - NOW FIXED
-        status = await email_system.get_subscription_status(user_id)  # This method now exists
-        
-        buttons = []
-        if status.get('success') and status.get('subscribed'):
-            status_text = (
-                f"✅ <b>Subscribed to Email Notifications</b>\n\n"
-                f"📧 <b>Email:</b> {status['email']}\n"
-                f"📅 <b>Since:</b> {status['subscription_date'].strftime('%Y-%m-%d') if status.get('subscription_date') else 'Recent'}"
-            )
-            buttons = [
-                [InlineKeyboardButton("🧪 Test Email Service", callback_data="email_test")],
-                [InlineKeyboardButton("📊 View Logs", callback_data="email_logs")],
-                [InlineKeyboardButton("⚙️ Settings", callback_data="email_settings")],
-                [InlineKeyboardButton("📧 Unsubscribe", callback_data="email_unsubscribe")]
-            ]
-        else:
-            status_text = (
-                "📧 <b>Email Notifications</b>\n\n"
-                "Get notified about:\n"
-                "• New features and updates\n"
-                "• Exclusive content releases\n"
-                "• Important announcements\n"
-                "• Security alerts\n\n"
-                "<i>Subscribe with your email to stay updated!</i>"
-            )
-            buttons = [
-                [InlineKeyboardButton("📧 Subscribe with Email", callback_data="email_subscribe_prompt")],
-                [InlineKeyboardButton("🧪 Test Service", callback_data="email_test")]
-            ]
-        
-        await message.reply_text(
-            status_text,
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-        return
-
-    # Handle email subscription (existing code)
-    email = message.command[1]
-    name = message.from_user.first_name
-    username = message.from_user.username
-    
-    processing_msg = await message.reply_text("🔄 <b>Processing your subscription...</b>")
-    
-    result = await email_system.subscribe_user(user_id, email, name, username)
-    
-    await processing_msg.delete()
-    
-    if result['success']:
-        buttons = [
-            [InlineKeyboardButton("🎯 Join Our Channels", callback_data="join_channels")],
-            [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage")]
-        ]
-        await message.reply_text(
-            "🎉 <b>Subscription Successful!</b>\n\n"
-            "✅ You've been subscribed to email notifications\n"
-            "📨 A welcome email has been sent to your inbox\n"
-            "🔔 You'll receive updates about new features\n\n"
-            "<i>Thank you for joining FileHubX Bot family!</i>",
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    else:
-        await message.reply_text(
-            f"❌ <b>Subscription Failed</b>\n\n"
-            f"Error: {result['error']}\n\n"
-            f"<i>Please try again or contact support.</i>"
-        )
-        
 @Bot.on_message(filters.command('myplan') & filters.private)
 async def check_plan(client: Client, message: Message):
     user_id = message.from_user.id  # Get user ID from the message
