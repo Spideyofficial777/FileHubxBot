@@ -483,9 +483,6 @@ async def user_status(client: Client, message: Message):
     
     await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
 
-# email notifications system 
-from pyrogram.types import CallbackQuery
-from email_system import email_system
 
 # Email Test Callback Handler
 @Bot.on_callback_query(filters.regex(r"^email_test$"))
