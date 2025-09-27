@@ -1,0 +1,16 @@
+# Email System Configuration
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=gaminghatyar777@gmail.com
+SMTP_PASSWORD=xvjxaszgbseqjwon
+FROM_EMAIL=gaminghatyar777@gmail.com
+FROM_NAME="FileHubX Bot"
+ADMIN_EMAIL=spideyofficial777@gmail.com
+
+# Enhanced Settings
+SMTP_USE_TLS=True
+SMTP_USE_SSL=False
+SMTP_TIMEOUT=30
+SMTP_RETRY_ATTEMPTS=3
+SMTP_RETRY_DELAY=5
+EMAIL_ENABLED=True
