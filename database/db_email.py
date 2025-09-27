@@ -1,4 +1,5 @@
 # This is the testing db for the sending email to the user we are created this only for the testing
+from typing import Any
 
 # Add this method to your existing EmailDatabase class
 async def log_test_result(self, test_id: str, test_data: Dict):
