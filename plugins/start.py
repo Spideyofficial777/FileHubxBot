@@ -484,116 +484,181 @@ async def user_status(client: Client, message: Message):
     await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
 
 # email notifications system 
+from pyrogram.types import CallbackQuery
+from email_system import email_system
+
+# Email Test Callback Handler
+@Bot.on_callback_query(filters.regex(r"^email_test$"))
+async def email_test_callback(client: Client, callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    await callback_query.answer("🧪 Starting email service test...")
+    
+    # Show testing message
+    processing_msg = await callback_query.message.reply_text(
+        "🧪 <b>Email Service Test</b>\n\n"
+        "🔍 Testing components:\n"
+        "• SMTP Connection\n"
+        "• Admin Email\n"
+        "• Template System\n"
+        "• Sending Capability\n\n"
+        "<i>Please wait...</i>"
+    )
+    
+    # Run comprehensive test
+    test_results = await email_system.test_email_service(
+        user_id=user_id,
+        user_email=callback_query.from_user.email  # If available
+    )
+    
+    await processing_msg.delete()
+    
+    # Prepare result message
+    if test_results.get('overall_success'):
+        result_text = "✅ <b>Email Test Completed Successfully!</b>\n\n"
+        result_text += f"📊 <b>Test ID:</b> <code>{test_results['test_id']}</code>\n"
+        result_text += f"🕒 <b>Time:</b> {test_results['timestamp']}\n"
+        result_text += f"🎯 <b>Success Rate:</b> {test_results['success_rate']}\n\n"
+        
+        for test_name, test_result in test_results['tests'].items():
+            status = "✅" if test_result.get('success') else "❌"
+            result_text += f"{status} <b>{test_name}:</b> {test_result.get('message', 'N/A')}\n"
+        
+        result_text += "\n📨 <i>Test emails have been sent to admin and user (if email available).</i>"
+        
+    else:
+        result_text = "❌ <b>Email Test Failed!</b>\n\n"
+        result_text += f"📊 <b>Test ID:</b> <code>{test_results.get('test_id', 'N/A')}</code>\n"
+        result_text += f"🕒 <b>Time:</b> {test_results.get('timestamp', 'N/A')}\n"
+        result_text += f"🚫 <b>Error:</b> {test_results.get('error', 'Unknown error')}\n\n"
+        
+        for test_name, test_result in test_results['tests'].items():
+            status = "✅" if test_result.get('success') else "❌"
+            result_text += f"{status} <b>{test_name}:</b> {test_result.get('message', 'N/A')}\n"
+        
+        result_text += "\n🔧 <i>Please check your SMTP configuration.</i>"
+    
+    # Add retry button
+    buttons = [
+        [InlineKeyboardButton("🔄 Run Test Again", callback_data="email_test")],
+        [InlineKeyboardButton("📊 View Detailed Log", callback_data="email_logs")],
+        [InlineKeyboardButton("⚙️ SMTP Settings", callback_data="email_settings")]
+    ]
+    
+    await callback_query.message.edit_text(
+        result_text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+@Bot.on_callback_query(filters.regex(r"^email_logs$"))
+async def email_logs_callback(client: Client, callback_query: CallbackQuery):
+    await callback_query.answer("📋 Showing email logs...")
+    
+    # Get recent test results
+    recent_tests = list(email_system.test_results.values())[-5:]  # Last 5 tests
+    
+    if not recent_tests:
+        logs_text = "📋 <b>Email Test Logs</b>\n\nNo tests have been run yet."
+    else:
+        logs_text = "📋 <b>Recent Email Tests</b>\n\n"
+        for test in recent_tests:
+            status = "✅" if test.get('overall_success') else "❌"
+            logs_text += f"{status} <b>Test {test['test_id']}</b>\n"
+            logs_text += f"   🕒 {test['timestamp']}\n"
+            logs_text += f"   📊 {test.get('success_rate', 'N/A')}\n\n"
+    
+    buttons = [
+        [InlineKeyboardButton("🧪 Run New Test", callback_data="email_test")],
+        [InlineKeyboardButton("🔙 Back", callback_data="email_manage")]
+    ]
+    
+    await callback_query.message.edit_text(
+        logs_text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+@Bot.on_callback_query(filters.regex(r"^email_settings$"))
+async def email_settings_callback(client: Client, callback_query: CallbackQuery):
+    await callback_query.answer("⚙️ Showing email settings...")
+    
+    settings_text = "⚙️ <b>Email System Settings</b>\n\n"
+    settings_text += f"🔗 <b>SMTP Server:</b> <code>{email_system.smtp_config['server']}</code>\n"
+    settings_text += f"🚪 <b>SMTP Port:</b> <code>{email_system.smtp_config['port']}</code>\n"
+    settings_text += f"📧 <b>From Email:</b> <code>{email_system.smtp_config['from_email']}</code>\n"
+    settings_text += f"👤 <b>Admin Email:</b> <code>{email_system.smtp_config['admin_email']}</code>\n"
+    settings_text += f"🔌 <b>Connection Status:</b> {'✅ Connected' if email_system.is_connected else '❌ Disconnected'}\n\n"
+    settings_text += f"🤖 <b>Bot:</b> @{BOT_USERNAME}\n"
+    settings_text += f"👑 <b>Maintained by:</b> @hacker_x_official_777"
+    
+    buttons = [
+        [InlineKeyboardButton("🧪 Test Connection", callback_data="email_test")],
+        [InlineKeyboardButton("🔙 Back", callback_data="email_manage")]
+    ]
+    
+    await callback_query.message.edit_text(
+        settings_text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+# Update your existing email_notify command to include test button
 @Bot.on_message(filters.command('email_notify') & filters.private)
 async def email_notify_command(client: Client, message: Message):
     user_id = message.from_user.id
     
-    # Check if user provided email
     if len(message.command) < 2:
-        # Show subscription status
+        # Show subscription status with test button
         status = await email_system.get_subscription_status(user_id)
         
-        if status['success']:
-            if status.get('subscribed'):
-                buttons = [
-                    [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage"),
-                    InlineKeyboardButton("🔔 Test Notification", callback_data="email_test")],
-                    [InlineKeyboardButton("📊 Subscription Stats", callback_data="email_stats")]
-                ]
-                await message.reply_text(
-                    f"📧 <b>Email Notification Status</b>\n\n"
-                    f"✅ <b>Status:</b> Subscribed\n"
-                    f"📨 <b>Email:</b> {status['email']}\n"
-                    f"📅 <b>Since:</b> {status['subscription_date'].strftime('%Y-%m-%d') if status['subscription_date'] else 'N/A'}\n\n"
-                    f"<i>You will receive notifications about new features and updates.</i>",
-                    reply_markup=InlineKeyboardMarkup(buttons)
-                )
-            else:
-                buttons = [
-                    [InlineKeyboardButton("📧 Subscribe Now", callback_data="email_subscribe")]
-                ]
-                await message.reply_text(
-                    "📧 <b>Email Notifications</b>\n\n"
-                    "Get notified about:\n"
-                    "• New features and updates\n"
-                    "• Exclusive content releases\n"
-                    "• Important announcements\n"
-                    "• Security alerts\n\n"
-                    "<i>Subscribe with your email to stay updated!</i>",
-                    reply_markup=InlineKeyboardMarkup(buttons)
-                )
+        buttons = []
+        if status.get('success') and status.get('subscribed'):
+            buttons = [
+                [InlineKeyboardButton("🧪 Test Email Service", callback_data="email_test")],
+                [InlineKeyboardButton("📊 View Logs", callback_data="email_logs")],
+                [InlineKeyboardButton("⚙️ Settings", callback_data="email_settings")],
+                [InlineKeyboardButton("📧 Unsubscribe", callback_data="email_unsubscribe")]
+            ]
+            status_text = f"✅ <b>Subscribed to Email Notifications</b>\n\n📧 <b>Email:</b> {status['email']}"
+        else:
+            buttons = [
+                [InlineKeyboardButton("📧 Subscribe with Email", callback_data="email_subscribe_prompt")],
+                [InlineKeyboardButton("🧪 Test Service", callback_data="email_test")]
+            ]
+            status_text = "📧 <b>Email Notifications</b>\n\nGet notified about updates and new features!"
+        
+        await message.reply_text(
+            status_text,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
         return
 
     # Handle email subscription
     email = message.command[1]
-    name = message.from_user.first_name
-    username = message.from_user.username
+    # ... (rest of your existing subscription code)
+
+# Admin command for detailed testing
+@Bot.on_message(filters.command('test_email') & filters.private & admin)
+async def test_email_command(client: Client, message: Message):
+    """Admin command for comprehensive email testing"""
+    processing_msg = await message.reply_text("🧪 <b>Running comprehensive email test...</b>")
     
-    # Show processing message
-    processing_msg = await message.reply_text("🔄 <b>Processing your subscription...</b>")
-    
-    # Subscribe user
-    result = await email_system.subscribe_user(user_id, email, name, username)
+    test_results = await email_system.test_email_service()
     
     await processing_msg.delete()
     
-    if result['success']:
-        buttons = [
-            [InlineKeyboardButton("🎯 Join Our Channels", callback_data="join_channels")],
-            [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage")]
-        ]
-        await message.reply_text(
-            "🎉 <b>Subscription Successful!</b>\n\n"
-            "✅ You've been subscribed to email notifications\n"
-            "📨 A welcome email has been sent to your inbox\n"
-            "🔔 You'll receive updates about new features\n\n"
-            "<i>Thank you for joining Spidey Official family!</i>",
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    else:
-        await message.reply_text(
-            f"❌ <b>Subscription Failed</b>\n\n"
-            f"Error: {result['error']}\n\n"
-            f"<i>Please try again or contact support.</i>"
-        )
-
-# Admin command to send notifications
-@Bot.on_message(filters.command('send_notification') & filters.private & admin)
-async def send_notification_command(client: Client, message: Message):
-    if len(message.command) < 2:
-        await message.reply_text(
-            "Usage: /send_notification <subject> | <message> | <details>\n\n"
-            "Example:\n"
-            "/send_notification New Update | We've added new features | Check out the latest improvements"
-        )
-        return
+    # Format detailed results for admin
+    result_text = "📋 <b>Comprehensive Email Test Results</b>\n\n"
+    result_text += f"🆔 <b>Test ID:</b> <code>{test_results.get('test_id', 'N/A')}</code>\n"
+    result_text += f"⏰ <b>Timestamp:</b> {test_results.get('timestamp', 'N/A')}\n"
+    result_text += f"🎯 <b>Overall:</b> {'✅ SUCCESS' if test_results.get('overall_success') else '❌ FAILED'}\n\n"
     
-    try:
-        # Parse command arguments
-        args = ' '.join(message.command[1:]).split('|')
-        subject = args[0].strip() if len(args) > 0 else "Important Update"
-        message_text = args[1].strip() if len(args) > 1 else "We have an important update for you!"
-        details = args[2].strip() if len(args) > 2 else ""
-        
-        processing_msg = await message.reply_text("🔄 <b>Sending notifications to all subscribers...</b>")
-        
-        result = await email_system.send_bulk_notification(subject, message_text, details)
-        
-        await processing_msg.delete()
-        
-        if result['success']:
-            await message.reply_text(
-                f"📊 <b>Notification Sent Successfully!</b>\n\n"
-                f"✅ Successful: {result['results']['success']}\n"
-                f"❌ Failed: {result['results']['failed']}\n"
-                f"📨 Total: {result['results']['total']}\n\n"
-                f"<i>Admin report has been sent to your email.</i>"
-            )
-        else:
-            await message.reply_text(f"❌ Failed to send notifications: {result['error']}")
-            
-    except Exception as e:
-        await message.reply_text(f"❌ Error: {str(e)}")
+    for test_name, test_result in test_results.get('tests', {}).items():
+        status_icon = "✅" if test_result.get('success') else "❌"
+        result_text += f"{status_icon} <b>{test_name.upper()}</b>\n"
+        result_text += f"   📝 {test_result.get('message', 'No message')}\n"
+        if test_result.get('error'):
+            result_text += f"   🚫 Error: {test_result['error']}\n"
+        result_text += "\n"
+    
+    await message.reply_text(result_text)
         
 @Bot.on_message(filters.command('myplan') & filters.private)
 async def check_plan(client: Client, message: Message):
