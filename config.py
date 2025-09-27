@@ -90,12 +90,12 @@ PRICE5 = os.environ.get("PRICE5", "550 rs")
 # ===================(EMAIL NOTIFICATION SYSTEM)==============#
 SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "gaminghatyar777@gmail.com")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "xvjxaszgbseqjwon")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", "gaminghatyar777@gmail.com")
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "spideyofficial777@gmail.com")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")  # Add your app password
+FROM_EMAIL = os.environ.get("FROM_EMAIL", "spideyofficial777@gmail.com")
 FROM_NAME = os.environ.get("FROM_NAME", "Spidey Official")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "spideyofficial777@gmail.com")
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "FileHubxBot")
+BOT_USERNAME = os.environ.get("BOT_USERNAME", "FileHubxBot")  # Without @
 
 # ===================(END)========================#
 NSFW_MODEL = "Falconsai/nsfw_image_detection"
