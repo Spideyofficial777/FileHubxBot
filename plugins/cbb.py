@@ -594,4 +594,4 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             text=f"#FREE_TRAIL_CLAIMED\n\n👤 ᴜꜱᴇʀ ɴᴀᴍᴇ - {query.from_user.mention}\n⚡ ᴜꜱᴇʀ ɪᴅ - <code>{user_id}</code>",
             disable_web_page_preview=True
         )
-           
+
