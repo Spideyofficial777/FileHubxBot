@@ -13,8 +13,8 @@
 import smtplib
 import asyncio
 import aiosmtplib
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import logging
 from typing import List, Dict, Optional
