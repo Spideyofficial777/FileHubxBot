@@ -3,17 +3,16 @@ from os import environ, getenv
 import logging
 from logging.handlers import RotatingFileHandler
 
-# rohit_1888 on Tg
+# hacker_x_official_777 on Tg
 # --------------------------------------------
-# Bot token @Botfather
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
-APP_ID = int(os.environ.get("APP_ID", "28519661"))  # Your API ID from my.telegram.org
+APP_ID = int(os.environ.get("APP_ID", "28519661"))
 API_HASH = os.environ.get("API_HASH", "d47c74c8a596fd3048955b322304109d")  # Your API Hash from my.telegram.org
 # --------------------------------------------
 CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002423451263"))
 VERIFIED_LOG = int(environ.get('VERIFIED_LOG', '-1002423451263'))  # Your db channel Id
 OWNER = os.environ.get("OWNER", "hacker_x_official_777")  # Owner username without @
-OWNER_ID = int(os.environ.get("OWNER_ID", "7965267063"))  # Owner id
+OWNER_ID = int(os.environ.get("OWNER_ID", "7965267063"))
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002294764885'))
 CHANNELS = int(os.environ.get("CHANNEL", "-1002423451263"))
 UPDATE_CHANNEL = int(os.environ.get("UPDATE_CHANNEL", "-1002461263750"))
@@ -58,10 +57,12 @@ CMD_TXT = """<blockquote><b>» ᴀᴅᴍɪɴ ᴄᴏᴍᴍᴀɴᴅs:</b></blockqu
 <b>›› /deladmin :</b> ʀᴇᴍᴏᴠᴇ ᴀɴ ᴀᴅᴍɪɴ
 <b>›› /admins :</b> ɢᴇᴛ ʟɪsᴛ ᴏꜰ ᴀᴅᴍɪɴs
 <b>›› /addpremium :</b> ᴀᴅᴅ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ
-<b>›› /premium_users :</b> ʟɪsᴛ ᴀʟʟ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀs
+<b>›› /premium_users :</b> ʟɪsᴛ ᴀʟʟ ᴘʀᴇᴍɪᴜᴍ ᴜsᴇʀs
 <b>›› /remove_premium :</b> ʀᴇᴍᴏᴠᴇ ᴘʀᴇᴍɪᴜᴍ ꜰʀᴏᴍ ᴀ ᴜꜱᴇʀ
 <b>›› /myplan :</b> ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ sᴛᴀᴛᴜs
 <b>›› /count :</b> ᴄᴏᴜɴᴛ verifications
+<b>›› /email_notify :</b> ᴍᴀɴᴀɢᴇ ᴇᴍᴀɪʟ ɴᴏᴛɪғɪᴄᴀᴛɪᴏɴs
+<b>›› /send_notification :</b> sᴇɴᴅ ɴᴏᴛɪғɪᴄᴀᴛɪᴏɴ ᴛᴏ ᴀʟʟ sᴜʙsᴄʀɪʙᴇʀs
 """
 
 CUSTOM_CAPTION = os.environ.get(
@@ -86,9 +87,19 @@ PRICE3 = os.environ.get("PRICE3", "150 rs")
 PRICE4 = os.environ.get("PRICE4", "280 rs")
 PRICE5 = os.environ.get("PRICE5", "550 rs")
 
+# ===================(EMAIL NOTIFICATION SYSTEM)==============#
+SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "gaminghatyar777@gmail.com")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "xvjxaszgbseqjwon")
+FROM_EMAIL = os.environ.get("FROM_EMAIL", "gaminghatyar777@gmail.com")
+FROM_NAME = os.environ.get("FROM_NAME", "Spidey Official")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "spideyofficial777@gmail.com")
+BOT_USERNAME = os.environ.get("BOT_USERNAME", "FileHubxBot")
+
 # ===================(END)========================#
 NSFW_MODEL = "Falconsai/nsfw_image_detection"
-WATERMARK = "© MediaHub"
+WATERMARK = "© Filehubxbot"
 PREMIUM_TAG = "🌟 PREMIUM"
 
 MIRROR_REGIONS = {
