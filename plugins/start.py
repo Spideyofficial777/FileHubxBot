@@ -111,7 +111,7 @@ async def start_command(client: Client, message: Message):
 
                     # Enhanced button with fallback
                     button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
-                    button_url = verify_status.get("link", "https://t.me/spideyofficialupdatez")
+                    button_url = verify_status.get("link") or "https://t.me/spideyofficialupdatez"
                     
                     reply_markup = InlineKeyboardMarkup(
                         [[InlineKeyboardButton(button_text, url=button_url)]]
@@ -132,15 +132,15 @@ async def start_command(client: Client, message: Message):
                     current_date = now.strftime("%Y-%m-%d")
 
                     log_msg = (
-                        f"✅ <b>Enhanced Verification Successful</b>\n\n"
-                        f"👤 User: {message.from_user.mention}\n"
-                        f"🆔 ID: <code>{message.from_user.id}</code>\n"
-                        f"📊 Total Verifications: {new_count}\n"
-                        f"🕒 Time: {current_time}\n"
-                        f"📅 Date: {current_date}\n"
-                        f"⏰ Access Duration: {get_exp_time(VERIFY_EXPIRE)}\n"
-                        f"#verify_completed #user_{user_id}"
-                    )
+                            f"🎯 <b>ᴇɴʜᴀɴᴄᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ</b>\n\n"
+                            f"👤 ᴜꜱᴇʀ: {message.from_user.mention}\n"
+                            f"🆔 ɪᴅ: <code>{message.from_user.id}</code>\n"
+                            f"📊 ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ: {new_count}\n"
+                            f"🕒 ᴛɪᴍᴇ: {current_time}\n"
+                            f"📅 ᴅᴀᴛᴇ: {current_date}\n"
+                            f"⏰ ᴀᴄᴄᴇꜱꜱ ᴅᴜʀᴀᴛɪᴏɴ: {get_exp_time(VERIFY_EXPIRE)}\n"
+                            f"#ᴠᴇʀɪꜰʏ_ᴄᴏᴍᴘʟᴇᴛᴇᴅ #ᴜꜱᴇʀ_{user_id}"
+                        )
                     await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
 
                 except Exception as e:
@@ -169,21 +169,16 @@ async def start_command(client: Client, message: Message):
                      InlineKeyboardButton('🆓 ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data='free_trial')]
                 ]
                 
-                # Enhanced verification required message
-                return await message.reply(
-                    f"🔒 <b>Verification Required</b>\n\n"
-                    f"📝 <b>Why Verification?</b>\n"
-                    f"• This helps us maintain service quality\n"
-                    f"• Supports free access for all users\n"
-                    f"• Takes only a few seconds\n\n"
-                    f"⏳ <b>Access Duration:</b> {get_exp_time(VERIFY_EXPIRE)}\n"
-                    f"🔄 <b>Token Expiry:</b> 10 minutes\n\n"
-                    f"<i>Complete one quick step to unlock full access!</i>",
-                    reply_markup=InlineKeyboardMarkup(btn),
-                    protect_content=False,
-                    quote=True
-                )
-
+            return await message.reply_photo(
+                photo=VERIFY_REQUIERD_IMG,
+                caption=script.VERIFICATION_TXT.format(
+                    mention=message.from_user.mention,
+                    expire=get_exp_time(VERIFY_EXPIRE)
+                ),
+                reply_markup=InlineKeyboardMarkup(btn),
+                quote=True
+            )
+            
     # Enhanced Force Subscription Check
     if not await is_subscribed(client, user_id):
         return await not_joined(client, message)
@@ -407,31 +402,7 @@ async def start_cache_cleanup(client, message):
 
 # Enhanced premium features
 @Bot.on_message(filters.command('features') & filters.private)
-async def show_features(client: Client, message: Message):
-    features_text = """
-🚀 <b>Enhanced Features</b>
-
-<b>Free Users:</b>
-✅ File Access (with verification)
-✅ Auto-delete protection
-✅ Basic support
-
-<b>Premium Users:</b>
-⭐ No verification required
-⭐ Priority file delivery  
-⭐ Extended auto-delete time
-⭐ Exclusive content access
-⭐ Priority support
-⭐ Higher download limits
-⭐ Early feature access
-
-<b>Admin Features:</b>
-👑 User management
-📊 Advanced analytics
-🔧 Bot configuration
-⚡ Instant support
-"""
-    
+async def show_features(client: Client, message: Message):    
     buttons = [
         [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium")],
         [InlineKeyboardButton("🆓 ᴛʀʏ ꜰʀᴇᴇ ᴛʀɪᴀʟ", callback_data="free_trial")],
@@ -440,7 +411,7 @@ async def show_features(client: Client, message: Message):
     
     await message.reply_photo(
         photo="https://graph.org/file/7519d226226bec1090db7.jpg",
-        caption=features_text,
+        caption=script.FEATURES_TXT,
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
