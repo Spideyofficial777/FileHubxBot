@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 
 # hacker_x_official_777 on Tg
 # --------------------------------------------
-TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "7620991709:AAH2qNNm4UVOTxQvheJNiHMNV7KN1f4L0Lo")
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 APP_ID = int(os.environ.get("APP_ID", "28519661"))
 API_HASH = os.environ.get("API_HASH", "d47c74c8a596fd3048955b322304109d")  # Your API Hash from my.telegram.org
 # --------------------------------------------
@@ -34,7 +34,7 @@ VERIFY_REQUIERD_IMG = environ.get("VERIFY_REQUIERD_IMG", "https://envs.sh/KFL.bi
 # --------------------------------------------
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "shortxlinks.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "09c3f9bc3a8b121b1e6b82a954e59da523dd188e")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 5))  # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 3600))  # Add time in seconds
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/spideyofficial_777/12")
 # --------------------------------------------
 START_MSG = os.environ.get("START_MESSAGE", "<b>ʜᴇʟʟᴏ {mention}\n\n<blockquote> ɪ ᴀᴍ ғɪʟᴇ sᴛᴏʀᴇ ʙᴏᴛ, ɪ ᴄᴀɴ sᴛᴏʀᴇ ᴘʀɪᴠᴀᴛᴇ ғɪʟᴇs ɪɴ sᴘᴇᴄɪғɪᴇᴅ ᴄʜᴀɴɴᴇʟ ᴀɴᴅ ᴏᴛʜᴇʀ ᴜsᴇʀs ᴄᴀɴ ᴀᴄᴄᴇss ɪᴛ ғʀᴏᴍ sᴘᴇᴄɪᴀʟ ʟɪɴᴋ.</blockquote></b>")
