@@ -38,36 +38,6 @@ TUT_VID = f"{TUT_VID}"
 
 # Enhanced verification tracking
 verification_cache = {}
-# 🎯 ENHANCED VERIFICATION CACHE CLASS
-class VerificationCache:
-    def __init__(self):
-        self._cache = {}
-    
-    async def get(self, user_id):
-        if user_id in self._cache:
-            data, timestamp = self._cache[user_id]
-            if time.time() - timestamp < 3600:  # 1 hour TTL
-                return data
-            else:
-                del self._cache[user_id]
-        return None
-    
-    async def set(self, user_id, data):
-        self._cache[user_id] = (data, time.time())
-    
-    async def delete(self, user_id):
-        if user_id in self._cache:
-            del self._cache[user_id]
-    
-    async def cleanup_expired(self):
-        current_time = time.time()
-        expired = [uid for uid, (_, timestamp) in self._cache.items() 
-                  if current_time - timestamp >= 3600]
-        for uid in expired:
-            del self._cache[uid]
-
-# Initialize enhanced cache
-verification_cache = VerificationCache()
 
 @Bot.on_message(filters.command('start') & filters.private)
 async def start_command(client: Client, message: Message):
@@ -75,115 +45,86 @@ async def start_command(client: Client, message: Message):
     id = message.from_user.id
     is_premium = await is_premium_user(id)
 
-    # 🔥 ENHANCED BAN CHECK WITH STYLISH UI
+    # Check if user is banned
     banned_users = await db.get_ban_users()
     if user_id in banned_users:
-        return await message.reply_photo(
-            photo="https://telegra.ph/file/c78645947613fcdb9a1d0.jpg",
-            caption="🚫 <b>ᴀᴄᴄᴏᴜɴᴛ ʀᴇꜱᴛʀɪᴄᴛᴇᴅ</b>\n\n"
-                   "⛔️ ʏᴏᴜ ᴀʀᴇ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴜꜱɪɴɢ ᴛʜɪꜱ ʙᴏᴛ\n\n"
-                   "<i>ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ ɪꜰ ʏᴏᴜ ᴛʜɪɴᴋ ᴛʜɪꜱ ɪꜱ ᴀ ᴍɪꜱᴛᴀᴋᴇ</i>",
+        return await message.reply_text(
+            "<b>⛔️ You are Bᴀɴɴᴇᴅ from using this bot.</b>\n\n"
+            "<i>Contact support if you think this is a mistake.</i>",
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("📧 ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ", url=BAN_SUPPORT)]]
+                [[InlineKeyboardButton("Contact Support", url=BAN_SUPPORT)]]
             )
         )
 
-    # ⚡ ENHANCED ADMIN VERIFICATION WITH CACHE
+    # Enhanced admin verification with caching
     if user_id in await db.get_all_admins():
         verify_status = {
             'is_verified': True,
             'verify_token': None, 
             'verified_time': time.time(),
             'link': "",
-            'verified_count': 0,
-            'user_type': 'admin'
+            'verified_count': 0
         }
-        await verification_cache.set(user_id, verify_status)
-        
-        # 👑 ADMIN SPECIAL WELCOME
-        if len(message.text) <= 7:
-            await message.reply_photo(
-                photo=START_PIC,
-                caption=f"👑 <b>ᴡᴇʟᴄᴏᴍᴇ ᴀᴅᴍɪɴ {message.from_user.mention}!</b>\n\n"
-                       f"🆔 <b>ᴜꜱᴇʀ ɪᴅ:</b> <code>{user_id}</code>\n"
-                       f"📊 <b>ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ:</b> {await db.total_users_count()}\n\n"
-                       f"<i>ʏᴏᴜ ʜᴀᴠᴇ ꜰᴜʟʟ ᴀᴄᴄᴇꜱꜱ ᴛᴏ ᴀʟʟ ꜰᴇᴀᴛᴜʀᴇꜱ</i>",
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("📊 ᴅᴀꜱʜʙᴏᴀʀᴅ", callback_data="admin")],
-                    [InlineKeyboardButton("👥 ᴜꜱᴇʀꜱ", callback_data="users_stats"),
-                     InlineKeyboardButton("📈 ꜱᴛᴀᴛꜱ", callback_data="stats")]
-                ])
-            )
-            return
-
+        # Cache admin verification
+        verification_cache[user_id] = verify_status
     else:
-        # 🔍 SMART CACHE VERIFICATION SYSTEM
-        verify_status = await verification_cache.get(user_id)
-        if not verify_status:
+        # Check cache first for faster verification
+        if user_id in verification_cache:
+            verify_status = verification_cache[user_id]
+        else:
             verify_status = await db.get_verify_status(id)
-            await verification_cache.set(user_id, verify_status)
+            verification_cache[user_id] = verify_status
 
-        # 🎯 ENHANCED VERIFICATION HANDLING
+        # Enhanced token verification handling
         if SHORTLINK_URL or SHORTLINK_API:
-            # ⏰ CHECK VERIFICATION EXPIRY
+            # Check if verification expired
             if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
                 await db.update_verify_status(user_id, is_verified=False)
                 verify_status['is_verified'] = False
-                await verification_cache.set(user_id, verify_status)
+                verification_cache[user_id] = verify_status
 
-            # 🔑 TOKEN VERIFICATION PROCESS
+            # Handle verification token from start command
             if "verify_" in message.text:
                 try:
                     _, token = message.text.split("_", 1)
                     
-                    # 🛡️ ENHANCED TOKEN VALIDATION
+                    # Enhanced token validation
                     if verify_status['verify_token'] != token:
-                        await verification_cache.delete(user_id)
-                        return await message.reply_photo(
-                            photo="https://telegra.ph/file/25d81e95a59a58745b4b2.jpg",
-                            caption="❌ <b>ᴛᴏᴋᴇɴ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜰᴀɪʟᴇᴅ</b>\n\n"
-                                   "• ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ ᴛᴏᴋᴇɴ\n"
-                                   "• ᴛᴏᴋᴇɴ ᴍᴀʏ ʜᴀᴠᴇ ʙᴇᴇɴ ᴜꜱᴇᴅ ᴀʟʀᴇᴀᴅʏ\n"
-                                   "• ꜱᴇꜱꜱɪᴏɴ ᴍɪɢʜᴛ ʜᴀᴠᴇ ᴇxᴘɪʀᴇᴅ\n\n"
-                                   "🔄 <b>ꜱᴏʟᴜᴛɪᴏɴ:</b>\n"
-                                   "ᴄʟɪᴄᴋ /ꜱᴛᴀʀᴛ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ ᴀ ɴᴇᴡ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʟɪɴᴋ",
-                            reply_markup=InlineKeyboardMarkup([
-                                [InlineKeyboardButton("🔄 ᴛʀʏ ᴀɢᴀɪɴ", callback_data="restart_verification")]
-                            ])
-                        )
+                        # Clear invalid token attempts
+                        if user_id in verification_cache:
+                            del verification_cache[user_id]
+                        return await message.reply("❌ Your token is invalid or expired. Try again by clicking /start.")
                     
-                    # ✅ UPDATE VERIFICATION STATUS
+                    # Update verification status
                     await db.update_verify_status(id, is_verified=True, verified_time=time.time())
                     verify_status['is_verified'] = True
                     verify_status['verified_time'] = time.time()
                     
-                    # 📈 UPDATE VERIFICATION COUNT
+                    # Update verification count
                     current = await db.get_verify_count(id)
                     new_count = current + 1
                     await db.set_verify_count(id, new_count)
                     verify_status['verified_count'] = new_count
                     
-                    # 💾 UPDATE CACHE
-                    await verification_cache.set(user_id, verify_status)
+                    # Update cache
+                    verification_cache[user_id] = verify_status
 
-                    # 🎉 ENHANCED SUCCESS MESSAGE
-                    await message.reply_animation(
-                        animation="https://telegra.ph/file/4c64144118b4d7291a804.mp4",
-                        caption=f"🎉 <b>ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!</b> 🎉\n\n"
-                               f"👤 <b>ᴡᴇʟᴄᴏᴍᴇ:</b> {message.from_user.mention}\n"
-                               f"✅ <b>ꜱᴛᴀᴛᴜꜱ:</b> ꜰᴜʟʟʏ ᴠᴇʀɪꜰɪᴇᴅ\n"
-                               f"⏰ <b>ᴀᴄᴄᴇꜱꜱ ᴅᴜʀᴀᴛɪᴏɴ:</b> {get_exp_time(VERIFY_EXPIRE)}\n"
-                               f"🔢 <b>ᴛᴏᴋᴇɴꜱ ᴜꜱᴇᴅ:</b> {new_count}\n"
-                               f"📅 <b>ᴠᴇʀɪꜰɪᴇᴅ ᴏɴ:</b> {datetime.now().strftime('%d %b %Y ᴀᴛ %I:%M %p')}\n\n"
-                               f"<i>ʏᴏᴜ ɴᴏᴡ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ᴛᴏ ᴀʟʟ ꜰᴇᴀᴛᴜʀᴇꜱ!</i>",
-                        reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton("📁 ᴀᴄᴄᴇꜱꜱ ꜰɪʟᴇꜱ", callback_data="get_files")],
-                            [InlineKeyboardButton("💎 ɢᴏ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium"),
-                             InlineKeyboardButton("📊 ᴘʀᴏꜰɪʟᴇ", callback_data="profile")]
-                        ])
+                    # Enhanced button with fallback
+                    button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
+                    button_url = verify_status.get("link", "https://t.me/spideyofficialupdatez")
+                    
+                    reply_markup = InlineKeyboardMarkup(
+                        [[InlineKeyboardButton(button_text, url=button_url)]]
                     )
 
-                    # 📊 ENHANCED USER VERIFICATION LOGGING
+                    # Enhanced verification success message
+                    await message.reply_photo(
+                        photo=VERIFY_IMG,
+                        caption=f"<blockquote><b>✅ ʜᴇʏ {message.from_user.mention}, ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!\n\n🎉 ʏᴏᴜ ɴᴏᴡ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ {get_exp_time(VERIFY_EXPIRE)}\n\nᴛᴏᴋᴇɴ ᴜꜱᴇᴅ: {new_count} ᴛɪᴍᴇꜱ</blockquote></b>",
+                        reply_markup=reply_markup
+                    )
+
+                    # Enhanced user verification logging
                     await verify_user(client, id, token)
 
                     now = datetime.now()
@@ -191,113 +132,83 @@ async def start_command(client: Client, message: Message):
                     current_date = now.strftime("%Y-%m-%d")
 
                     log_msg = (
-                        f"🎯 <b>ᴇɴʜᴀɴᴄᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ</b>\n\n"
-                        f"👤 ᴜꜱᴇʀ: {message.from_user.mention}\n"
-                        f"🆔 ɪᴅ: <code>{message.from_user.id}</code>\n"
-                        f"📊 ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ: {new_count}\n"
-                        f"🕒 ᴛɪᴍᴇ: {current_time}\n"
-                        f"📅 ᴅᴀᴛᴇ: {current_date}\n"
-                        f"⏰ ᴀᴄᴄᴇꜱꜱ ᴅᴜʀᴀᴛɪᴏɴ: {get_exp_time(VERIFY_EXPIRE)}\n"
-                        f"#ᴠᴇʀɪꜰʏ_ᴄᴏᴍᴘʟᴇᴛᴇᴅ #ᴜꜱᴇʀ_{user_id}"
+                        f"✅ <b>Enhanced Verification Successful</b>\n\n"
+                        f"👤 User: {message.from_user.mention}\n"
+                        f"🆔 ID: <code>{message.from_user.id}</code>\n"
+                        f"📊 Total Verifications: {new_count}\n"
+                        f"🕒 Time: {current_time}\n"
+                        f"📅 Date: {current_date}\n"
+                        f"⏰ Access Duration: {get_exp_time(VERIFY_EXPIRE)}\n"
+                        f"#verify_completed #user_{user_id}"
                     )
                     await client.send_message(chat_id=VERIFIED_LOG, text=log_msg)
 
                 except Exception as e:
-                    print(f"ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴇʀʀᴏʀ: {e}")
-                    return await message.reply(
-                        "🔴 <b>ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴇʀʀᴏʀ</b>\n\n"
-                        "ᴡᴇ ᴇɴᴄᴏᴜɴᴛᴇʀᴇᴅ ᴀɴ ɪꜱꜱᴜᴇ ᴘʀᴏᴄᴇꜱꜱɪɴɢ ʏᴏᴜʀ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ.\n\n"
-                        "<b>ᴘʟᴇᴀꜱᴇ ᴛʀʏ:</b>\n"
-                        "1. ᴄʟɪᴄᴋ /ꜱᴛᴀʀᴛ ᴀɢᴀɪɴ\n"
-                        "2. ᴜꜱᴇ ᴀ ɴᴇᴡ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʟɪɴᴋ\n"
-                        "3. ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ ɪꜰ ɪꜱꜱᴜᴇ ᴘᴇʀꜱɪꜱᴛꜱ"
-                    )
+                    print(f"Verification error: {e}")
+                    return await message.reply("❌ Verification failed. Please try again.")
 
-            # 🔐 SHOW VERIFICATION REQUIRED MESSAGE
+            # Show verification required message if not verified and not premium
             if not verify_status['is_verified'] and not is_premium:
-                # 🔑 GENERATE SECURE TOKEN
-                token = ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=16))
+                # Generate secure token
+                token = ''.join(random.choices(spidey.ascii_letters + spidey.digits, k=12))
                 await db.update_verify_status(id, verify_token=token, link="")
                 verify_status['verify_token'] = token
-                await verification_cache.set(user_id, verify_status)
+                verification_cache[user_id] = verify_status
                 
-                # 🔗 ENHANCED SHORTLINK GENERATION
+                # Enhanced shortlink generation with error handling
                 try:
                     link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://telegram.dog/{client.username}?start=verify_{token}')
                 except Exception as e:
-                    print(f"ꜱʜᴏʀᴛʟɪɴᴋ ᴇʀʀᴏʀ: {e}")
+                    print(f"Shortlink error: {e}")
                     link = f'https://telegram.dog/{client.username}?start=verify_{token}'
                 
-                # 🎨 STYLISH VERIFICATION BUTTONS
                 btn = [
-                    [InlineKeyboardButton("🔗 ꜱᴛᴀʀᴛ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ", url=link)], 
-                    [InlineKeyboardButton('📺 ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰʏ', url=TUT_VID)],
-                    [
-                        InlineKeyboardButton('💎 ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='premium'),
-                        InlineKeyboardButton('🆓 ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data='free_trial')
-                    ],
-                    [InlineKeyboardButton("❓ ɴᴇᴇᴅ ʜᴇʟᴘ?", callback_data="verification_help")]
+                    [InlineKeyboardButton("🔗 ᴏᴘᴇɴ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʟɪɴᴋ", url=link)], 
+                    [InlineKeyboardButton('📺 ᴛᴜᴛᴏʀɪᴀʟ ᴠɪᴅᴇᴏ', url=TUT_VID)],
+                    [InlineKeyboardButton('💎 ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ', callback_data='premium'),
+                     InlineKeyboardButton('🆓 ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data='free_trial')]
                 ]
                 
-                # 📝 ENHANCED VERIFICATION MESSAGE
-                verification_text = f"""
-🔐 <b>ᴀᴄᴄᴏᴜɴᴛ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇQᴜɪʀᴇᴅ</b>
-
-👋 <b>ʜᴇʟʟᴏ {message.from_user.first_name}!</b>
-
-ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ ᴜꜱɪɴɢ ᴏᴜʀ ꜱᴇʀᴠɪᴄᴇꜱ ᴀɴᴅ ᴀᴄᴄᴇꜱꜱ ᴀʟʟ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴡᴇ ʀᴇQᴜɪʀᴇ ᴀ Qᴜɪᴄᴋ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ.
-
-<b>📋 ᴡʜᴀᴛ ʜᴀᴘᴘᴇɴꜱ ɴᴇxᴛ?</b>
-1. ᴄʟɪᴄᴋ ᴛʜᴇ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ
-2. ᴄᴏᴍᴘʟᴇᴛᴇ ᴏɴᴇ ꜱɪᴍᴘʟᴇ ꜱᴛᴇᴘ
-3. ɢᴇᴛ ɪɴꜱᴛᴀɴᴛ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ {get_exp_time(VERIFY_EXPIRE)}
-
-<b>⭐ ᴘʀᴇᴍɪᴜᴍ ʙᴇɴᴇꜰɪᴛꜱ:</b>
-• ɴᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇQᴜɪʀᴇᴅ
-• ꜰᴀꜱᴛᴇʀ ᴀᴄᴄᴇꜱꜱ
-• ᴘʀɪᴏʀɪᴛʏ ꜱᴜᴘᴘᴏʀᴛ
-• ᴇɴʜᴀɴᴄᴇᴅ ꜰᴇᴀᴛᴜʀᴇꜱ
-
-<b>🛡️ 100% ꜱᴀꜰᴇ & ꜱᴇᴄᴜʀᴇ</b>
-• ɴᴏ ᴘᴇʀꜱᴏɴᴀʟ ᴅᴀᴛᴀ ᴄᴏʟʟᴇᴄᴛᴇᴅ
-• ɪɴꜱᴛᴀɴᴛ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ
-• ᴇɴᴄʀʏᴘᴛᴇᴅ ᴘʀᴏᴄᴇꜱꜱ
-"""
-                return await message.reply_photo(
-                    photo=VERIFY_IMG,
-                    caption=verification_text,
+                # Enhanced verification required message
+                return await message.reply(
+                    f"🔒 <b>Verification Required</b>\n\n"
+                    f"📝 <b>Why Verification?</b>\n"
+                    f"• This helps us maintain service quality\n"
+                    f"• Supports free access for all users\n"
+                    f"• Takes only a few seconds\n\n"
+                    f"⏳ <b>Access Duration:</b> {get_exp_time(VERIFY_EXPIRE)}\n"
+                    f"🔄 <b>Token Expiry:</b> 10 minutes\n\n"
+                    f"<i>Complete one quick step to unlock full access!</i>",
                     reply_markup=InlineKeyboardMarkup(btn),
                     protect_content=False,
                     quote=True
                 )
 
-    # 📢 ENHANCED FORCE SUBSCRIPTION CHECK
+    # Enhanced Force Subscription Check
     if not await is_subscribed(client, user_id):
         return await not_joined(client, message)
 
-    # ⏰ ENHANCED AUTO-DELETE WITH USER PREFERENCES
+    # Enhanced auto-delete with user preferences
     FILE_AUTO_DELETE = await db.get_del_timer()
 
-    # 👤 ENHANCED USER REGISTRATION
+    # Enhanced user registration
     if not await db.present_user(user_id):
         try:
             await db.add_user(user_id)
-            # 📨 ENHANCED NEW USER NOTIFICATION
-            join_time = datetime.now().strftime("%d %b %Y ᴀᴛ %I:%M %p")
+            # Send enhanced new user notification
             await client.send_message(
                 CHANNEL_ID, 
-                f"🆕 <b>ɴᴇᴡ ᴜꜱᴇʀ ʀᴇɢɪꜱᴛᴇʀᴇᴅ</b>\n\n"
-                f"👤 <b>ᴜꜱᴇʀ:</b> {message.from_user.mention}\n"
-                f"🆔 <b>ɪᴅ:</b> <code>{user_id}</code>\n"
-                f"📛 <b>ꜰɪʀꜱᴛ ɴᴀᴍᴇ:</b> {message.from_user.first_name}\n"
-                f"👥 <b>ᴜꜱᴇʀɴᴀᴍᴇ:</b> @{message.from_user.username if message.from_user.username else 'ɴᴏɴᴇ'}\n"
-                f"⏰ <b>ᴊᴏɪɴᴇᴅ ᴀᴛ:</b> {join_time}\n\n"
-                f"#ɴᴇᴡ_ᴜꜱᴇʀ #ɪᴅ_{user_id}"
+                script.NEW_USER_TXT.format(
+                    temp.B_LINK, 
+                    message.from_user.id, 
+                    message.from_user.mention,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
             )
         except Exception as e:
-            print(f"ᴜꜱᴇʀ ʀᴇɢɪꜱᴛʀᴀᴛɪᴏɴ ᴇʀʀᴏʀ: {e}")
+            print(f"User registration error: {e}")
 
-    # 📁 ENHANCED FILE HANDLING SYSTEM
+    # Enhanced file handling with improved error handling
     text = message.text
     if len(text) > 7:
         try:
@@ -315,35 +226,35 @@ async def start_command(client: Client, message: Message):
                 end = int(int(argument[2]) / abs(client.db_channel.id))
                 ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
             except Exception as e:
-                print(f"ᴇʀʀᴏʀ ᴅᴇᴄᴏᴅɪɴɢ ɪᴅꜱ: {e}")
-                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ʀᴀɴɢᴇ ᴘʀᴏᴠɪᴅᴇᴅ.")
+                print(f"Error decoding IDs: {e}")
+                return await message.reply_text("❌ Invalid file range provided.")
 
         elif len(argument) == 2:
             try:
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except Exception as e:
-                print(f"ᴇʀʀᴏʀ ᴅᴇᴄᴏᴅɪɴɢ ɪᴅ: {e}")
-                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ɪᴅ ᴘʀᴏᴠɪᴅᴇᴅ.")
+                print(f"Error decoding ID: {e}")
+                return await message.reply_text("❌ Invalid file ID provided.")
 
-        # ⏳ ENHANCED PROGRESS INDICATOR
-        temp_msg = await message.reply("🔄 <b>ᴘʀᴏᴄᴇꜱꜱɪɴɢ ʏᴏᴜʀ ʀᴇQᴜᴇꜱᴛ...</b>")
+        # Enhanced progress indicator
+        temp_msg = await message.reply("🔄 <b>Processing your request...</b>")
         
         try:
             messages = await get_messages(client, ids)
         except Exception as e:
             await temp_msg.delete()
-            return await message.reply_text("❌ ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ.")
+            return await message.reply_text("❌ Failed to retrieve files. Please try again later.")
         
         await temp_msg.delete()
 
-        # 📤 ENHANCED FILE SENDING WITH BATCH PROCESSING
+        # Enhanced file sending with batch processing
         sent_messages = []
         success_count = 0
         fail_count = 0
 
         for msg in messages:
             try:
-                # 📝 ENHANCED CAPTION HANDLING
+                # Enhanced caption handling
                 if bool(CUSTOM_CAPTION) and msg.document:
                     caption = CUSTOM_CAPTION.format(
                         previouscaption="" if not msg.caption else msg.caption.html,
@@ -354,7 +265,7 @@ async def start_command(client: Client, message: Message):
 
                 reply_markup = msg.reply_markup if not DISABLE_CHANNEL_BUTTON else None
 
-                # 🚀 SEND FILE WITH ENHANCED ERROR HANDLING
+                # Send file with enhanced error handling
                 sent_msg = await msg.copy(
                     chat_id=message.from_user.id,
                     caption=caption,
@@ -378,26 +289,26 @@ async def start_command(client: Client, message: Message):
                     sent_messages.append(sent_msg)
                     success_count += 1
                 except Exception as flood_error:
-                    print(f"ꜰʟᴏᴏᴅᴡᴀɪᴛ ᴇʀʀᴏʀ: {flood_error}")
+                    print(f"FloodWait error: {flood_error}")
                     fail_count += 1
 
             except Exception as e:
-                print(f"ꜰᴀɪʟᴇᴅ ᴛᴏ ꜱᴇɴᴅ ᴍᴇꜱꜱᴀɢᴇ: {e}")
+                print(f"Failed to send message: {e}")
                 fail_count += 1
 
-        # 🗑️ ENHANCED AUTO-DELETE NOTIFICATION
+        # Enhanced auto-delete notification
         if FILE_AUTO_DELETE > 0 and success_count > 0:
             expiry_time = get_exp_time(FILE_AUTO_DELETE)
             
             notification_msg = await message.reply(
-                f"📦 <b>ꜰɪʟᴇ ᴅᴇʟɪᴠᴇʀʏ ꜱᴜᴍᴍᴀʀʏ</b>\n\n"
-                f"✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇɴᴛ: {success_count} ꜰɪʟᴇꜱ\n"
-                f"❌ ꜰᴀɪʟᴇᴅ: {fail_count} ꜰɪʟᴇꜱ\n\n"
-                f"⏰ <b>ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ɪɴ:</b> {expiry_time}\n"
-                f"💾 <b>ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ</b>"
+                f"📦 <b>File Delivery Summary</b>\n\n"
+                f"✅ Successfully sent: {success_count} files\n"
+                f"❌ Failed: {fail_count} files\n\n"
+                f"⏰ <b>Auto-delete in:</b> {expiry_time}\n"
+                f"💾 <b>Save files to your saved messages</b>"
             )
 
-            # ⏰ ENHANCED AUTO-DELETE FUNCTIONALITY
+            # Enhanced auto-delete functionality
             await asyncio.sleep(FILE_AUTO_DELETE)
 
             deleted_count = 0
@@ -407,9 +318,9 @@ async def start_command(client: Client, message: Message):
                         await sent_msg.delete()
                         deleted_count += 1
                     except Exception as e:
-                        print(f"ᴇʀʀᴏʀ ᴅᴇʟᴇᴛɪɴɢ ᴍᴇꜱꜱᴀɢᴇ: {e}")
+                        print(f"Error deleting message: {e}")
 
-            # 📝 ENHANCED POST-DELETE NOTIFICATION
+            # Enhanced post-delete notification
             try:
                 reload_url = f"https://t.me/{client.username}?start={message.command[1]}" if len(message.command) > 1 else None
                 
@@ -418,20 +329,20 @@ async def start_command(client: Client, message: Message):
                 ) if reload_url else None
 
                 await notification_msg.edit(
-                    f"🗑️ <b>ᴀᴜᴛᴏ-ᴄʟᴇᴀɴᴜᴘ ᴄᴏᴍᴘʟᴇᴛᴇᴅ</b>\n\n"
-                    f"✅ ᴅᴇʟᴇᴛᴇᴅ {deleted_count} ꜰɪʟᴇꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ\n"
-                    f"📝 ꜰɪʟᴇꜱ ᴀʀᴇ ɴᴏ ʟᴏɴɢᴇʀ ᴀᴄᴄᴇꜱꜱɪʙʟᴇ ꜰʀᴏᴍ ᴛʜɪꜱ ᴄʜᴀᴛ\n\n"
-                    f"<i>ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ ᴀɢᴀɪɴ</i>",
+                    f"🗑️ <b>Auto-cleanup Completed</b>\n\n"
+                    f"✅ Deleted {deleted_count} files successfully\n"
+                    f"📝 Files are no longer accessible from this chat\n\n"
+                    f"<i>Click below to retrieve files again</i>",
                     reply_markup=keyboard
                 )
             except Exception as e:
-                print(f"ɴᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ ᴜᴘᴅᴀᴛᴇ ᴇʀʀᴏʀ: {e}")
+                print(f"Notification update error: {e}")
 
         elif success_count == 0:
-            await message.reply_text("❌ ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ.")
+            await message.reply_text("❌ No files could be delivered. Please try again.")
 
     else:
-        # 🎊 ENHANCED WELCOME MESSAGE WITH BETTER UI
+        # Enhanced start message with better UI
         reply_markup = InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("📢 ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟꜱ", url="https://t.me/Spideyofficial777")],
@@ -442,19 +353,18 @@ async def start_command(client: Client, message: Message):
                 [
                     InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium"),
                     InlineKeyboardButton("📊 ꜱᴛᴀᴛꜱ", callback_data="stats")
-                ],
-                [InlineKeyboardButton("🔐 ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴛᴀᴛᴜꜱ", callback_data="verification_status")]
+                ]
             ]
         )
         
-        # ✨ ENHANCED WELCOME MESSAGE WITH RANDOM EFFECTS
+        # Enhanced welcome message with random effects
         effects = [
-            5104841245755180586,  # 🔥 ꜰɪʀᴇ
-            5159385139981059251,  # 🎈 ʙᴀʟʟᴏᴏɴꜱ  
-            5046509860389126442,  # 🎊 ᴄᴏɴꜰᴇᴛᴛɪ
-            5107584321108051014,  # ✨ ꜱᴘᴀʀᴋʟᴇꜱ
-            5104927257829441566,  # 🌟 ꜱᴛᴀʀꜱ
-            5104854308671914026   # 💫 ᴘᴜʟꜱᴇ
+            5104841245755180586,  # 🔥 Fire
+            5159385139981059251,  # 🎈 Balloons  
+            5046509860389126442,  # 🎊 Confetti
+            5107584321108051014,  # ✨ Sparkles
+            5104927257829441566,  # 🌟 Stars
+            5104854308671914026   # 💫 Pulse
         ]
         
         await message.reply_photo(
@@ -470,31 +380,31 @@ async def start_command(client: Client, message: Message):
             message_effect_id=int(random.choice(effects))
         )
 
-# 🧹 ENHANCED VERIFICATION CACHE CLEANUP FUNCTION
+# Enhanced verification cache cleanup function
 async def cleanup_verification_cache():
-    """ᴄʟᴇᴀɴ ᴜᴘ ᴇxᴘɪʀᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴄᴀᴄʜᴇ ᴘᴇʀɪᴏᴅɪᴄᴀʟʟʏ"""
+    """Clean up expired verification cache periodically"""
     while True:
-        await asyncio.sleep(3600)  # ᴄʟᴇᴀɴ ᴇᴠᴇʀʏ ʜᴏᴜʀ
+        await asyncio.sleep(3600)  # Clean every hour
         current_time = time.time()
         expired_users = []
         
-        for user_id, (data, timestamp) in verification_cache._cache.items():
+        for user_id, data in verification_cache.items():
             if data.get('is_verified') and VERIFY_EXPIRE < (current_time - data.get('verified_time', 0)):
                 expired_users.append(user_id)
         
         for user_id in expired_users:
-            await verification_cache.delete(user_id)
+            del verification_cache[user_id]
         
         if expired_users:
-            print(f"ᴄʟᴇᴀɴᴇᴅ ᴜᴘ {len(expired_users)} ᴇxᴘɪʀᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴄᴀᴄʜᴇ ᴇɴᴛʀɪᴇꜱ")
+            print(f"Cleaned up {len(expired_users)} expired verification cache entries")
 
-# 🚀 START CACHE CLEANUP TASK
+# Start cache cleanup task
 @Bot.on_message(filters.command('start'))
 async def start_cache_cleanup(client, message):
-    # ꜱᴛᴀʀᴛ ʙᴀᴄᴋɢʀᴏᴜɴᴅ ᴛᴀꜱᴋ ɪꜰ ɴᴏᴛ ᴀʟʀᴇᴀᴅʏ ʀᴜɴɴɪɴɢ
+    # Start background task if not already running
     if not hasattr(client, 'cache_cleanup_task'):
         client.cache_cleanup_task = asyncio.create_task(cleanup_verification_cache())
-        
+
 # Enhanced premium features
 @Bot.on_message(filters.command('features') & filters.private)
 async def show_features(client: Client, message: Message):
