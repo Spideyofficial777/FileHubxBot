@@ -49,10 +49,10 @@ async def start_command(client: Client, message: Message):
     banned_users = await db.get_ban_users()
     if user_id in banned_users:
         return await message.reply_text(
-            "<b>⛔️ You are Bᴀɴɴᴇᴅ from using this bot.</b>\n\n"
-            "<i>Contact support if you think this is a mistake.</i>",
+            "⛔️ <b>ʏᴏᴜ ᴀʀᴇ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴜꜱɪɴɢ ᴛʜɪꜱ ʙᴏᴛ</b>\n\n"
+            "<i>ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ ɪꜰ ʏᴏᴜ ᴛʜɪɴᴋ ᴛʜɪꜱ ɪꜱ ᴀ ᴍɪꜱᴛᴀᴋᴇ</i>",
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Contact Support", url=BAN_SUPPORT)]]
+                [[InlineKeyboardButton("ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ", url=BAN_SUPPORT)]]
             )
         )
 
@@ -93,7 +93,7 @@ async def start_command(client: Client, message: Message):
                         # Clear invalid token attempts
                         if user_id in verification_cache:
                             del verification_cache[user_id]
-                        return await message.reply("❌ Your token is invalid or expired. Try again by clicking /start.")
+                        return await message.reply("❌ ʏᴏᴜʀ ᴛᴏᴋᴇɴ ɪꜱ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ. ᴛʀʏ ᴀɢᴀɪɴ ʙʏ ᴄʟɪᴄᴋɪɴɢ /start")
                     
                     # Update verification status
                     await db.update_verify_status(id, is_verified=True, verified_time=time.time())
@@ -145,7 +145,7 @@ async def start_command(client: Client, message: Message):
 
                 except Exception as e:
                     print(f"Verification error: {e}")
-                    return await message.reply("❌ Verification failed. Please try again.")
+                    return await message.reply("❌ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜰᴀɪʟᴇᴅ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
 
             # Show verification required message if not verified and not premium
             if not verify_status['is_verified'] and not is_premium:
@@ -169,15 +169,15 @@ async def start_command(client: Client, message: Message):
                      InlineKeyboardButton('🆓 ꜰʀᴇᴇ ᴛʀɪᴀʟ', callback_data='free_trial')]
                 ]
                 
-            return await message.reply_photo(
-                photo=VERIFY_REQUIERD_IMG,
-                caption=script.VERIFICATION_TXT.format(
-                    mention=message.from_user.mention,
-                    expire=get_exp_time(VERIFY_EXPIRE)
-                ),
-                reply_markup=InlineKeyboardMarkup(btn),
-                quote=True
-            )
+                return await message.reply_photo(
+                    photo=VERIFY_REQUIERD_IMG,
+                    caption=script.VERIFICATION_TXT.format(
+                        mention=message.from_user.mention,
+                        expire=get_exp_time(VERIFY_EXPIRE)
+                    ),
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    quote=True
+                )
             
     # Enhanced Force Subscription Check
     if not await is_subscribed(client, user_id):
@@ -222,23 +222,22 @@ async def start_command(client: Client, message: Message):
                 ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
             except Exception as e:
                 print(f"Error decoding IDs: {e}")
-                return await message.reply_text("❌ Invalid file range provided.")
-
+                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ʀᴀɴɢᴇ ᴘʀᴏᴠɪᴅᴇᴅ")
         elif len(argument) == 2:
             try:
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except Exception as e:
                 print(f"Error decoding ID: {e}")
-                return await message.reply_text("❌ Invalid file ID provided.")
+                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ɪᴅ ᴘʀᴏᴠɪᴅᴇᴅ")
 
         # Enhanced progress indicator
-        temp_msg = await message.reply("🔄 <b>Processing your request...</b>")
+        temp_msg = await message.reply("🔄 <b>ᴘʀᴏᴄᴇꜱꜱɪɴɢ ʏᴏᴜʀ ʀᴇQᴜᴇꜱᴛ...</b>")
         
         try:
             messages = await get_messages(client, ids)
         except Exception as e:
             await temp_msg.delete()
-            return await message.reply_text("❌ Failed to retrieve files. Please try again later.")
+            return await message.reply_text("❌ ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ")
         
         await temp_msg.delete()
 
@@ -296,11 +295,11 @@ async def start_command(client: Client, message: Message):
             expiry_time = get_exp_time(FILE_AUTO_DELETE)
             
             notification_msg = await message.reply(
-                f"📦 <b>File Delivery Summary</b>\n\n"
-                f"✅ Successfully sent: {success_count} files\n"
-                f"❌ Failed: {fail_count} files\n\n"
-                f"⏰ <b>Auto-delete in:</b> {expiry_time}\n"
-                f"💾 <b>Save files to your saved messages</b>"
+                f"📦 <b>ꜰɪʟᴇ ᴅᴇʟɪᴠᴇʀʏ ꜱᴜᴍᴍᴀʀʏ</b>\n\n"
+                f"✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇɴᴛ: {success_count} ꜰɪʟᴇꜱ\n"
+                f"❌ ꜰᴀɪʟᴇᴅ: {fail_count} ꜰɪʟᴇꜱ\n\n"
+                f"⏰ <b>ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ɪɴ:</b> {expiry_time}\n"
+                f"💾 <b>ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ</b>"
             )
 
             # Enhanced auto-delete functionality
@@ -324,17 +323,17 @@ async def start_command(client: Client, message: Message):
                 ) if reload_url else None
 
                 await notification_msg.edit(
-                    f"🗑️ <b>Auto-cleanup Completed</b>\n\n"
-                    f"✅ Deleted {deleted_count} files successfully\n"
-                    f"📝 Files are no longer accessible from this chat\n\n"
-                    f"<i>Click below to retrieve files again</i>",
+                    f"🗑️ <b>ᴀᴜᴛᴏ-ᴄʟᴇᴀɴᴜᴘ ᴄᴏᴍᴘʟᴇᴛᴇᴅ</b>\n\n"
+                    f"✅ ᴅᴇʟᴇᴛᴇᴅ {deleted_count} ꜰɪʟᴇꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ\n"
+                    f"📝 ꜰɪʟᴇꜱ ᴀʀᴇ ɴᴏ ʟᴏɴɢᴇʀ ᴀᴄᴄᴇꜱꜱɪʙʟᴇ ꜰʀᴏᴍ ᴛʜɪꜱ ᴄʜᴀᴛ\n\n"
+                    f"<i>ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ ᴀɢᴀɪɴ</i>",
                     reply_markup=keyboard
                 )
             except Exception as e:
                 print(f"Notification update error: {e}")
 
         elif success_count == 0:
-            await message.reply_text("❌ No files could be delivered. Please try again.")
+            await message.reply_text("❌ ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
 
     else:
         # Enhanced start message with better UI
@@ -425,12 +424,12 @@ async def user_status(client: Client, message: Message):
     verify_status = verification_cache.get(user_id, await db.get_verify_status(user_id))
     
     status_text = f"""
-📊 <b>User Status</b>
+📊 <b>ᴜꜱᴇʀ ꜱᴛᴀᴛᴜꜱ</b>
 
-👤 <b>User:</b> {message.from_user.mention}
-🆔 <b>ID:</b> <code>{user_id}</code>
-💎 <b>Premium:</b> {'✅ Active' if is_premium else '❌ Inactive'}
-🔐 <b>Verified:</b> {'✅ Yes' if verify_status.get('is_verified') else '❌ No'}
+👤 <b>ᴜꜱᴇʀ:</b> {message.from_user.mention}
+🆔 <b>ɪᴅ:</b> <code>{user_id}</code>
+💎 <b>ᴘʀᴇᴍɪᴜᴍ:</b> {'✅ ᴀᴄᴛɪᴠᴇ' if is_premium else '❌ ɪɴᴀᴄᴛɪᴠᴇ'}
+🔐 <b>ᴠᴇʀɪꜰɪᴇᴅ:</b> {'✅ ʏᴇꜱ' if verify_status.get('is_verified') else '❌ ɴᴏ'}
 
 """
     
@@ -438,14 +437,14 @@ async def user_status(client: Client, message: Message):
         verified_time = verify_status.get('verified_time', 0)
         time_left = VERIFY_EXPIRE - (time.time() - verified_time)
         if time_left > 0:
-            status_text += f"⏳ <b>Verification expires in:</b> {get_exp_time(time_left)}\n"
+            status_text += f"⏳ <b>ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴇxᴘɪʀᴇꜱ ɪɴ:</b> {get_exp_time(time_left)}\n"
     
     if is_premium:
         premium_info = await get_premium_info(user_id)
         if premium_info:
-            status_text += f"⭐ <b>Premium expires:</b> {premium_info['expiry']}\n"
+            status_text += f"⭐ <b>ᴘʀᴇᴍɪᴜᴍ ᴇxᴘɪʀᴇꜱ:</b> {premium_info['expiry']}\n"
     
-    status_text += f"\n📈 <b>Total verifications:</b> {verify_status.get('verified_count', 0)}"
+    status_text += f"\n📈 <b>ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ:</b> {verify_status.get('verified_count', 0)}"
     
     buttons = [
         [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ", callback_data="premium")],
@@ -454,24 +453,22 @@ async def user_status(client: Client, message: Message):
     
     await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
 
-# from pyrogram.types import CallbackQuery
-# from email_system import email_system
 # Fixed Email Test Callback Handler
 @Bot.on_callback_query(filters.regex(r"^email_test$"))
 async def email_test_callback(client: Client, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
-    await callback_query.answer("🧪 Starting enhanced email service test...")
+    await callback_query.answer("🧪 ꜱᴛᴀʀᴛɪɴɢ ᴇɴʜᴀɴᴄᴇᴅ ᴇᴍᴀɪʟ ꜱᴇʀᴠɪᴄᴇ ᴛᴇꜱᴛ...")
     
     # Show testing message
     processing_msg = await callback_query.message.reply_text(
-        "🧪 <b>Enhanced Email Service Test</b>\n\n"
-        "🔍 Testing components:\n"
-        "• SMTP Connection & Authentication\n"
-        "• Backup Server Fallback\n"
-        "• Admin Email Delivery\n"
-        "• User Email Delivery\n"
-        "• Connection Stability\n\n"
-        "<i>This may take 15-30 seconds...</i>"
+        "🧪 <b>ᴇɴʜᴀɴᴄᴇᴅ ᴇᴍᴀɪʟ ꜱᴇʀᴠɪᴄᴇ ᴛᴇꜱᴛ</b>\n\n"
+        "🔍 ᴛᴇꜱᴛɪɴɢ ᴄᴏᴍᴘᴏɴᴇɴᴛꜱ:\n"
+        "• ꜱᴍᴛᴘ ᴄᴏɴɴᴇᴄᴛɪᴏɴ & ᴀᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ\n"
+        "• ʙᴀᴄᴋᴜᴘ ꜱᴇʀᴠᴇʀ ꜰᴀʟʟʙᴀᴄᴋ\n"
+        "• ᴀᴅᴍɪɴ ᴇᴍᴀɪʟ ᴅᴇʟɪᴠᴇʀʏ\n"
+        "• ᴜꜱᴇʀ ᴇᴍᴀɪʟ ᴅᴇʟɪᴠᴇʀʏ\n"
+        "• ᴄᴏɴɴᴇᴄᴛɪᴏɴ ꜱᴛᴀʙɪʟɪᴛʏ\n\n"
+        "<i>ᴛʜɪꜱ ᴍᴀʏ ᴛᴀᴋᴇ 15-30 ꜱᴇᴄᴏɴᴅꜱ...</i>"
     )
     
     # Get user's email from database
@@ -493,42 +490,42 @@ async def email_test_callback(client: Client, callback_query: CallbackQuery):
     
     # Prepare detailed result message
     if test_results.get('overall_success'):
-        result_text = "✅ <b>Email Test Completed Successfully!</b>\n\n"
-        result_text += f"📊 <b>Test ID:</b> <code>{test_results['test_id']}</code>\n"
-        result_text += f"🕒 <b>Duration:</b> {test_results.get('duration', 'N/A')}s\n"
-        result_text += f"🎯 <b>Success Rate:</b> {test_results.get('success_percentage', 0)}%\n"
-        result_text += f"🔗 <b>Server:</b> {test_results['configuration']['smtp_server']}\n\n"
+        result_text = "✅ <b>ᴇᴍᴀɪʟ ᴛᴇꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!</b>\n\n"
+        result_text += f"📊 <b>ᴛᴇꜱᴛ ɪᴅ:</b> <code>{test_results['test_id']}</code>\n"
+        result_text += f"🕒 <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {test_results.get('duration', 'ɴ/ᴀ')}ꜱ\n"
+        result_text += f"🎯 <b>ꜱᴜᴄᴄᴇꜱꜱ ʀᴀᴛᴇ:</b> {test_results.get('success_percentage', 0)}%\n"
+        result_text += f"🔗 <b>ꜱᴇʀᴠᴇʀ:</b> {test_results['configuration']['smtp_server']}\n\n"
         
-        result_text += "<b>Detailed Results:</b>\n"
+        result_text += "<b>ᴅᴇᴛᴀɪʟᴇᴅ ʀᴇꜱᴜʟᴛꜱ:</b>\n"
         for test_name, test_result in test_results['tests'].items():
             status = "✅" if test_result.get('success') else "❌"
             emoji = "🔗" if "connection" in test_name else "📧"
-            result_text += f"{emoji} {status} <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'N/A')}\n"
+            result_text += f"{emoji} {status} <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'ɴ/ᴀ')}\n"
         
-        result_text += f"\n📨 <i>Test completed at {test_results['timestamp']}</i>"
+        result_text += f"\n📨 <i>ᴛᴇꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ᴀᴛ {test_results['timestamp']}</i>"
         
     else:
-        result_text = "❌ <b>Email Test Failed!</b>\n\n"
-        result_text += f"📊 <b>Test ID:</b> <code>{test_results.get('test_id', 'N/A')}</code>\n"
-        result_text += f"🚫 <b>Error:</b> {test_results.get('error', 'Unknown error')}\n\n"
+        result_text = "❌ <b>ᴇᴍᴀɪʟ ᴛᴇꜱᴛ ꜰᴀɪʟᴇᴅ!</b>\n\n"
+        result_text += f"📊 <b>ᴛᴇꜱᴛ ɪᴅ:</b> <code>{test_results.get('test_id', 'ɴ/ᴀ')}</code>\n"
+        result_text += f"🚫 <b>ᴇʀʀᴏʀ:</b> {test_results.get('error', 'ᴜɴᴋɴᴏᴡɴ ᴇʀʀᴏʀ')}\n\n"
         
-        result_text += "<b>Failed Tests:</b>\n"
+        result_text += "<b>ꜰᴀɪʟᴇᴅ ᴛᴇꜱᴛꜱ:</b>\n"
         for test_name, test_result in test_results.get('tests', {}).items():
             if not test_result.get('success'):
-                result_text += f"❌ <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'N/A')}\n"
+                result_text += f"❌ <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'ɴ/ᴀ')}\n"
         
-        result_text += "\n🔧 <b>Possible Solutions:</b>\n"
-        result_text += "• Check SMTP credentials in environment variables\n"
-        result_text += "• Verify email password (use App Password for Gmail)\n"
-        result_text += "• Ensure less secure apps are enabled (if using Gmail)\n"
-        result_text += "• Check firewall/port restrictions\n"
+        result_text += "\n🔧 <b>ᴘᴏꜱꜱɪʙʟᴇ ꜱᴏʟᴜᴛɪᴏɴꜱ:</b>\n"
+        result_text += "• ᴄʜᴇᴄᴋ ꜱᴍᴛᴘ ᴄʀᴇᴅᴇɴᴛɪᴀʟꜱ ɪɴ ᴇɴᴠɪʀᴏɴᴍᴇɴᴛ ᴠᴀʀɪᴀʙʟᴇꜱ\n"
+        result_text += "• ᴠᴇʀɪꜰʏ ᴇᴍᴀɪʟ ᴘᴀꜱꜱᴡᴏʀᴅ (ᴜꜱᴇ ᴀᴘᴘ ᴘᴀꜱꜱᴡᴏʀᴅ ꜰᴏʀ ɢᴍᴀɪʟ)\n"
+        result_text += "• ᴇɴꜱᴜʀᴇ ʟᴇꜱꜱ ꜱᴇᴄᴜʀᴇ ᴀᴘᴘꜱ ᴀʀᴇ ᴇɴᴀʙʟᴇᴅ (ɪꜰ ᴜꜱɪɴɢ ɢᴍᴀɪʟ)\n"
+        result_text += "• ᴄʜᴇᴄᴋ ꜰɪʀᴇᴡᴀʟʟ/ᴘᴏʀᴛ ʀᴇꜱᴛʀɪᴄᴛɪᴏɴꜱ\n"
     
     # Enhanced buttons with diagnostics
     buttons = [
-        [InlineKeyboardButton("🔄 Run Test Again", callback_data="email_test")],
-        [InlineKeyboardButton("📊 System Diagnostics", callback_data="email_diagnostics")],
-        [InlineKeyboardButton("⚙️ SMTP Settings Help", callback_data="smtp_help")],
-        [InlineKeyboardButton("📧 Manage Subscription", callback_data="email_manage")]
+        [InlineKeyboardButton("🔄 ʀᴜɴ ᴛᴇꜱᴛ ᴀɢᴀɪɴ", callback_data="email_test")],
+        [InlineKeyboardButton("📊 ꜱʏꜱᴛᴇᴍ ᴅɪᴀɢɴᴏꜱᴛɪᴄꜱ", callback_data="email_diagnostics")],
+        [InlineKeyboardButton("⚙️ ꜱᴍᴛᴘ ꜱᴇᴛᴛɪɴɢꜱ ʜᴇʟᴘ", callback_data="smtp_help")],
+        [InlineKeyboardButton("📧 ᴍᴀɴᴀɢᴇ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ", callback_data="email_manage")]
     ]
     
     await callback_query.message.edit_text(
@@ -536,6 +533,7 @@ async def email_test_callback(client: Client, callback_query: CallbackQuery):
         reply_markup=InlineKeyboardMarkup(buttons),
         disable_web_page_preview=True
     )
+
 @Bot.on_message(filters.command('myplan') & filters.private)
 async def check_plan(client: Client, message: Message):
     user_id = message.from_user.id  # Get user ID from the message
@@ -552,18 +550,18 @@ async def check_plan(client: Client, message: Message):
 async def add_premium_user_command(client, msg):
     if len(msg.command) != 4:
         await msg.reply_text(
-            "Usage: /addpremium <user_id> <time_value> <time_unit>\n\n"
-            "Time Units:\n"
-            "s - seconds\n"
-            "m - minutes\n"
-            "h - hours\n"
-            "d - days\n"
-            "y - years\n\n"
-            "Examples:\n"
-            "/addpremium 123456789 30 m → 30 minutes\n"
-            "/addpremium 123456789 2 h → 2 hours\n"
-            "/addpremium 123456789 1 d → 1 day\n"
-            "/addpremium 123456789 1 y → 1 year"
+            "ᴜꜱᴀɢᴇ: /addpremium <user_id> <time_value> <time_unit>\n\n"
+            "ᴛɪᴍᴇ ᴜɴɪᴛꜱ:\n"
+            "ꜱ - ꜱᴇᴄᴏɴᴅꜱ\n"
+            "ᴍ - ᴍɪɴᴜᴛᴇꜱ\n"
+            "ʜ - ʜᴏᴜʀꜱ\n"
+            "ᴅ - ᴅᴀʏꜱ\n"
+            "ʏ - ʏᴇᴀʀꜱ\n\n"
+            "ᴇxᴀᴍᴘʟᴇꜱ:\n"
+            "/addpremium 123456789 30 ᴍ → 30 ᴍɪɴᴜᴛᴇꜱ\n"
+            "/addpremium 123456789 2 ʜ → 2 ʜᴏᴜʀꜱ\n"
+            "/addpremium 123456789 1 ᴅ → 1 ᴅᴀʏ\n"
+            "/addpremium 123456789 1 ʏ → 1 ʏᴇᴀʀ"
         )
         return
 
@@ -577,38 +575,38 @@ async def add_premium_user_command(client, msg):
 
         # Notify the admin
         await msg.reply_text(
-            f"✅ User `{user_id}` added as a premium user for {time_value} {time_unit}.\n"
-            f"Expiration Time: `{expiration_time}`"
+            f"✅ ᴜꜱᴇʀ `{user_id}` ᴀᴅᴅᴇᴅ ᴀꜱ ᴀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ ꜰᴏʀ {time_value} {time_unit}.\n"
+            f"ᴇxᴘɪʀᴀᴛɪᴏɴ ᴛɪᴍᴇ: `{expiration_time}`"
         )
 
         # Notify the user
         await client.send_message(
             chat_id=user_id,
             text=(
-                f"🎉 Premium Activated!\n\n"
-                f"You have received premium access for `{time_value} {time_unit}`.\n"
-                f"Expires on: `{expiration_time}`"
+                f"🎉 ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!\n\n"
+                f"ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ `{time_value} {time_unit}`.\n"
+                f"ᴇxᴘɪʀᴇꜱ ᴏɴ: `{expiration_time}`"
             ),
         )
 
     except ValueError:
-        await msg.reply_text("❌ Invalid input. Please ensure user ID and time value are numbers.")
+        await msg.reply_text("❌ ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ. ᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴠᴀʟᴜᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ")
     except Exception as e:
-        await msg.reply_text(f"⚠️ An error occurred: `{str(e)}`")
+        await msg.reply_text(f"⚠️ ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ: `{str(e)}`")
 
 
 # Command to remove premium user
 @Bot.on_message(filters.command('remove_premium') & filters.private & admin)
 async def pre_remove_user(client: Client, msg: Message):
     if len(msg.command) != 2:
-        await msg.reply_text("useage: /remove_premium user_id ")
+        await msg.reply_text("ᴜꜱᴀɢᴇ: /remove_premium ᴜꜱᴇʀ_ɪᴅ")
         return
     try:
         user_id = int(msg.command[1])
         await remove_premium(user_id)
-        await msg.reply_text(f"User {user_id} has been removed.")
+        await msg.reply_text(f"ᴜꜱᴇʀ {user_id} ʜᴀꜱ ʙᴇᴇɴ ʀᴇᴍᴏᴠᴇᴅ")
     except ValueError:
-        await msg.reply_text("user_id must be an integer or not available in database.")
+        await msg.reply_text("ᴜꜱᴇʀ_ɪᴅ ᴍᴜꜱᴛ ʙᴇ ᴀɴ ɪɴᴛᴇɢᴇʀ ᴏʀ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴅᴀᴛᴀʙᴀꜱᴇ")
 
 
 # Command to list active premium users
@@ -619,7 +617,7 @@ async def list_premium_users_command(client, message):
 
     # Retrieve all users from the collection
     premium_users_cursor = collection.find({})
-    premium_user_list = ['Active Premium Users in database:']
+    premium_user_list = ['ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ɪɴ ᴅᴀᴛᴀʙᴀꜱᴇ:']
     current_time = datetime.now(ist)  # Get current time in IST
 
     # Use async for to iterate over the async cursor
@@ -641,7 +639,7 @@ async def list_premium_users_command(client, message):
 
             # If not expired, retrieve user info
             user_info = await client.get_users(user_id)
-            username = user_info.username if user_info.username else "No Username"
+            username = user_info.username if user_info.username else "ɴᴏ ᴜꜱᴇʀɴᴀᴍᴇ"
             first_name = user_info.first_name
             mention=user_info.mention
 
@@ -652,23 +650,23 @@ async def list_premium_users_command(client, message):
                 (remaining_time.seconds // 60) % 60,
                 remaining_time.seconds % 60,
             )
-            expiry_info = f"{days}d {hours}h {minutes}m {seconds}s left"
+            expiry_info = f"{days}ᴅ {hours}ʜ {minutes}ᴍ {seconds}ꜱ ʟᴇꜰᴛ"
 
             # Add user details to the list
             premium_user_list.append(
-                f"UserID: <code>{user_id}</code>\n"
-                f"User: @{username}\n"
-                f"Name: {mention}\n"
-                f"Expiry: {expiry_info}"
+                f"ᴜꜱᴇʀɪᴅ: <code>{user_id}</code>\n"
+                f"ᴜꜱᴇʀ: @{username}\n"
+                f"ɴᴀᴍᴇ: {mention}\n"
+                f"ᴇxᴘɪʀʏ: {expiry_info}"
             )
         except Exception as e:
             premium_user_list.append(
-                f"UserID: <code>{user_id}</code>\n"
-                f"Error: Unable to fetch user details ({str(e)})"
+                f"ᴜꜱᴇʀɪᴅ: <code>{user_id}</code>\n"
+                f"ᴇʀʀᴏʀ: ᴜɴᴀʙʟᴇ ᴛᴏ ꜰᴇᴛᴄʜ ᴜꜱᴇʀ ᴅᴇᴛᴀɪʟꜱ ({str(e)})"
             )
 
     if len(premium_user_list) == 1:  # No active users found
-        await message.reply_text("I found 0 active premium users in my DB")
+        await message.reply_text("ɪ ꜰᴏᴜɴᴅ 0 ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ɪɴ ᴍʏ ᴅʙ")
     else:
         await message.reply_text("\n\n".join(premium_user_list), parse_mode=None)
 
@@ -678,14 +676,14 @@ async def list_premium_users_command(client, message):
 @Bot.on_message(filters.command("count") & filters.private & admin)
 async def total_verify_count_cmd(client, message: Message):
     total = await db.get_total_verify_count()
-    await message.reply_text(f"Tᴏᴛᴀʟ ᴠᴇʀɪғɪᴇᴅ ᴛᴏᴋᴇɴs ᴛᴏᴅᴀʏ: <b>{total}</b>")
+    await message.reply_text(f"ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴋᴇɴꜱ ᴛᴏᴅᴀʏ: <b>{total}</b>")
 
 
 #=====================================================================================##
 
 @Bot.on_message(filters.command('commands') & filters.private & admin)
 async def bcmd(bot: Bot, message: Message):        
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data = "close")]])
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏꜱᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
 
 
@@ -695,7 +693,7 @@ async def plan_command(client: Client, message: Message):
     mention = message.from_user.mention
 
     buttons = [[
-        InlineKeyboardButton('ʀᴇғᴇʀ ᴀɴᴅ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='reffff'),
+        InlineKeyboardButton('ʀᴇꜰᴇʀ ᴀɴᴅ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ', callback_data='reffff'),
     ],[
         InlineKeyboardButton('ʙʀᴏɴᴢᴇ ', callback_data='broze'),
         InlineKeyboardButton('ꜱɪʟᴠᴇʀ ', callback_data='silver')
@@ -706,7 +704,7 @@ async def plan_command(client: Client, message: Message):
         InlineKeyboardButton('ᴅɪᴀᴍᴏɴᴅ ', callback_data='diamond'),
         InlineKeyboardButton('ᴏᴛʜᴇʀ ', callback_data='other')
     ],[
-        InlineKeyboardButton('ɢᴇᴛ ғʀᴇᴇ ᴛʀᴀɪʟ ғᴏʀ 𝟻 ᴍɪɴᴜᴛᴇs ☺️', callback_data='free')
+        InlineKeyboardButton('ɢᴇᴛ ꜰʀᴇᴇ ᴛʀᴀɪʟ ꜰᴏʀ 𝟻 ᴍɪɴᴜᴛᴇꜱ ☺️', callback_data='free')
     ],[
         InlineKeyboardButton('⇋ ʙᴀᴄᴋ ᴛᴏ ʜᴏᴍᴇ ⇋', callback_data='start')
     ]]
