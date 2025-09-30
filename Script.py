@@ -317,7 +317,7 @@ Usᴇʀ - {}"""
 • ᴇɴᴄʀʏᴘᴛᴇᴅ ᴘʀᴏᴄᴇꜱꜱ
 """
     
-    FEATURES_TEXT = """
+    FEATURES_TXT = """
 🚀 <b> ᴇɴʜᴀɴᴄᴇᴅ ғᴇᴀᴛᴜʀᴇꜱ</b>
 
 <b>ғʀᴇᴇ ᴜꜱᴇʀꜱ:</b>
@@ -456,4 +456,5 @@ NSFW_WARNING = """<b>\n🔞 NSFW Content 🔞\n</b>"""
   #  "5044134455711629726",  # ❤️ Heart
   #  "5046509860389126442",  # 🎉 Celebration (Confetti)
 #]
+
 
