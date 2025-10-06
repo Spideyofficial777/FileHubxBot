@@ -65,13 +65,9 @@ async def show_progress_animation(client, message, total_steps=7):
     for i in range(1, total_steps):
         await asyncio.sleep(0.8)
         try:
-            progress_bar = "█" * i + "░" * (total_steps - i)
-            percentage = (i / total_steps) * 100
-            
             animated_text = (
                 f"{progress_messages[i]}\n\n"
-                f"📊 <b>ᴘʀᴏɢʀᴇꜱꜱ:</b> [{progress_bar}] {percentage:.0f}%\n"
-                f"⏳ <b>ꜱᴛᴀᴛᴜꜱ:</b> {get_loading_emoji(i)} {get_status_text(i)}"
+                f"⏳ <b>ꜱᴛᴀᴛᴜꜱ:</b> {get_loading_emoji(i)} {get_status_text(i)} !!!"
             )
             
             await temp_msg.edit(animated_text)
@@ -86,13 +82,13 @@ def get_loading_emoji(step):
 
 def get_status_text(step):
     statuses = [
-        "ɪɴɪᴛɪᴀʟɪᴢɪɴɢ ꜱʏꜱᴛᴇᴍ...",
-        "ᴇꜱᴛᴀʙʟɪꜱʜɪɴɢ ꜱᴇᴄᴜʀᴇ ᴄᴏɴɴᴇᴄᴛɪᴏɴ...",
-        "ʟᴏᴄᴀᴛɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇꜱ...",
-        "ᴘʀᴏᴄᴇꜱꜱɪɴɢ ꜰɪʟᴇ ᴅᴀᴛᴀ...",
-        "ᴏᴘᴛɪᴍɪᴢɪɴɢ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴘᴇᴇᴅ...",
-        "ꜰɪɴᴀʟ ᴘʀᴇᴘᴀʀᴀᴛɪᴏɴꜱ...",
-        "ᴀʟᴍᴏꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇ..."
+        "ɪɴɪᴛɪᴀʟɪᴢɪɴɢ ꜱʏꜱᴛᴇᴍ",
+        "ᴇꜱᴛᴀʙʟɪꜱʜɪɴɢ ꜱᴇᴄᴜʀᴇ ᴄᴏɴɴᴇᴄᴛɪᴏɴ",
+        "ʟᴏᴄᴀᴛɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇꜱ",
+        "ᴘʀᴏᴄᴇꜱꜱɪɴɢ ꜰɪʟᴇ ᴅᴀᴛᴀ",
+        "ᴏᴘᴛɪᴍɪᴢɪɴɢ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴘᴇᴇᴅ",
+        "ꜰɪɴᴀʟ ᴘʀᴇᴘᴀʀᴀᴛɪᴏɴꜱ",
+        "ᴀʟᴍᴏꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇ"
     ]
     return statuses[step % len(statuses)]
 
@@ -137,14 +133,10 @@ async def send_files_with_progress(client, message, messages, progress_msg):
     
     for index, msg in enumerate(messages, 1):
         try:
-            progress_percentage = (index / total_files) * 100
-            progress_bar = "█" * int(progress_percentage / 10) + "░" * (10 - int(progress_percentage / 10))
-            
             progress_text = (
                 f"📤 <b>ꜱᴇɴᴅɪɴɢ ꜰɪʟᴇꜱ...</b>\n\n"
-                f"📊 <b>ᴘʀᴏɢʀᴇꜱꜱ:</b> [{progress_bar}] {progress_percentage:.0f}%\n"
                 f"📁 <b>ꜰɪʟᴇ {index}</b> ᴏꜰ {total_files}\n"
-                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴘʀᴏᴄᴇꜱꜱɪɴɢ..."
+                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴘʀᴏᴄᴇꜱꜱɪɴɢ... !!!"
             )
             
             await progress_msg.edit(progress_text)
@@ -192,7 +184,7 @@ async def send_files_with_progress(client, message, messages, progress_msg):
         f"✅ <b>ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇɴᴛ:</b> {len(sent_messages)} ꜰɪʟᴇꜱ\n"
         f"📦 <b>ᴛᴏᴛᴀʟ ꜱɪᴢᴇ:</b> ᴏᴘᴛɪᴍɪᴢᴇᴅ\n"
         f"🚀 <b>ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴘᴇᴇᴅ:</b> ᴜʟᴛʀᴀ ꜰᴀꜱᴛ\n\n"
-        f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ!"
+        f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ !!!"
     )
     
     await progress_msg.edit(completion_msg)
@@ -379,7 +371,7 @@ async def start_command(client: Client, message: Message):
                 f"📦 <b>ꜰɪʟᴇ ᴅᴇʟɪᴠᴇʀʏ ᴄᴏᴍᴘʟᴇᴛᴇᴅ!</b>\n\n"
                 f"✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇɴᴛ: {len(sent_messages)} ꜰɪʟᴇꜱ\n"
                 f"⏰ <b>ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ɪɴ:</b> {expiry_time}\n"
-                f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ"
+                f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ !!!"
             )
 
             await asyncio.sleep(FILE_AUTO_DELETE)
@@ -404,19 +396,19 @@ async def start_command(client: Client, message: Message):
                     f"🗑️ <b>ᴀᴜᴛᴏ-ᴄʟᴇᴀɴᴜᴘ ᴄᴏᴍᴘʟᴇᴛᴇᴅ</b>\n\n"
                     f"✅ ᴅᴇʟᴇᴛᴇᴅ {deleted_count} ꜰɪʟᴇꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ\n"
                     f"📝 ꜰɪʟᴇꜱ ᴀʀᴇ ɴᴏ ʟᴏɴɢᴇʀ ᴀᴄᴄᴇꜱꜱɪʙʟᴇ ꜰʀᴏᴍ ᴛʜɪꜱ ᴄʜᴀᴛ\n\n"
-                    f"<i>ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ ᴀɢᴀɪɴ</i>",
+                    f"<i>ᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ ᴀɢᴀɪɴ !!!</i>",
                     reply_markup=keyboard
                 )
             except Exception as e:
                 print(f"Notification update error: {e}")
 
         elif len(sent_messages) == 0:
-            await message.reply_text("❌ <b>ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
+            await message.reply_text("❌ <b>ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ !!!")
 
     else:
         reply_markup = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("📢 ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟꜱ", url="https://t.me/Spideyofficial777")],
+                [InlineKeyboardButton("📢 ᴍᴏʀᴇ ᴄʜᴀɴɴᴇʟꜱ", callback_data="group_info")],
                 [
                     InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about"),
                     InlineKeyboardButton("🆘 ʜᴇʟᴘ", callback_data="help")
@@ -472,9 +464,57 @@ async def start_cache_cleanup(client, message):
     if not hasattr(client, 'cache_cleanup_task'):
         client.cache_cleanup_task = asyncio.create_task(cleanup_verification_cache())
 
-# Rest of the functions remain the same as in your original script...
-# [The remaining functions like show_features, user_status, email_test_callback, 
-# check_plan, add_premium_user_command, etc. remain unchanged from your original script]
+# Rest of the functions remain the same...
+# [Keep all other functions like show_features, user_status, etc. unchanged]
+
+@Bot.on_message(filters.command('features') & filters.private)
+async def show_features(client: Client, message: Message):    
+    buttons = [
+        [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium")],
+        [InlineKeyboardButton("🆓 ᴛʀʏ ꜰʀᴇᴇ ᴛʀɪᴀʟ", callback_data="free_trial")],
+        [InlineKeyboardButton("📊 ᴍʏ ꜱᴛᴀᴛᴜꜱ", callback_data="mystatus")]
+    ]
+    
+    await message.reply_photo(
+        photo="https://graph.org/file/7519d226226bec1090db7.jpg",
+        caption=script.FEATURES_TXT,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+@Bot.on_message(filters.command('status') & filters.private)
+async def user_status(client: Client, message: Message):
+    user_id = message.from_user.id
+    is_premium = await is_premium_user(user_id)
+    
+    verify_status = verification_cache.get(user_id, await db.get_verify_status(user_id))
+    
+    status_text = f"""
+📊 <b>ᴜꜱᴇʀ ꜱᴛᴀᴛᴜꜱ</b>
+
+👤 <b>ᴜꜱᴇʀ:</b> {message.from_user.mention}
+🆔 <b>ɪᴅ:</b> <code>{user_id}</code>
+💎 <b>ᴘʀᴇᴍɪᴜᴍ:</b> {'✅ ᴀᴄᴛɪᴠᴇ' if is_premium else '❌ ɪɴᴀᴄᴛɪᴠᴇ'}
+🔐 <b>ᴠᴇʀɪꜰɪᴇᴅ:</b> {'✅ ʏᴇꜱ' if verify_status.get('is_verified') else '❌ ɴᴏ'}
+
+"""
+    
+    if verify_status.get('is_verified'):
+        verified_time = verify_status.get('verified_time', 0)
+        time_left = VERIFY_EXPIRE - (time.time() - verified_time)
+        if time_left > 0:
+            status_text += f"⏳ <b>ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴇxᴘɪʀᴇꜱ ɪɴ:</b> {get_exp_time(time_left)}\n"
+    
+    if is_premium:
+        premium_info = await get_premium_info(user_id)
+        if premium_info:
+            status_text += f"⭐ <b>ᴘʀᴇᴍɪᴜᴍ ᴇxᴘɪʀᴇꜱ:</b> {premium_info['expiry']}\n"
+    
+    status_text += f"\n📈 <b>ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ:</b> {verify_status.get('verified_count', 0)}"
+    
+    buttons = [
+        [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ", callback_data="premium")],
+        [InlineKeyboardButton("🔄 ʀᴇꜰʀᴇꜱʜ", callback_data="refresh_status")
+
 
 @Bot.on_message(filters.command('features') & filters.private)
 async def show_features(client: Client, message: Message):    
