@@ -93,7 +93,7 @@ async def start_command(client: Client, message: Message):
                         # Clear invalid token attempts
                         if user_id in verification_cache:
                             del verification_cache[user_id]
-                        return await message.reply("❌ ʏᴏᴜʀ ᴛᴏᴋᴇɴ ɪꜱ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ. ᴛʀʏ ᴀɢᴀɪɴ ʙʏ ᴄʟɪᴄᴋɪɴɢ /start")
+                        return await message.reply("❌ <b>ʏᴏᴜʀ ᴛᴏᴋᴇɴ ɪꜱ ɪɴᴠᴀʟɪᴅ ᴏʀ ᴇxᴘɪʀᴇᴅ</b>\n\nᴛʀʏ ᴀɢᴀɪɴ ʙʏ ᴄʟɪᴄᴋɪɴɢ /start")
                     
                     # Update verification status
                     await db.update_verify_status(id, is_verified=True, verified_time=time.time())
@@ -145,7 +145,7 @@ async def start_command(client: Client, message: Message):
 
                 except Exception as e:
                     print(f"Verification error: {e}")
-                    return await message.reply("❌ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜰᴀɪʟᴇᴅ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
+                    return await message.reply("❌ <b>ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜰᴀɪʟᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
 
             # Show verification required message if not verified and not premium
             if not verify_status['is_verified'] and not is_premium:
@@ -222,13 +222,13 @@ async def start_command(client: Client, message: Message):
                 ids = range(start, end + 1) if start <= end else list(range(start, end - 1, -1))
             except Exception as e:
                 print(f"Error decoding IDs: {e}")
-                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ʀᴀɴɢᴇ ᴘʀᴏᴠɪᴅᴇᴅ")
+                return await message.reply_text("❌ <b>ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ʀᴀɴɢᴇ ᴘʀᴏᴠɪᴅᴇᴅ</b>")
         elif len(argument) == 2:
             try:
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except Exception as e:
                 print(f"Error decoding ID: {e}")
-                return await message.reply_text("❌ ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ɪᴅ ᴘʀᴏᴠɪᴅᴇᴅ")
+                return await message.reply_text("❌ <b>ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ɪᴅ ᴘʀᴏᴠɪᴅᴇᴅ</b>")
 
         # Enhanced progress indicator
         temp_msg = await message.reply("🔄 <b>ᴘʀᴏᴄᴇꜱꜱɪɴɢ ʏᴏᴜʀ ʀᴇQᴜᴇꜱᴛ...</b>")
@@ -237,7 +237,7 @@ async def start_command(client: Client, message: Message):
             messages = await get_messages(client, ids)
         except Exception as e:
             await temp_msg.delete()
-            return await message.reply_text("❌ ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ")
+            return await message.reply_text("❌ <b>ꜰᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴛʀɪᴇᴠᴇ ꜰɪʟᴇꜱ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ ʟᴀᴛᴇʀ")
         
         await temp_msg.delete()
 
@@ -333,7 +333,7 @@ async def start_command(client: Client, message: Message):
                 print(f"Notification update error: {e}")
 
         elif success_count == 0:
-            await message.reply_text("❌ ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ. ᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
+            await message.reply_text("❌ <b>ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ")
 
     else:
         # Enhanced start message with better UI
@@ -583,16 +583,16 @@ async def add_premium_user_command(client, msg):
         await client.send_message(
             chat_id=user_id,
             text=(
-                f"🎉 ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!\n\n"
+                f"🎉 <b>ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b>\n\n"
                 f"ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ `{time_value} {time_unit}`.\n"
                 f"ᴇxᴘɪʀᴇꜱ ᴏɴ: `{expiration_time}`"
             ),
         )
 
     except ValueError:
-        await msg.reply_text("❌ ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ. ᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴠᴀʟᴜᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ")
+        await msg.reply_text("❌ <b>ɪɴᴠᴀʟɪᴅ ɪɴᴘᴜᴛ</b>\n\nᴘʟᴇᴀꜱᴇ ᴇɴꜱᴜʀᴇ ᴜꜱᴇʀ ɪᴅ ᴀɴᴅ ᴛɪᴍᴇ ᴠᴀʟᴜᴇ ᴀʀᴇ ɴᴜᴍʙᴇʀꜱ")
     except Exception as e:
-        await msg.reply_text(f"⚠️ ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ: `{str(e)}`")
+        await msg.reply_text(f"⚠️ <b>ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ:</b> `{str(e)}`")
 
 
 # Command to remove premium user
@@ -617,7 +617,7 @@ async def list_premium_users_command(client, message):
 
     # Retrieve all users from the collection
     premium_users_cursor = collection.find({})
-    premium_user_list = ['ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ɪɴ ᴅᴀᴛᴀʙᴀꜱᴇ:']
+    premium_user_list = ['<b>ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ɪɴ ᴅᴀᴛᴀʙᴀꜱᴇ:</b>']
     current_time = datetime.now(ist)  # Get current time in IST
 
     # Use async for to iterate over the async cursor
