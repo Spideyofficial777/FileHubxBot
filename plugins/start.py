@@ -512,9 +512,9 @@ async def user_status(client: Client, message: Message):
     status_text += f"\n📈 <b>ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ:</b> {verify_status.get('verified_count', 0)}"
     
     buttons = [
-        [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ", callback_data="premium")],
-        [InlineKeyboardButton("🔄 ʀᴇꜰʀᴇꜱʜ", callback_data="refresh_status")
-
+    [InlineKeyboardButton("💎 ᴜᴘɢʀᴀᴅᴇ", callback_data="premium")],
+    [InlineKeyboardButton("🔄 ʀᴇꜰʀᴇꜱʜ", callback_data="refresh_status")]
+]
 
 @Bot.on_message(filters.command('features') & filters.private)
 async def show_features(client: Client, message: Message):    
