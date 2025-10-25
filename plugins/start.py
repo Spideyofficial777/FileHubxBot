@@ -361,7 +361,7 @@ async def start_command(client: Client, message: Message):
     if not await is_subscribed(client, user_id):
         return await not_joined(client, message)
 
-    FILE_AUTO_DELETE = await db.get_del_timer()
+    FILE_AUTO_DELETE = await db.get_del_timer() or FILE_AUTO_DEL_TIMER
 
     if not await db.present_user(user_id):
         try:
@@ -836,3 +836,41 @@ async def not_joined(client: Client, message: Message):
             f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @hacker_x_official_777</i></b>\n"
             f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
         )
+
+@Bot.on_message(filters.command("testdel") & filters.private)
+async def test_auto_delete(client, message):
+    test_msg = await message.reply("🧹 This message will auto-delete after 30 seconds.")
+    await asyncio.create_task(schedule_auto_delete(client, [test_msg], test_msg, 30, None))
+    
+# After sending all files successfully
+if sent_messages:
+    files_to_delete = sent_messages  # already sent message objects
+
+    # Dynamic formatted message for auto-delete notice
+    delCap = (
+        "<b>ᴀʟʟ {} ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+        .format(
+            len(files_to_delete),
+            f'{FILE_AUTO_DELETE // 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DELETE >= 60 else f'{FILE_AUTO_DELETE} sᴇᴄᴏɴᴅs'
+        )
+    )
+
+    # After-deletion message caption
+    afterDelCap = (
+        "<b>ᴀʟʟ {} ғɪʟᴇs ᴀʀᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+        .format(
+            len(files_to_delete),
+            f'{FILE_AUTO_DELETE // 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DELETE >= 60 else f'{FILE_AUTO_DELETE} sᴇᴄᴏɴᴅs'
+        )
+    )
+
+    # Send the notice message
+    replyed = await message.reply_text(delCap, disable_web_page_preview=True, quote=True)
+
+    # Add it to delete list so it gets deleted too
+    sent_messages.append(replyed)
+
+    # Schedule the deletion of all messages including this one
+    asyncio.create_task(
+        schedule_auto_delete(client, sent_messages, replyed, FILE_AUTO_DELETE, reload_url)
+    )
