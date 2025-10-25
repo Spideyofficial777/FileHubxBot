@@ -55,18 +55,14 @@ progress_messages = [
     "⚡ <b>ᴘʀᴇᴘᴀʀɪɴɢ ᴅᴏᴡɴʟᴏᴀᴅ...</b>",
     "🎯 <b>ᴀʟᴍᴏꜱᴛ ᴛʜᴇʀᴇ...</b>",
     "✨ <b>ꜰɪɴᴀʟɪᴢɪɴɢ...</b>",
-    "!!!!!!!!!",
-    "!!!!!!!!!",
 ]
 
 success_messages = [
     "🎉 <b>ᴡᴏᴡ! ʏᴏᴜʀ ꜰɪʟᴇꜱ ᴀʀᴇ ʀᴇᴀᴅʏ!</b> 🌟",
     "✅ <b>ꜱᴜᴄᴄᴇꜱꜱ! ᴀʟʟ ꜰɪʟᴇꜱ ᴅᴇʟɪᴠᴇʀᴇᴅ!</b> 🚀",
     "🔥 <b>ʙᴏᴏᴍ! ʏᴏᴜʀ ꜰɪʟᴇꜱ ᴀʀᴇ ʜᴇʀᴇ!</b> 💫",
-    "📦 <b>ᴘᴀᴄᴋᴀɢᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ ꜱᴜᴄᴄᴇꜱꜱ꜠ᴜʟʟʏ!</b> 🎁",
+    "📦 <b>ᴘᴀᴄᴋᴀɢᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!</b> 🎁",
     "⚡ <b>ʟɪɢʜᴛɴɪɴɢ ꜰᴀꜱᴛ! ꜰɪʟᴇꜱ ᴀʀᴇ ʀᴇᴀᴅʏ!</b> ⚡",
-    "!!!!!!!!!",
-    "!!!!!!!!!",
 ]
 
 
@@ -74,7 +70,7 @@ success_messages = [
 async def show_progress_animation(client, message, total_steps=7):
     temp_msg = await message.reply(progress_messages[0])
 
-    for i in range(1, total_steps):
+    for i in range(1, min(total_steps, len(progress_messages))):
         await asyncio.sleep(0.8)
         try:
             animated_text = f"{progress_messages[i]}\n\n"
@@ -83,26 +79,6 @@ async def show_progress_animation(client, message, total_steps=7):
             continue
 
     return temp_msg
-
-
-def get_loading_emoji(step):
-    emojis = ["🔄", "📡", "🔍", "📂", "⚡", "🎯", "✨"]
-    return emojis[step % len(emojis)]
-
-
-def get_status_text(step):
-    statuses = [
-        "ɪɴɪᴛɪᴀʟɪᴢɪɴɢ ꜱʏꜱᴛᴇᴍ",
-        "ᴇꜱᴛᴀʙʟɪꜱʜɪɴɢ ꜱᴇᴄᴜʀᴇ ᴄᴏɴɴᴇᴄᴛɪᴏɴ",
-        "ʟᴏᴄᴀᴛɪɴɢ ʏᴏᴜʀ ꜰɪʟᴇꜱ",
-        "ᴘʀᴏᴄᴇꜱꜱɪɴɢ ꜰɪʟᴇ ᴅᴀᴛᴀ",
-        "ᴏᴘᴛɪᴍɪᴢɪɴɢ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴘᴇᴇᴅ",
-        "ꜰɪɴᴀʟ ᴘʀᴇᴘᴀʀᴀᴛɪᴏɴꜱ",
-        "ᴀʟᴍᴏꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇ",
-        "!!!!!!!!!",
-        "!!!!!!!!!",
-    ]
-    return statuses[step % len(statuses)]
 
 
 async def enhanced_file_processing(client, message, ids):
@@ -150,7 +126,7 @@ async def send_files_with_progress(client, message, messages, progress_msg):
             progress_text = (
                 f"📤 <b>ꜱᴇɴᴅɪɴɢ ꜰɪʟᴇꜱ...</b>\n\n"
                 f"📁 <b>ꜰɪʟᴇ {index}</b> ᴏꜰ {total_files}\n"
-                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴄᴏᴍᴘʟᴇᴛᴇ... !!!"
+                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴘʀᴏᴄᴇꜱꜱɪɴɢ..."
             )
 
             await progress_msg.edit(progress_text)
@@ -192,24 +168,18 @@ async def send_files_with_progress(client, message, messages, progress_msg):
             print(f"Failed to send message: {e}")
             continue
 
-    # Final completion message (left to progress message flow; not forcibly edited here)
     return sent_messages
 
 
-# ================================================================================== #
-# Auto-delete scheduler (merged from start (1).py). This is the single added auto-delete
-# function integrated safely with existing logic. It schedules deletion and updates the
-# notification message with a "Get file again" button when available.
-# ================================================================================== #
-async def schedule_auto_delete(client, codeflix_msgs, notification_msg, file_auto_delete, reload_url):
+# Auto-delete scheduler
+async def schedule_auto_delete(client, files_to_delete, notification_msg, file_auto_delete, reload_url):
     try:
         await asyncio.sleep(file_auto_delete)
     except Exception as e:
-        # If sleep is interrupted or invalid, still attempt to continue safely
         print(f"Auto-delete sleep interrupted or errored: {e}")
 
     deleted_count = 0
-    for snt_msg in codeflix_msgs:
+    for snt_msg in files_to_delete:
         if snt_msg:
             try:
                 await snt_msg.delete()
@@ -220,23 +190,20 @@ async def schedule_auto_delete(client, codeflix_msgs, notification_msg, file_aut
 
     try:
         keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("ɢᴇᴛ ғɪʟᴇ ᴀɢᴀɪɴ!", url=reload_url)]]
+            [[InlineKeyboardButton("ɢᴇᴛ ꜰɪʟᴇ ᴀɢᴀɪɴ!", url=reload_url)]]
         ) if reload_url else None
 
-        # Safely edit the notification message to indicate files were deleted
         await notification_msg.edit(
-            "<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇꜱ ʜᴀᴠᴇ ʙᴇᴇɴ ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇᴅ.</b>\n\n"
+            f"<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇꜱ ʜᴀᴠᴇ ʙᴇᴇɴ ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇᴅ.</b>\n\n"
             f"✅ ᴅᴇʟᴇᴛᴇᴅ {deleted_count} ꜰɪʟᴇꜱ\n\n"
-            "<i>Click the button below to get them again (if available).</i>",
+            f"<i>ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴛʜᴇᴍ ᴀɢᴀɪɴ (ɪꜰ ᴀᴠᴀɪʟᴀʙʟᴇ).</i>",
             reply_markup=keyboard,
         )
     except Exception as e:
         print(f"Error updating notification with 'Get File Again' button: {e}")
 
 
-# ================================================================================== #
-# /start command — main flow (keeps your enhanced verification, caching, progress UI)
-# ================================================================================== #
+# /start command
 @Bot.on_message(filters.command("start") & filters.private)
 async def start_command(client: Client, message: Message):
     user_id = message.from_user.id
@@ -297,14 +264,14 @@ async def start_command(client: Client, message: Message):
 
                     verification_cache[user_id] = verify_status
 
-                    button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ғɪʟᴇ"
+                    button_text = "📁 ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ɢᴇᴛ ꜰɪʟᴇ"
                     button_url = verify_status.get("link") or "https://t.me/spideyofficialupdatez"
 
                     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=button_url)]])
 
                     await message.reply_photo(
                         photo=VERIFY_IMG,
-                        caption=f"<blockquote><b>✅ ʜᴇʏ {message.from_user.mention}, ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱ꜠ᴜʟ!\n\n🎉 ʏᴏᴜ ɴᴏᴡ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ {get_exp_time(VERIFY_EXPIRE)}\n\nᴛᴏᴋᴇɴ ᴜꜱᴇᴅ: {new_count} ᴛɪᴍᴇꜱ</blockquote></b>",
+                        caption=f"<blockquote><b>✅ ʜᴇʏ {message.from_user.mention}, ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!\n\n🎉 ʏᴏᴜ ɴᴏᴡ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ {get_exp_time(VERIFY_EXPIRE)}\n\nᴛᴏᴋᴇɴ ᴜꜱᴇᴅ: {new_count} ᴛɪᴍᴇꜱ</blockquote></b>",
                         reply_markup=reply_markup,
                     )
 
@@ -315,7 +282,7 @@ async def start_command(client: Client, message: Message):
                     current_date = now.strftime("%Y-%m-%d")
 
                     log_msg = (
-                        f"🎯 <b>ᴇɴʜᴀɴᴄᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱ꜠ᴜʟ</b>\n\n"
+                        f"🎯 <b>ᴇɴʜᴀɴᴄᴇᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ</b>\n\n"
                         f"👤 ᴜꜱᴇʀ: {message.from_user.mention}\n"
                         f"🆔 ɪᴅ: <code>{message.from_user.id}</code>\n"
                         f"📊 ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ: {new_count}\n"
@@ -404,7 +371,7 @@ async def start_command(client: Client, message: Message):
                 print(f"Error decoding ID: {e}")
                 return await message.reply_text("❌ <b>ɪɴᴠᴀʟɪᴅ ꜰɪʟᴇ ɪᴅ ᴘʀᴏᴠɪᴅᴇᴅ</b>")
 
-        # Use enhanced file processing with beautiful progress
+        # Use enhanced file processing
         sent_messages = await enhanced_file_processing(client, message, ids)
 
         # Enhanced auto-delete notification
@@ -413,21 +380,18 @@ async def start_command(client: Client, message: Message):
 
             notification_msg = await message.reply(
                 f"📦 <b>ꜰɪʟᴇ ᴅᴇʟɪᴠᴇʀʏ ᴄᴏᴍᴘʟᴇᴛᴇᴅ!</b>\n\n"
-                f"✅ ꜱᴜᴄᴄᴇꜱ꜠ᴜʟʟʏ ꜱᴇɴᴛ: {len(sent_messages)} ꜰɪʟᴇꜱ\n"
+                f"✅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ꜱᴇɴᴛ: {len(sent_messages)} ꜰɪʟᴇꜱ\n"
                 f"⏰ <b>ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ɪɴ:</b> {expiry_time}\n"
-                f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ !!!"
+                f"💾 <b>ᴛɪᴘ:</b> ꜱᴀᴠᴇ ꜰɪʟᴇꜱ ᴛᴏ ʏᴏᴜʀ ꜱᴀᴠᴇᴅ ᴍᴇꜱꜱᴀɢᴇꜱ!"
             )
 
             reload_url = f"https://t.me/{client.username}?start={message.command[1]}" if len(message.command) > 1 else None
 
-            # Schedule auto-delete using the integrated scheduler
-            try:
-                asyncio.create_task(schedule_auto_delete(client, sent_messages, notification_msg, FILE_AUTO_DELETE, reload_url))
-            except Exception as e:
-                print(f"Error scheduling auto-delete task: {e}")
+            # Schedule auto-delete
+            asyncio.create_task(schedule_auto_delete(client, sent_messages, notification_msg, FILE_AUTO_DELETE, reload_url))
 
         elif len(sent_messages) == 0:
-            await message.reply_text("❌ <b>ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ !!!")
+            await message.reply_text("❌ <b>ɴᴏ ꜰɪʟᴇꜱ ᴄᴏᴜʟᴅ ʙᴇ ᴅᴇʟɪᴠᴇʀᴇᴅ</b>\n\nᴘʟᴇᴀꜱᴇ ᴛʀʏ ᴀɢᴀɪɴ!")
 
     else:
         reply_markup = InlineKeyboardMarkup(
@@ -459,7 +423,7 @@ async def start_command(client: Client, message: Message):
         )
 
 
-# Enhanced verification cache cleanup function
+# Enhanced verification cache cleanup
 async def cleanup_verification_cache():
     while True:
         await asyncio.sleep(3600)
@@ -478,15 +442,7 @@ async def cleanup_verification_cache():
             print(f"Cleaned up {len(expired_users)} expired verification cache entries")
 
 
-@Bot.on_message(filters.command("start"))
-async def start_cache_cleanup(client, message):
-    if not hasattr(client, "cache_cleanup_task"):
-        client.cache_cleanup_task = asyncio.create_task(cleanup_verification_cache())
-
-
-# ================================================================================== #
-# /features and /status handlers (single copies; duplicates removed)
-# ================================================================================== #
+# /features command
 @Bot.on_message(filters.command("features") & filters.private)
 async def show_features(client: Client, message: Message):
     buttons = [
@@ -498,6 +454,7 @@ async def show_features(client: Client, message: Message):
     await message.reply_photo(photo="https://graph.org/file/7519d226226bec1090db7.jpg", caption=script.FEATURES_TXT, reply_markup=InlineKeyboardMarkup(buttons))
 
 
+# /status command
 @Bot.on_message(filters.command("status") & filters.private)
 async def user_status(client: Client, message: Message):
     user_id = message.from_user.id
@@ -534,9 +491,7 @@ async def user_status(client: Client, message: Message):
     await message.reply_text(status_text, reply_markup=InlineKeyboardMarkup(buttons))
 
 
-# ================================================================================== #
-# Email test callback (keeps original handling)
-# ================================================================================== #
+# Email test callback
 @Bot.on_callback_query(filters.regex(r"^email_test$"))
 async def email_test_callback(client: Client, callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
@@ -566,10 +521,10 @@ async def email_test_callback(client: Client, callback_query: CallbackQuery):
     await processing_msg.delete()
 
     if test_results.get("overall_success"):
-        result_text = "✅ <b>ᴇᴍᴀɪʟ ᴛᴇꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱ꜠ᴜʟʟʏ!</b>\n\n"
+        result_text = "✅ <b>ᴇᴍᴀɪʟ ᴛᴇꜱᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ!</b>\n\n"
         result_text += f"📊 <b>ᴛᴇꜱᴛ ɪᴅ:</b> <code>{test_results['test_id']}</code>\n"
         result_text += f"🕒 <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {test_results.get('duration', 'ɴ/ᴀ')}ꜱ\n"
-        result_text += f"🎯 <b>ꜱᴜᴄᴄᴇꜱ꜠ᴜʟ ʀᴀᴛᴇ:</b> {test_results.get('success_percentage', 0)}%\n"
+        result_text += f"🎯 <b>ꜱᴜᴄᴄᴇꜱꜱ ʀᴀᴛᴇ:</b> {test_results.get('success_percentage', 0)}%\n"
         result_text += f"🔗 <b>ꜱᴇʀᴠᴇʀ:</b> {test_results['configuration']['smtp_server']}\n\n"
 
         result_text += "<b>ᴅᴇᴛᴀɪʟᴇᴅ ʀᴇꜱᴜʟᴛꜱ:</b>\n"
@@ -591,7 +546,7 @@ async def email_test_callback(client: Client, callback_query: CallbackQuery):
                 result_text += f"❌ <b>{test_name.replace('_', ' ').title()}:</b> {test_result.get('message', 'ɴ/ᴀ')}\n"
 
         result_text += "\n🔧 <b>ᴘᴏꜱꜱɪʙʟᴇ ꜱᴏʟᴜᴛɪᴏɴꜱ:</b>\n"
-        result_text += "• ᴄʜᴇᴄᴋ ꜱᴍᴛᴘ ᴄʀᴇᴅᴇɴᴛɪᴀʟꜱ ɪɴ ᴇɴᴠɪʀᴏɴᴍᴇɴᴛ ᴠᴀʀɪᴀᴛʙʟᴇꜱ\n"
+        result_text += "• ᴄʜᴇᴄᴋ ꜱᴍᴛᴘ ᴄʀᴇᴅᴇɴᴛɪᴀʟꜱ ɪɴ ᴇɴᴠɪʀᴏɴᴍᴇɴᴛ ᴠᴀʀɪᴀʙʟᴇꜱ\n"
         result_text += "• ᴠᴇʀɪꜰʏ ᴇᴍᴀɪʟ ᴘᴀꜱꜱᴡᴏʀᴅ (ᴜꜱᴇ ᴀᴘᴘ ᴘᴀꜱꜱᴡᴏʀᴅ ꜰᴏʀ ɢᴍᴀɪʟ)\n"
         result_text += "• ᴇɴꜱᴜʀᴇ ʟᴇꜱꜱ ꜱᴇᴄᴜʀᴇ ᴀᴘᴘꜱ ᴀʀᴇ ᴇɴᴀʙʟᴇᴅ (ɪꜰ ᴜꜱɪɴɢ ɢᴍᴀɪʟ)\n"
         result_text += "• ᴄʜᴇᴄᴋ ꜰɪʀᴇᴡᴀʟʟ/ᴘᴏʀᴛ ʀᴇꜱᴛʀɪᴄᴛɪᴏɴꜱ\n"
@@ -600,15 +555,13 @@ async def email_test_callback(client: Client, callback_query: CallbackQuery):
         [InlineKeyboardButton("🔄 ʀᴜɴ ᴛᴇꜱᴛ ᴀɢᴀɪɴ", callback_data="email_test")],
         [InlineKeyboardButton("📊 ꜱʏꜱᴛᴇᴍ ᴅɪᴀɢɴᴏꜱᴛɪᴄꜱ", callback_data="email_diagnostics")],
         [InlineKeyboardButton("⚙️ ꜱᴍᴛᴘ ꜱᴇᴛᴛɪɴɢꜱ ʜᴇʟᴘ", callback_data="smtp_help")],
-        [InlineKeyboardButton("📧 ᴍᴀɴᴀɢᴇ ꜱᴜꜱʙᴄʀɪᴘᴛɪᴏɴ", callback_data="email_manage")],
+        [InlineKeyboardButton("📧 ᴍᴀɴᴀɢᴇ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ", callback_data="email_manage")],
     ]
 
     await callback_query.message.edit_text(result_text, reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=True)
 
 
-# ================================================================================== #
-# Premium management commands (addpremium, remove_premium, premium_users)
-# ================================================================================== #
+# /myplan command
 @Bot.on_message(filters.command("myplan") & filters.private)
 async def check_plan(client: Client, message: Message):
     user_id = message.from_user.id
@@ -616,6 +569,7 @@ async def check_plan(client: Client, message: Message):
     await message.reply(status_message)
 
 
+# /addpremium command
 @Bot.on_message(filters.command("addpremium") & filters.private & admin)
 async def add_premium_user_command(client, msg: Message):
     if len(msg.command) != 4:
@@ -650,7 +604,7 @@ async def add_premium_user_command(client, msg: Message):
             chat_id=user_id,
             text=(
                 f"🎉 <b>ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b>\n\n"
-                f"ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱᴋ ꜰᴏʀ `{time_value} {time_unit}`.\n"
+                f"ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇꜱꜱ ꜰᴏʀ `{time_value} {time_unit}`.\n"
                 f"ᴇxᴘɪʀᴀᴛɪᴏɴ: `{expiration_time}`"
             ),
         )
@@ -661,6 +615,7 @@ async def add_premium_user_command(client, msg: Message):
         await msg.reply_text(f"⚠️ <b>ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ:</b> `{str(e)}`")
 
 
+# /remove_premium command
 @Bot.on_message(filters.command("remove_premium") & filters.private & admin)
 async def pre_remove_user(client: Client, msg: Message):
     if len(msg.command) != 2:
@@ -674,6 +629,7 @@ async def pre_remove_user(client: Client, msg: Message):
         await msg.reply_text("ᴜꜱᴇʀ_ɪᴅ ᴍᴜꜱᴛ ʙᴇ ᴀɴ ɪɴᴛᴇɢᴇʀ ᴏʀ ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴅᴀᴛᴀʙᴀꜱᴇ")
 
 
+# /premium_users command
 @Bot.on_message(filters.command("premium_users") & filters.private & admin)
 async def list_premium_users_command(client: Client, message: Message):
     from pytz import timezone
@@ -720,22 +676,21 @@ async def list_premium_users_command(client: Client, message: Message):
         await message.reply_text("\n\n".join(premium_user_list))
 
 
-# ================================================================================== #
-# Misc commands and admin utilities
-# ================================================================================== #
+# /count command
 @Bot.on_message(filters.command("count") & filters.private & admin)
 async def total_verify_count_cmd(client: Client, message: Message):
     total = await db.get_total_verify_count()
-    await message.reply_text(f"ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴋᴇꜱ ᴛᴏᴅᴀʏ: <b>{total}</b>")
+    await message.reply_text(f"ᴛᴏᴛᴀʟ ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴋᴇɴꜱ ᴛᴏᴅᴀʏ: <b>{total}</b>")
 
 
+# /commands command
 @Bot.on_message(filters.command("commands") & filters.private & admin)
 async def bcmd(bot: Bot, message: Message):
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏꜱᴇ •", callback_data="close")]])
     await message.reply(text=CMD_TXT, reply_markup=reply_markup, quote=True)
 
 
-# Plan command
+# /plan command
 @Bot.on_message(filters.command("plan") & filters.private)
 async def plan_command(client: Client, message: Message):
     mention = message.from_user.mention
@@ -751,15 +706,19 @@ async def plan_command(client: Client, message: Message):
     await message.reply_photo(photo="https://graph.org/file/7519d226226bec1090db7.jpg", caption=script.PREPLANS_TXT.format(mention), reply_markup=InlineKeyboardMarkup(buttons))
 
 
-# ================================================================================== #
-# Force-subscription helper (not_joined) - kept from the start (1).py merged version
-# ================================================================================== #
-# Create a simple cache to avoid repeated get_chat calls
+# /testdel command
+@Bot.on_message(filters.command("testdel") & filters.private)
+async def test_auto_delete(client, message):
+    test_msg = await message.reply("🧹 ᴛʜɪꜱ ᴍᴇꜱꜱᴀɢᴇ ᴡɪʟʟ ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ᴀꜰᴛᴇʀ 30 ꜱᴇᴄᴏɴᴅꜱ.")
+    await asyncio.create_task(schedule_auto_delete(client, [test_msg], test_msg, 30, None))
+
+
+# Force subscription helper - chat data cache
 chat_data_cache = {}
 
 
 async def not_joined(client: Client, message: Message):
-    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ sᴇᴄ..</i></b>")
+    temp = await message.reply("<b><i>ᴡᴀɪᴛ ᴀ ꜱᴇᴄ..</i></b>")
     user_id = message.from_user.id
     buttons = []
     count = 0
@@ -806,15 +765,15 @@ async def not_joined(client: Client, message: Message):
             except Exception as e:
                 print(f"Error with chat {chat_id}: {e}")
                 return await temp.edit(
-                    f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n"
-                    f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
+                    f"<b><i>! ᴇʀʀᴏʀ, ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ ꜱᴏʟᴠᴇ ᴛʜᴇ ɪꜱꜱᴜᴇꜱ @rohit_1888</i></b>\n"
+                    f"<blockquote expandable><b>ʀᴇᴀꜱᴏɴ:</b> {e}</blockquote>"
                 )
 
         try:
             buttons.append(
                 [
                     InlineKeyboardButton(
-                        text="♻️ Tʀʏ Aɢᴀɪɴ",
+                        text="♻️ ᴛʀʏ ᴀɢᴀɪɴ",
                         url=f"https://t.me/{client.username}?start={message.command[1]}" if message.command and len(message.command) > 1 else f"https://t.me/{client.username}",
                     )
                 ]
@@ -822,55 +781,22 @@ async def not_joined(client: Client, message: Message):
         except Exception:
             pass
 
-        await message.reply_photo(photo=FORCE_PIC, caption=FORCE_MSG.format(
-            first=message.from_user.first_name,
-            last=message.from_user.last_name,
-            username=None if not message.from_user.username else "@" + message.from_user.username,
-            mention=message.from_user.mention,
-            id=message.from_user.id,
-        ), reply_markup=InlineKeyboardMarkup(buttons))
+        await temp.delete()
+        await message.reply_photo(
+            photo=FORCE_PIC,
+            caption=FORCE_MSG.format(
+                first=message.from_user.first_name,
+                last=message.from_user.last_name,
+                username=None if not message.from_user.username else "@" + message.from_user.username,
+                mention=message.from_user.mention,
+                id=message.from_user.id,
+            ),
+            reply_markup=InlineKeyboardMarkup(buttons),
+        )
 
     except Exception as e:
         print(f"Final Error: {e}")
         await temp.edit(
-            f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @hacker_x_official_777</i></b>\n"
-            f"<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>"
+            f"<b><i>! ᴇʀʀᴏʀ, ᴄᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ ꜱᴏʟᴠᴇ ᴛʜᴇ ɪꜱꜱᴜᴇꜱ @hacker_x_official_777</i></b>\n"
+            f"<blockquote expandable><b>ʀᴇᴀꜱᴏɴ:</b> {e}</blockquote>"
         )
-
-@Bot.on_message(filters.command("testdel") & filters.private)
-async def test_auto_delete(client, message):
-    test_msg = await message.reply("🧹 This message will auto-delete after 30 seconds.")
-    await asyncio.create_task(schedule_auto_delete(client, [test_msg], test_msg, 30, None))
-    
-# After sending all files successfully
-if sent_messages:
-    files_to_delete = sent_messages  # already sent message objects
-
-    # Dynamic formatted message for auto-delete notice
-    delCap = (
-        "<b>ᴀʟʟ {} ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
-        .format(
-            len(files_to_delete),
-            f'{FILE_AUTO_DELETE // 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DELETE >= 60 else f'{FILE_AUTO_DELETE} sᴇᴄᴏɴᴅs'
-        )
-    )
-
-    # After-deletion message caption
-    afterDelCap = (
-        "<b>ᴀʟʟ {} ғɪʟᴇs ᴀʀᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
-        .format(
-            len(files_to_delete),
-            f'{FILE_AUTO_DELETE // 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DELETE >= 60 else f'{FILE_AUTO_DELETE} sᴇᴄᴏɴᴅs'
-        )
-    )
-
-    # Send the notice message
-    replyed = await message.reply_text(delCap, disable_web_page_preview=True, quote=True)
-
-    # Add it to delete list so it gets deleted too
-    sent_messages.append(replyed)
-
-    # Schedule the deletion of all messages including this one
-    asyncio.create_task(
-        schedule_auto_delete(client, sent_messages, replyed, FILE_AUTO_DELETE, reload_url)
-    )
