@@ -142,7 +142,7 @@ async def send_files_with_progress(client, message, messages, progress_msg):
             progress_text = (
                 f"📤 <b>ꜱᴇɴᴅɪɴɢ ꜰɪʟᴇꜱ...</b>\n\n"
                 f"📁 <b>ꜰɪʟᴇ {index}</b> ᴏꜰ {total_files}\n"
-                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴘʀᴏᴄᴇꜱꜱɪɴɢ... !!!"
+                f"⚡ <b>ꜱᴛᴀᴛᴜꜱ:</b> ᴄᴏᴍᴘʟᴇᴛᴇ... !!!"
             )
             
             await progress_msg.edit(progress_text)
@@ -804,7 +804,26 @@ async def bcmd(bot: Bot, message: Message):
     reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("• ᴄʟᴏꜱᴇ •", callback_data = "close")]])
     await message.reply(text=CMD_TXT, reply_markup = reply_markup, quote= True)
 
+async def schedule_auto_delete(client, codeflix_msgs, notification_msg, file_auto_delete, reload_url):
+    await asyncio.sleep(file_auto_delete)
+    for snt_msg in codeflix_msgs:
+        if snt_msg:
+            try:
+                await snt_msg.delete()
+            except Exception as e:
+                print(f"Error deleting message {snt_msg.id}: {e}")
 
+    try:
+        keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("ɢᴇᴛ ғɪʟᴇ ᴀɢᴀɪɴ!", url=reload_url)]]
+        ) if reload_url else None
+
+        await notification_msg.edit(
+            "<b>ʏᴏᴜʀ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ ɪꜱ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ !!\n\nᴄʟɪᴄᴋ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ʏᴏᴜʀ ᴅᴇʟᴇᴛᴇᴅ ᴠɪᴅᴇᴏ / ꜰɪʟᴇ 👇</b>",
+            reply_markup=keyboard
+        )
+    except Exception as e:
+        print(f"Error updating notification with 'Get File Again' button: {e}")
 
 @Bot.on_message(filters.command("plan") & filters.private)
 async def plan_command(client: Client, message: Message):
