@@ -31,7 +31,8 @@ START_PIC = os.environ.get("START_PIC", "https://telegra.ph/file/ec17880d61180d3
 FORCE_PIC = os.environ.get("FORCE_PIC", "https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg")
 VERIFY_IMG = environ.get("VERIFY_IMG", "https://graph.org/file/1669ab9af68eaa62c3ca4.jpg")
 VERIFY_REQUIERD_IMG = environ.get("VERIFY_REQUIERD_IMG", "https://envs.sh/KFL.bin")
-FILE_AUTO_DEL_TIMER = int(environ.get('FILE_AUTO_DEL_TIMER', '600'))
+#FILE_AUTO_DEL_TIMER = int(environ.get('FILE_AUTO_DEL_TIMER', '600'))
+FILE_AUTO_DEL_TIMER = int(os.environ.get("FILE_AUTO_DEL_TIMER", "600"))
 # --------------------------------------------
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "shortxlinks.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "09c3f9bc3a8b121b1e6b82a954e59da523dd188e")
